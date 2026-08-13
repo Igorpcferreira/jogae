@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; background:#14161A; }
+  * { box-sizing:border-box; }
+  a { color:#35E878; text-decoration:none; }
+  a:hover { color:#FFD84A; }
+  ::-webkit-scrollbar { width:0; height:0 }
+  @keyframes jgLand { 0%{transform:translateY(22px) scale(.9);opacity:0} 100%{transform:translateY(0) scale(1);opacity:1} }
+  @keyframes jgRise { 0%{transform:translateY(16px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+  @keyframes jgScorePop { 0%{transform:translateY(30%) scale(.82);opacity:0} 55%{transform:translateY(0) scale(1.1);opacity:1} 100%{transform:translateY(0) scale(1);opacity:1} }
+  @keyframes jgSweep { 0%{transform:translateX(-120%)} 100%{transform:translateX(220%)} }
+  @keyframes jgDraw { 0%{stroke-dashoffset:120} 100%{stroke-dashoffset:0} }
+  @keyframes jgDash { 0%{stroke-dashoffset:200} 100%{stroke-dashoffset:0} }
+  @keyframes jgTrail { 0%{offset-distance:0%} 100%{offset-distance:100%} }
+  @keyframes jgPulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  @keyframes jgSheet { 0%{transform:translateY(100%)} 100%{transform:translateY(0)} }
+  @keyframes jgFade { 0%{opacity:0} 100%{opacity:1} }
+  @keyframes jgPop { 0%{transform:scale(.7);opacity:0} 60%{transform:scale(1.08);opacity:1} 100%{transform:scale(1);opacity:1} }
+  @keyframes jgScatter { 0%{transform:translate(0,0) rotate(0)} 100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r))} }
+  @keyframes jgSpin { to { transform:rotate(360deg) } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; width:100%; background:#14161A; display:flex; align-items:flex-start; justify-content:center; padding:40px 20px; font-family:'DM Sans',system-ui,sans-serif">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+
+  <div style="position:absolute; inset:0; background:#090A0C; color:#ECEFF3; display:flex; flex-direction:column; overflow:hidden">
+
+    <sc-if value="{{ isSplash }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; background:#090A0C; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; z-index:90">
+        <div style="position:absolute; inset:0; background-image:linear-gradient(#ECEFF308 1px,transparent 1px),linear-gradient(90deg,#ECEFF308 1px,transparent 1px); background-size:44px 44px"></div>
+        <svg width="92" height="92" viewBox="0 0 52 52" fill="none" style="position:relative">
+          <path d="M0 10 L10 0 H52 V42 L42 52 H0 Z" fill="#35E878" style="animation:jgPop 520ms cubic-bezier(.2,1.3,.35,1) both"></path>
+          <circle cx="16" cy="38" r="6" fill="#090A0C" style="animation:jgFade 200ms ease 380ms both"></circle>
+          <path d="M16 38 C31 38 37 25 37 12" stroke="#090A0C" stroke-width="5" stroke-linecap="round" stroke-dasharray="120" style="animation:jgDraw 520ms cubic-bezier(.4,0,.2,1) 300ms both"></path>
+          <path d="M31 12 H43" stroke="#090A0C" stroke-width="5" stroke-linecap="round" stroke-dasharray="120" style="animation:jgDraw 240ms ease 660ms both"></path>
+        </svg>
+        <div style="position:relative; font-family:Anton,sans-serif; font-size:46px; line-height:1; animation:jgRise 380ms cubic-bezier(.4,0,.2,1) 520ms both">JOGAÊ</div>
+        <div style="position:relative; font-size:12px; font-weight:700; letter-spacing:.18em; color:#7A828E; animation:jgFade 400ms ease 800ms both">SEU FUT, SEM ENROLAÇÃO</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:none; padding:58px 18px 12px; display:flex; align-items:center; gap:10px; background:#090A0C; border-bottom:1px solid #16191E">
+        <div style="display:flex; align-items:center; gap:9px; padding:6px 12px 6px 6px; background:#111317; border:1px solid #262A31; border-radius:999px">
+          <div style="width:24px; height:24px; background:#35E878; border-radius:7px; display:flex; align-items:center; justify-content:center; font-family:Anton,sans-serif; font-size:12px; color:#090A0C">FQ</div>
+          <div style="font-size:13px; font-weight:700">Fut da Quinta</div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7A828E" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </div>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:8px">
+          <sc-if value="{{ isLiveOn }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; align-items:center; gap:6px; padding:5px 9px; background:#FF4D4D; color:#090A0C; border-radius:999px; font-size:9.5px; font-weight:700; letter-spacing:.1em"><div style="width:5px; height:5px; background:#090A0C; border-radius:999px; animation:jgPulse 1.2s ease-in-out infinite"></div>AO VIVO</div>
+          </sc-if>
+          <div style="width:32px; height:32px; background:#FF4FA3; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; color:#090A0C">SA</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="flex:1; overflow-y:auto; overflow-x:hidden">
+
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:20px 18px 30px; display:flex; flex-direction:column; gap:18px">
+          <div>
+            <div style="font-size:13px; color:#7A828E">Boa, Salles.</div>
+            <div style="font-family:Anton,sans-serif; font-size:32px; line-height:1.02; text-transform:uppercase; margin-top:6px">Bora montar<br>os times?</div>
+          </div>
+
+          <div style="position:relative; background:#111317; border:1px solid #262A31; border-radius:18px; overflow:hidden">
+            <div aria-hidden="true" style="position:absolute; right:-8px; top:-22px; font-family:Anton,sans-serif; font-size:120px; line-height:.8; color:transparent; -webkit-text-stroke:1.3px rgba(53,232,120,.16)">04</div>
+            <div style="position:relative; padding:18px">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px">
+                <div style="padding:4px 9px; background:#35E8781F; border:1px solid #35E87866; color:#35E878; border-radius:999px; font-size:9.5px; font-weight:700; letter-spacing:.1em">PRÓXIMA RODADA</div>
+                <div style="font-size:11px; color:#7A828E">em 2 dias</div>
+              </div>
+              <div style="font-family:Anton,sans-serif; font-size:26px; line-height:1.05; text-transform:uppercase">Quinta · 20:30–22:00</div>
+              <div style="display:flex; align-items:center; gap:7px; margin-top:8px; font-size:13px; color:#A7AEB9">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7A828E" stroke-width="1.9" stroke-linecap="round"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+                Arena Farofa · Campo 03
+              </div>
+              <div style="display:flex; align-items:baseline; gap:9px; margin-top:16px">
+                <div style="font-family:Anton,sans-serif; font-size:38px; line-height:1; font-variant-numeric:tabular-nums">20</div>
+                <div style="font-size:13px; color:#7A828E">/ 20 confirmados</div>
+                <div style="margin-left:auto; font-size:11px; font-weight:700; letter-spacing:.08em; color:#35E878">FECHOU</div>
+              </div>
+              <div style="height:7px; background:#1A1D22; border-radius:999px; overflow:hidden; margin-top:10px"><div style="width:100%; height:100%; background:#35E878"></div></div>
+              <div style="display:flex; align-items:center; gap:7px; margin-top:10px; font-size:12px; color:#7A828E"><div style="width:5px; height:5px; background:#FFD84A; border-radius:999px"></div>2 na espera · Carlão, Juliel</div>
+              <button onClick="{{ goRodada }}" style="width:100%; height:52px; margin-top:16px; background:#35E878; color:#090A0C; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; cursor:pointer" style-active="transform:translateY(1px)">Abrir rodada</button>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px">
+            <div style="flex:1; background:#111317; border:1px solid #262A31; border-radius:14px; padding:14px">
+              <div style="font-size:10px; font-weight:700; letter-spacing:.1em; color:#7A828E">ARTILHARIA DO MÊS</div>
+              <div style="display:flex; align-items:center; gap:9px; margin-top:12px">
+                <div style="width:32px; height:32px; background:#FFD84A; border-radius:9px; display:flex; align-items:center; justify-content:center; font-family:Anton,sans-serif; font-size:14px; color:#090A0C">PE</div>
+                <div style="font-size:13.5px; font-weight:700">Pedrão</div>
+                <div style="margin-left:auto; font-family:Anton,sans-serif; font-size:24px; color:#FFD84A; font-variant-numeric:tabular-nums">14</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:9px; margin-top:10px; opacity:.75">
+                <div style="width:32px; height:32px; background:#262A31; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700">DE</div>
+                <div style="font-size:13.5px">Deivão</div>
+                <div style="margin-left:auto; font-family:Anton,sans-serif; font-size:24px; font-variant-numeric:tabular-nums">11</div>
+              </div>
+            </div>
+            <div style="width:118px; flex:none; background:#111317; border:1px solid #262A31; border-radius:14px; padding:14px; display:flex; flex-direction:column">
+              <div style="font-size:10px; font-weight:700; letter-spacing:.1em; color:#7A828E">SUA SEQUÊNCIA</div>
+              <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; margin-top:10px; color:#FF4FA3">7</div>
+              <div style="font-size:11.5px; color:#A7AEB9; line-height:1.35; margin-top:4px">rodadas<br>seguidas</div>
+              <div style="display:flex; gap:3px; margin-top:auto">
+                <div style="flex:1; height:5px; background:#FF4FA3"></div><div style="flex:1; height:5px; background:#FF4FA3"></div><div style="flex:1; height:5px; background:#FF4FA3"></div><div style="flex:1; height:5px; background:#FF4FA3"></div><div style="flex:1; height:5px; background:#262A31"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#111317; border:1px dashed #262A31; border-radius:14px">
+            <div style="width:34px; height:34px; border:1px dashed #FFD84A; border-radius:999px; display:flex; align-items:center; justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFD84A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21v-9a1.9 1.9 0 0 1 3.8 0V7.5a1.6 1.6 0 0 1 3.2 0v5.2l2.6 1.5A3 3 0 0 1 18 16.8V21z"></path></svg></div>
+            <div style="font-size:13px; line-height:1.4">Danilo confirmou como goleiro.<br><span style="color:#7A828E">4 de 4 gols cobertos.</span></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRodada }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:18px 18px 30px; display:flex; flex-direction:column; gap:16px">
+          <div style="display:flex; align-items:flex-start; gap:12px">
+            <div>
+              <div style="font-family:Anton,sans-serif; font-size:28px; line-height:1.05; text-transform:uppercase">Quinta 20:30</div>
+              <div style="font-size:12.5px; color:#7A828E; margin-top:5px">Arena Farofa · Campo 03 · society 5</div>
+            </div>
+            <div style="margin-left:auto; padding:5px 10px; background:#35E8781F; border:1px solid #35E87866; color:#35E878; border-radius:999px; font-size:9.5px; font-weight:700; letter-spacing:.1em; white-space:nowrap">LISTA CHEIA</div>
+          </div>
+
+          <div style="display:flex; gap:10px">
+            <button onClick="{{ goImportar }}" style="flex:1; height:50px; background:#35E878; color:#090A0C; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer">Importar lista</button>
+            <button onClick="{{ goPresorteio }}" style="flex:1; height:50px; background:transparent; color:#ECEFF3; border:1px solid #3B4149; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer">Montar times</button>
+          </div>
+
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px">
+              <div style="font-size:11.5px; font-weight:700; letter-spacing:.12em; color:#7A828E">CONFIRMADOS</div>
+              <div style="font-family:Anton,sans-serif; font-size:15px; color:#35E878">{{ confirmedCount }}</div>
+            </div>
+            <div style="background:#111317; border:1px solid #262A31; border-radius:14px; overflow:hidden">
+              <sc-for list="{{ confirmedList }}" as="p" hint-placeholder-count="5">
+                <div style="display:flex; align-items:center; gap:11px; padding:11px 14px; border-bottom:1px solid #16191E">
+                  <div style="font-family:Anton,sans-serif; font-size:13px; color:#7A828E; width:20px; font-variant-numeric:tabular-nums">{{ p.num }}</div>
+                  <div style="width:32px; height:32px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; background:{{ p.avBg }}; color:{{ p.avFg }}">{{ p.initials }}</div>
+                  <div style="font-size:14px; font-weight:500">{{ p.name }}</div>
+                  <sc-if value="{{ p.gk }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-left:auto; padding:3px 7px; background:#FFD84A; color:#090A0C; border-radius:5px; font-size:9px; font-weight:700; letter-spacing:.08em">GK</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:11.5px; font-weight:700; letter-spacing:.12em; color:#7A828E; margin-bottom:10px">ESPERA</div>
+            <div style="display:flex; flex-direction:column; gap:8px">
+              <sc-for list="{{ waitingList }}" as="w" hint-placeholder-count="2">
+                <div style="display:flex; align-items:center; gap:11px; padding:11px 14px; border:1px dashed #262A31; border-radius:12px">
+                  <div style="width:32px; height:32px; border:1px dashed #3B4149; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; color:#7A828E">{{ w.initials }}</div>
+                  <div style="font-size:14px; color:#A7AEB9">{{ w.name }}</div>
+                  <div style="margin-left:auto; height:30px; padding:0 12px; border:1px solid #3B4149; border-radius:999px; display:flex; align-items:center; font-size:11px; font-weight:700; color:#A7AEB9">Promover</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isImportar }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:18px 18px 30px; display:flex; flex-direction:column; gap:14px">
+          <div>
+            <div style="font-family:Anton,sans-serif; font-size:28px; line-height:1.05; text-transform:uppercase">Cole a lista<br>do grupo</div>
+            <div style="font-size:13px; color:#A7AEB9; margin-top:8px; line-height:1.5">Do jeito que tá no WhatsApp. Numeração, apelido, (GK), espera — o Jogaê entende.</div>
+          </div>
+          <div style="background:#111317; border:1px solid #262A31; border-radius:14px; overflow:hidden">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; background:#0F1114; border-bottom:1px solid #262A31">
+              <div style="font-size:10px; font-weight:700; letter-spacing:.12em; color:#7A828E">LISTA COLADA</div>
+              <div style="font-size:10.5px; font-weight:700; color:#35E878">{{ rawLines }} LINHAS</div>
+            </div>
+            <textarea onChange="{{ setRaw }}" value="{{ raw }}" spellcheck="false" style="width:100%; height:270px; background:transparent; border:none; outline:none; resize:none; padding:14px; color:#A7AEB9; font-family:'DM Sans',sans-serif; font-size:13px; line-height:1.8"></textarea>
+          </div>
+          <button onClick="{{ parseList }}" style="height:54px; background:#35E878; color:#090A0C; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; cursor:pointer">Interpretar lista</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isParsing }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:120px 30px; display:flex; flex-direction:column; align-items:center; gap:26px">
+          <svg viewBox="0 0 240 70" style="width:100%; height:70px">
+            <path d="M8 58 C60 58 90 18 232 12" stroke="#262A31" stroke-width="2" fill="none" stroke-dasharray="4 6"></path>
+            <path d="M8 58 C60 58 90 18 232 12" stroke="#35E878" stroke-width="2" fill="none" stroke-dasharray="200" style="animation:jgDash 1.4s linear infinite"></path>
+            <circle r="5" fill="#35E878" style="offset-path:path('M8 58 C60 58 90 18 232 12'); animation:jgTrail 1.4s linear infinite"></circle>
+          </svg>
+          <div style="font-family:Anton,sans-serif; font-size:22px; text-transform:uppercase">Interpretando…</div>
+          <div style="font-size:13px; color:#7A828E; text-align:center">Separando confirmados, goleiros e espera.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRevisao }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:18px 18px 30px; display:flex; flex-direction:column; gap:16px">
+          <div style="font-family:Anton,sans-serif; font-size:28px; line-height:1.05; text-transform:uppercase">Confere aí</div>
+          <div style="display:flex; gap:10px">
+            <div style="flex:1; padding:13px 14px; background:#111317; border:1px solid #262A31; border-radius:12px"><div style="font-family:Anton,sans-serif; font-size:28px; line-height:1; color:#35E878; font-variant-numeric:tabular-nums">{{ confirmedCount }}</div><div style="font-size:10px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:5px">CONFIRMADOS</div></div>
+            <div style="flex:1; padding:13px 14px; background:#111317; border:1px solid #262A31; border-radius:12px"><div style="font-family:Anton,sans-serif; font-size:28px; line-height:1; color:#FFD84A; font-variant-numeric:tabular-nums">{{ gkCount }}</div><div style="font-size:10px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:5px">GOLEIROS</div></div>
+            <div style="flex:1; padding:13px 14px; background:#111317; border:1px solid #262A31; border-radius:12px"><div style="font-family:Anton,sans-serif; font-size:28px; line-height:1; color:#A7AEB9; font-variant-numeric:tabular-nums">{{ waitingCount }}</div><div style="font-size:10px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:5px">ESPERA</div></div>
+          </div>
+
+          <sc-if value="{{ hasWarning }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; gap:12px; padding:15px; background:#111317; border:1px solid #FFD84A66; border-radius:14px">
+              <svg style="flex:none; margin-top:2px" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFD84A" stroke-width="2" stroke-linecap="round"><path d="M12 8.5v5M12 17v.4"></path><circle cx="12" cy="12" r="9"></circle></svg>
+              <div style="flex:1">
+                <div style="font-size:14px; font-weight:700">Dois nomes parecidos</div>
+                <div style="font-size:13px; color:#A7AEB9; line-height:1.5; margin-top:5px">{{ warningText }}</div>
+                <div style="display:flex; gap:8px; margin-top:12px">
+                  <button onClick="{{ mergeAlias }}" style="height:36px; padding:0 14px; background:#FFD84A; color:#090A0C; border:none; border-radius:999px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700; cursor:pointer">É a mesma pessoa</button>
+                  <button onClick="{{ keepAlias }}" style="height:36px; padding:0 14px; background:transparent; border:1px solid #3B4149; color:#A7AEB9; border-radius:999px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700; cursor:pointer">São diferentes</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="background:#111317; border:1px solid #262A31; border-radius:14px; overflow:hidden">
+            <sc-for list="{{ confirmedList }}" as="p" hint-placeholder-count="6">
+              <div style="display:flex; align-items:center; gap:11px; padding:10px 14px; border-bottom:1px solid #16191E">
+                <div style="width:30px; height:30px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; background:{{ p.avBg }}; color:{{ p.avFg }}">{{ p.initials }}</div>
+                <div style="font-size:14px">{{ p.name }}</div>
+                <sc-if value="{{ p.gk }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-left:auto; padding:3px 7px; background:#FFD84A; color:#090A0C; border-radius:5px; font-size:9px; font-weight:700; letter-spacing:.08em">GK</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <button onClick="{{ goPresorteio }}" style="height:54px; background:#35E878; color:#090A0C; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; cursor:pointer">Confirmar lista</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPresorteio }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:18px 18px 30px; display:flex; flex-direction:column; gap:16px">
+          <div>
+            <div style="font-family:Anton,sans-serif; font-size:28px; line-height:1.05; text-transform:uppercase">{{ confirmedCount }} na quadra</div>
+            <div style="font-size:13px; color:#7A828E; margin-top:6px">4 times de 5 · 1 goleiro por time</div>
+          </div>
+          <div style="display:flex; background:#111317; border:1px solid #262A31; border-radius:999px; padding:4px">
+            <button onClick="{{ setRandom }}" style="flex:1; height:40px; border:none; border-radius:999px; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:700; letter-spacing:.06em; cursor:pointer; background:{{ randomBg }}; color:{{ randomFg }}">Aleatório</button>
+            <button onClick="{{ setBalanced }}" style="flex:1; height:40px; border:none; border-radius:999px; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:700; letter-spacing:.06em; cursor:pointer; background:{{ balancedBg }}; color:{{ balancedFg }}">Equilibrado</button>
+          </div>
+          <div style="font-size:12.5px; color:#7A828E; line-height:1.5">{{ modeHint }}</div>
+          <div style="display:flex; flex-wrap:wrap; gap:7px">
+            <sc-for list="{{ confirmedList }}" as="p" hint-placeholder-count="12">
+              <div style="display:flex; align-items:center; gap:8px; height:40px; padding:0 13px 0 5px; background:#1A1D22; border:1px solid #262A31; border-radius:999px">
+                <div style="width:30px; height:30px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; background:{{ p.avBg }}; color:{{ p.avFg }}">{{ p.initials }}</div>
+                <div style="font-size:13.5px">{{ p.name }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <button onClick="{{ drawTeams }}" style="height:56px; background:#35E878; color:#090A0C; border:none; border-radius:14px; font-family:Anton,sans-serif; font-size:22px; letter-spacing:.02em; cursor:pointer" style-active="transform:scale(.98)">MONTAR TIMES</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isTimes }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:18px 18px 30px; display:flex; flex-direction:column; gap:14px">
+          <div style="display:flex; align-items:flex-start">
+            <div>
+              <div style="font-family:Anton,sans-serif; font-size:28px; line-height:1.05; text-transform:uppercase">Times prontos</div>
+              <div style="font-size:12.5px; color:#7A828E; margin-top:5px">{{ modeLabel }} · quinta 20:30</div>
+            </div>
+            <button onClick="{{ drawTeams }}" style="margin-left:auto; width:40px; height:40px; background:#111317; border:1px solid #262A31; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5h4l10 11h4M3 17.5h4l3-3.2M14 9.7l3-3.2h4M18.5 4l2.5 2.5-2.5 2.5M18.5 15l2.5 2.5-2.5 2.5"></path></svg></button>
+          </div>
+          <sc-for list="{{ teams }}" as="t" hint-placeholder-count="4">
+            <div style="background:#111317; border:1px solid #262A31; border-radius:16px; overflow:hidden; animation:{{ t.anim }}">
+              <div style="padding:12px 14px; background:{{ t.color }}; clip-path:polygon(0 0,100% 0,100% 100%,16px 100%,0 calc(100% - 16px)); display:flex; align-items:center">
+                <div style="font-family:Anton,sans-serif; font-size:19px; color:#090A0C; line-height:1">{{ t.label }}</div>
+                <div style="margin-left:auto; font-family:Anton,sans-serif; font-size:19px; color:#090A0C33">{{ t.num }}</div>
+              </div>
+              <div style="padding:6px 0">
+                <sc-for list="{{ t.players }}" as="p" hint-placeholder-count="5">
+                  <div style="display:flex; align-items:center; gap:10px; padding:8px 14px; animation:{{ p.anim }}">
+                    <div style="width:28px; height:28px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; background:{{ p.avBg }}; color:{{ p.avFg }}">{{ p.initials }}</div>
+                    <div style="font-size:13.5px; font-weight:500">{{ p.name }}</div>
+                    <sc-if value="{{ p.gk }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin-left:auto; font-size:9px; font-weight:700; letter-spacing:.08em; color:#FFD84A">GK</div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+          <div style="display:flex; gap:10px">
+            <button onClick="{{ goShare }}" style="flex:1; height:52px; background:#35E878; color:#090A0C; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer">Compartilhar</button>
+            <button onClick="{{ startMatch }}" style="flex:1; height:52px; background:transparent; border:1px solid #FF4D4D; color:#FF4D4D; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer">Começar jogo</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isShare }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:18px 18px 30px; display:flex; flex-direction:column; gap:16px">
+          <div style="font-family:Anton,sans-serif; font-size:28px; line-height:1.05; text-transform:uppercase">Manda no grupo</div>
+          <div style="background:#0F1114; border:1px solid #262A31; border-radius:14px; padding:16px; font-size:12.5px; line-height:1.85; color:#A7AEB9; white-space:pre-line">{{ shareText }}</div>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <button onClick="{{ copyShare }}" style="height:52px; background:#35E878; color:#090A0C; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer">Copiar pro WhatsApp</button>
+            <button onClick="{{ copyShare }}" style="height:48px; background:transparent; border:1px solid #3B4149; color:#ECEFF3; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer">Copiar link da rodada</button>
+            <button onClick="{{ copyShare }}" style="height:48px; background:transparent; border:1px solid #FF4FA3; color:#FF4FA3; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer">Gerar card de imagem</button>
+          </div>
+          <button onClick="{{ startMatch }}" style="height:52px; background:#FF4D4D; color:#090A0C; border:none; border-radius:12px; font-family:Anton,sans-serif; font-size:20px; cursor:pointer">COMEÇAR JOGO</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLive }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:14px 14px 30px; display:flex; flex-direction:column; gap:14px">
+          <div style="position:relative; background:#111317; border:1px solid #262A31; border-radius:18px; overflow:hidden">
+            <div style="position:absolute; inset:0; background-image:repeating-linear-gradient(0deg,#ECEFF308 0 1px,transparent 1px 3px); pointer-events:none"></div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid #262A31">
+              <div style="display:flex; align-items:center; gap:7px; padding:5px 9px; background:#FF4D4D; color:#090A0C; border-radius:999px; font-size:9.5px; font-weight:700; letter-spacing:.1em"><div style="width:5px; height:5px; background:#090A0C; border-radius:999px; animation:jgPulse 1.2s ease-in-out infinite"></div>AO VIVO</div>
+              <div style="font-family:Anton,sans-serif; font-size:22px; font-variant-numeric:tabular-nums">{{ clock }}</div>
+              <div style="font-size:10px; font-weight:700; letter-spacing:.1em; color:#7A828E">JOGO {{ gameNo }}</div>
+            </div>
+            <div style="display:flex; align-items:stretch">
+              <div style="flex:1; padding:16px 12px 18px; display:flex; flex-direction:column; align-items:center; gap:8px">
+                <div style="width:100%; height:4px; background:{{ colorA }}"></div>
+                <div style="font-family:Anton,sans-serif; font-size:15px; letter-spacing:.04em; color:{{ colorA }}">{{ nameA }}</div>
+                <div style="font-family:Anton,sans-serif; font-size:84px; line-height:.82; font-variant-numeric:tabular-nums; animation:{{ popA }}">{{ scoreA }}</div>
+              </div>
+              <div style="width:1px; background:#262A31"></div>
+              <div style="flex:1; padding:16px 12px 18px; display:flex; flex-direction:column; align-items:center; gap:8px">
+                <div style="width:100%; height:4px; background:{{ colorB }}"></div>
+                <div style="font-family:Anton,sans-serif; font-size:15px; letter-spacing:.04em; color:{{ colorB }}">{{ nameB }}</div>
+                <div style="font-family:Anton,sans-serif; font-size:84px; line-height:.82; font-variant-numeric:tabular-nums; animation:{{ popB }}">{{ scoreB }}</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:9px; padding:12px 14px 14px; border-top:1px solid #262A31">
+              <button onClick="{{ goalA }}" style="flex:1; height:56px; background:{{ colorA }}; color:#090A0C; border:none; border-radius:12px; font-family:Anton,sans-serif; font-size:19px; cursor:pointer" style-active="transform:scale(.97)">+ GOL</button>
+              <button onClick="{{ goalB }}" style="flex:1; height:56px; background:{{ colorB }}; color:#090A0C; border:none; border-radius:12px; font-family:Anton,sans-serif; font-size:19px; cursor:pointer" style-active="transform:scale(.97)">+ GOL</button>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:9px">
+            <button onClick="{{ undo }}" style="flex:1; height:44px; background:transparent; border:1px solid #3B4149; color:#A7AEB9; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; cursor:pointer">Desfazer lance</button>
+            <button onClick="{{ endMatch }}" style="flex:1; height:44px; background:transparent; border:1px solid #3B4149; color:#A7AEB9; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; cursor:pointer">Encerrar</button>
+          </div>
+
+          <div>
+            <div style="font-size:11px; font-weight:700; letter-spacing:.12em; color:#7A828E; margin-bottom:10px">ÚLTIMOS LANCES</div>
+            <sc-if value="{{ hasEvents }}" hint-placeholder-val="{{ true }}">
+              <div style="background:#111317; border:1px solid #262A31; border-radius:14px; overflow:hidden">
+                <sc-for list="{{ events }}" as="e" hint-placeholder-count="3">
+                  <div style="display:flex; align-items:center; gap:11px; padding:11px 14px; border-bottom:1px solid #16191E; animation:jgRise 260ms ease both">
+                    <div style="font-family:Anton,sans-serif; font-size:14px; color:#7A828E; width:26px; font-variant-numeric:tabular-nums">{{ e.min }}</div>
+                    <div style="width:3px; height:26px; background:{{ e.color }}"></div>
+                    <div style="flex:1">
+                      <div style="font-size:13.5px; font-weight:700">{{ e.scorer }}</div>
+                      <div style="font-size:11.5px; color:#7A828E">{{ e.detail }}</div>
+                    </div>
+                    <div style="font-family:Anton,sans-serif; font-size:15px; color:#A7AEB9; font-variant-numeric:tabular-nums">{{ e.tally }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noEvents }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:22px; border:1px dashed #262A31; border-radius:14px; text-align:center; font-size:13px; color:#7A828E">0 a 0. Alguém abre o placar.</div>
+            </sc-if>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:11px; padding:13px 15px; background:#111317; border:1px solid #262A31; border-radius:14px">
+            <div style="font-size:10px; font-weight:700; letter-spacing:.1em; color:#7A828E">A SEGUIR</div>
+            <div style="margin-left:auto; font-size:13px; font-weight:700">{{ nextGame }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isFim }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:24px 18px 30px; display:flex; flex-direction:column; gap:18px">
+          <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">FIM DE JOGO · {{ clock }}</div>
+          <div style="position:relative; background:#111317; border:1px solid #262A31; border-radius:18px; padding:22px 18px; overflow:hidden">
+            <div aria-hidden="true" style="position:absolute; right:-10px; bottom:-34px; font-family:Anton,sans-serif; font-size:130px; line-height:.8; color:transparent; -webkit-text-stroke:1.3px rgba(236,239,243,.08)">FIM</div>
+            <div style="position:relative; display:flex; align-items:center; justify-content:center; gap:16px">
+              <div style="text-align:center"><div style="font-family:Anton,sans-serif; font-size:16px; color:{{ colorA }}">{{ nameA }}</div><div style="font-family:Anton,sans-serif; font-size:64px; line-height:.9; font-variant-numeric:tabular-nums">{{ scoreA }}</div></div>
+              <div style="font-family:Anton,sans-serif; font-size:26px; color:#3B4149">×</div>
+              <div style="text-align:center"><div style="font-family:Anton,sans-serif; font-size:16px; color:{{ colorB }}">{{ nameB }}</div><div style="font-family:Anton,sans-serif; font-size:64px; line-height:.9; font-variant-numeric:tabular-nums">{{ scoreB }}</div></div>
+            </div>
+            <div style="position:relative; margin-top:18px; padding-top:16px; border-top:1px solid #262A31; text-align:center">
+              <div style="font-size:11px; font-weight:700; letter-spacing:.1em; color:#7A828E">RESULTADO</div>
+              <div style="font-family:Anton,sans-serif; font-size:26px; margin-top:7px; text-transform:uppercase">{{ resultLabel }}</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:11px; padding:14px 16px; background:#111317; border:1px solid #262A31; border-radius:14px">
+            <div style="font-size:12.5px; color:#7A828E">Próximo confronto</div>
+            <div style="margin-left:auto; font-size:13.5px; font-weight:700">{{ nextGame }}</div>
+          </div>
+          <button onClick="{{ nextMatch }}" style="height:54px; background:#FF4D4D; color:#090A0C; border:none; border-radius:12px; font-family:Anton,sans-serif; font-size:20px; cursor:pointer">COMEÇAR PRÓXIMO JOGO</button>
+          <button onClick="{{ goRanking }}" style="height:48px; background:transparent; border:1px solid #3B4149; color:#ECEFF3; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer">Ver ranking</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRanking }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:18px 0 30px; display:flex; flex-direction:column; gap:14px">
+          <div style="padding:0 18px"><div style="font-family:Anton,sans-serif; font-size:28px; line-height:1.05; text-transform:uppercase">Ranking</div></div>
+          <div style="display:flex; gap:22px; padding:0 18px; border-bottom:1px solid #262A31">
+            <button onClick="{{ setPeriodRodada }}" style="padding:10px 0; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:700; color:{{ pRodadaC }}; box-shadow:{{ pRodadaU }}">Rodada</button>
+            <button onClick="{{ setPeriodMes }}" style="padding:10px 0; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:700; color:{{ pMesC }}; box-shadow:{{ pMesU }}">Mês</button>
+            <button onClick="{{ setPeriodGeral }}" style="padding:10px 0; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:700; color:{{ pGeralC }}; box-shadow:{{ pGeralU }}">Geral</button>
+          </div>
+          <div style="display:flex; gap:7px; padding:0 18px; overflow-x:auto">
+            <button onClick="{{ setMetricG }}" style="flex:none; height:34px; padding:0 14px; border-radius:999px; border:1px solid {{ mGB }}; background:{{ mGBg }}; color:{{ mGC }}; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:700; cursor:pointer">Gols</button>
+            <button onClick="{{ setMetricA }}" style="flex:none; height:34px; padding:0 14px; border-radius:999px; border:1px solid {{ mAB }}; background:{{ mABg }}; color:{{ mAC }}; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:700; cursor:pointer">Assistências</button>
+            <button onClick="{{ setMetricP }}" style="flex:none; height:34px; padding:0 14px; border-radius:999px; border:1px solid {{ mPB }}; background:{{ mPBg }}; color:{{ mPC }}; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:700; cursor:pointer">Presença</button>
+          </div>
+
+          <div style="padding:0 18px; display:flex; flex-direction:column; gap:10px">
+            <sc-for list="{{ podium }}" as="r" hint-placeholder-count="3">
+              <div style="position:relative; display:flex; align-items:center; gap:13px; padding:16px; background:#111317; border:1px solid #262A31; border-radius:16px; overflow:hidden; animation:{{ r.anim }}">
+                <div aria-hidden="true" style="position:absolute; right:8px; top:-16px; font-family:Anton,sans-serif; font-size:86px; line-height:1; color:transparent; -webkit-text-stroke:1.4px {{ r.ghost }}">{{ r.pos }}</div>
+                <div style="position:relative; width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-family:Anton,sans-serif; font-size:18px; background:{{ r.avBg }}; color:{{ r.avFg }}">{{ r.initials }}</div>
+                <div style="position:relative; flex:1">
+                  <div style="font-family:Anton,sans-serif; font-size:21px; line-height:1; text-transform:uppercase">{{ r.name }}</div>
+                  <div style="font-size:11.5px; color:#7A828E; margin-top:5px">{{ r.sub }}</div>
+                </div>
+                <div style="position:relative; font-family:Anton,sans-serif; font-size:34px; color:{{ r.valColor }}; font-variant-numeric:tabular-nums">{{ r.value }}</div>
+              </div>
+            </sc-for>
+            <div style="background:#111317; border:1px solid #262A31; border-radius:14px; overflow:hidden">
+              <sc-for list="{{ rest }}" as="r" hint-placeholder-count="6">
+                <div style="display:flex; align-items:center; gap:12px; padding:11px 14px; border-bottom:1px solid #16191E">
+                  <div style="font-family:Anton,sans-serif; font-size:14px; color:#7A828E; width:22px; font-variant-numeric:tabular-nums">{{ r.pos }}</div>
+                  <div style="width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; background:{{ r.avBg }}; color:{{ r.avFg }}">{{ r.initials }}</div>
+                  <div style="flex:1; font-size:13.5px">{{ r.name }}</div>
+                  <div style="font-family:Anton,sans-serif; font-size:20px; color:#A7AEB9; font-variant-numeric:tabular-nums">{{ r.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPerfil }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:18px 18px 30px; display:flex; flex-direction:column; gap:16px">
+          <div style="position:relative; background:#111317; border:1px solid #262A31; border-radius:18px; padding:20px; overflow:hidden">
+            <div aria-hidden="true" style="position:absolute; right:-8px; top:-26px; font-family:Anton,sans-serif; font-size:140px; line-height:.8; color:transparent; -webkit-text-stroke:1.4px rgba(255,79,163,.22)">10</div>
+            <div style="position:absolute; left:0; top:0; bottom:0; width:4px; background:#FF4FA3"></div>
+            <div style="position:relative; display:flex; align-items:center; gap:13px">
+              <div style="width:58px; height:58px; background:#FF4FA3; color:#090A0C; border-radius:17px; display:flex; align-items:center; justify-content:center; font-family:Anton,sans-serif; font-size:23px">SA</div>
+              <div>
+                <div style="font-family:Anton,sans-serif; font-size:28px; line-height:1; text-transform:uppercase">Salles</div>
+                <div style="font-size:12px; color:#7A828E; margin-top:5px">Linha · organizador · desde mar 2024</div>
+              </div>
+            </div>
+            <div style="position:relative; display:flex; gap:9px; margin-top:18px">
+              <div style="flex:1; padding:12px 13px; background:#1A1D22; border-radius:10px"><div style="font-family:Anton,sans-serif; font-size:28px; line-height:1; color:#FFD84A; font-variant-numeric:tabular-nums">9</div><div style="font-size:9.5px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:5px">GOLS</div></div>
+              <div style="flex:1; padding:12px 13px; background:#1A1D22; border-radius:10px"><div style="font-family:Anton,sans-serif; font-size:28px; line-height:1; font-variant-numeric:tabular-nums">12</div><div style="font-size:9.5px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:5px">ASSIST.</div></div>
+              <div style="flex:1; padding:12px 13px; background:#1A1D22; border-radius:10px"><div style="font-family:Anton,sans-serif; font-size:28px; line-height:1; color:#35E878; font-variant-numeric:tabular-nums">18</div><div style="font-size:9.5px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:5px">PRESENÇAS</div></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px; font-weight:700; letter-spacing:.12em; color:#7A828E; margin-bottom:10px">HISTÓRICO</div>
+            <div style="background:#111317; border:1px solid #262A31; border-radius:14px; overflow:hidden">
+              <div style="display:flex; align-items:center; gap:12px; padding:13px 14px; border-bottom:1px solid #16191E"><div style="width:8px; height:24px; background:#35E878"></div><div style="flex:1"><div style="font-size:13.5px; font-weight:700">05 set · Time Verde</div><div style="font-size:11.5px; color:#7A828E">2 gols · 1 assistência</div></div><div style="padding:4px 9px; background:#35E8781F; color:#35E878; border-radius:999px; font-size:10px; font-weight:700">V</div></div>
+              <div style="display:flex; align-items:center; gap:12px; padding:13px 14px; border-bottom:1px solid #16191E"><div style="width:8px; height:24px; background:#FFD84A"></div><div style="flex:1"><div style="font-size:13.5px; font-weight:700">29 ago · Time Amarelo</div><div style="font-size:11.5px; color:#7A828E">1 gol</div></div><div style="padding:4px 9px; background:#262A31; color:#A7AEB9; border-radius:999px; font-size:10px; font-weight:700">E</div></div>
+              <div style="display:flex; align-items:center; gap:12px; padding:13px 14px"><div style="width:8px; height:24px; background:#FF4D4D"></div><div style="flex:1"><div style="font-size:13.5px; font-weight:700">22 ago · Time Vermelho</div><div style="font-size:11.5px; color:#7A828E">3 assistências</div></div><div style="padding:4px 9px; background:#FF4D4D1F; color:#FF4D4D; border-radius:999px; font-size:10px; font-weight:700">D</div></div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:none; padding:8px 6px 40px; background:#0D0F12; border-top:1px solid #1A1D22; display:flex; align-items:flex-end; justify-content:space-around">
+        <button onClick="{{ goHome }}" style="background:none; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:5px; min-width:56px; padding:6px 0">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="{{ navHome }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5V20H4z"></path></svg>
+          <div style="font-size:10px; font-weight:700; color:{{ navHome }}">Home</div>
+        </button>
+        <button onClick="{{ goRodada }}" style="background:none; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:5px; min-width:56px; padding:6px 0">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="{{ navRodada }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="15" rx="2"></rect><path d="M3 10h18M8 3.5v4M16 3.5v4"></path></svg>
+          <div style="font-size:10px; font-weight:700; color:{{ navRodada }}">Rodada</div>
+        </button>
+        <button onClick="{{ goLive }}" style="width:54px; height:54px; background:#FF4D4D; border:none; border-radius:17px; display:flex; align-items:center; justify-content:center; margin-bottom:4px; cursor:pointer; box-shadow:0 6px 18px rgba(255,77,77,.3)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#090A0C" stroke-width="2.3" stroke-linecap="round"><rect x="2.5" y="5" width="19" height="12" rx="2"></rect><path d="M12 5v12"></path></svg>
+        </button>
+        <button onClick="{{ goRanking }}" style="background:none; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:5px; min-width:56px; padding:6px 0">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="{{ navRanking }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V13M10 20V8M16 20V15M22 20H2"></path></svg>
+          <div style="font-size:10px; font-weight:700; color:{{ navRanking }}">Ranking</div>
+        </button>
+        <button onClick="{{ goPerfil }}" style="background:none; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:5px; min-width:56px; padding:6px 0">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="{{ navPerfil }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.5"></circle><path d="M5 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"></path></svg>
+          <div style="font-size:10px; font-weight:700; color:{{ navPerfil }}">Perfil</div>
+        </button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDrawing }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; background:#090A0C; z-index:80; display:flex; flex-direction:column; padding:70px 20px 30px; animation:jgFade 180ms ease both">
+        <div style="position:absolute; left:0; right:0; top:50%; height:1px; background:#ECEFF314"></div>
+        <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:180px; height:180px; border:1px solid #ECEFF314; border-radius:50%"></div>
+        <svg viewBox="0 0 360 700" style="position:absolute; inset:0; width:100%; height:100%">
+          <path d="M20 660 C120 660 180 300 340 60" stroke="#FF4FA3" stroke-width="2" fill="none" stroke-dasharray="200" style="animation:jgDash 900ms cubic-bezier(.4,0,.2,1) 200ms both"></path>
+          <circle r="6" fill="#FF4FA3" style="offset-path:path('M20 660 C120 660 180 300 340 60'); animation:jgTrail 900ms cubic-bezier(.4,0,.2,1) 200ms both"></circle>
+        </svg>
+        <div style="position:relative; display:flex; align-items:center; justify-content:space-between">
+          <div style="font-family:Anton,sans-serif; font-size:24px; text-transform:uppercase">Sorteando…</div>
+          <button onClick="{{ skipDraw }}" style="height:34px; padding:0 14px; background:transparent; border:1px solid #3B4149; color:#A7AEB9; border-radius:999px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700; cursor:pointer">Pular</button>
+        </div>
+        <div style="position:relative; flex:1; display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:26px">
+          <div style="display:flex; flex-direction:column; gap:6px; animation:jgLand 300ms cubic-bezier(.2,1.3,.35,1) 300ms both"><div style="height:6px; background:#35E878"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 400ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 460ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 520ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 580ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 640ms both"></div></div>
+          <div style="display:flex; flex-direction:column; gap:6px; animation:jgLand 300ms cubic-bezier(.2,1.3,.35,1) 400ms both"><div style="height:6px; background:#FFD84A"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 500ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 560ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 620ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 680ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 740ms both"></div></div>
+          <div style="display:flex; flex-direction:column; gap:6px; animation:jgLand 300ms cubic-bezier(.2,1.3,.35,1) 500ms both"><div style="height:6px; background:#FF4D4D"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 600ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 660ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 720ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 780ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 840ms both"></div></div>
+          <div style="display:flex; flex-direction:column; gap:6px; animation:jgLand 300ms cubic-bezier(.2,1.3,.35,1) 600ms both"><div style="height:6px; background:#FF4FA3"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 700ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 760ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 820ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 880ms both"></div><div style="height:24px; background:#111317; animation:jgLand 260ms cubic-bezier(.2,1.3,.35,1) 940ms both"></div></div>
+        </div>
+        <div style="position:relative; text-align:center; font-size:12px; color:#7A828E; margin-top:18px">{{ drawHint }}</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetGol }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; z-index:85; display:flex; flex-direction:column; justify-content:flex-end">
+        <div onClick="{{ closeSheet }}" style="position:absolute; inset:0; background:rgba(9,10,12,.72); animation:jgFade 180ms ease both"></div>
+        <div style="position:relative; background:#1A1D22; border-top:1px solid #3B4149; border-radius:24px 24px 0 0; padding:14px 0 42px; animation:jgSheet 300ms cubic-bezier(.4,0,.2,1) both">
+          <div style="width:44px; height:4px; background:#3B4149; border-radius:999px; margin:0 auto 16px"></div>
+          <div style="padding:0 20px 14px; display:flex; align-items:center">
+            <div style="font-family:Anton,sans-serif; font-size:26px; text-transform:uppercase">Gol de quem?</div>
+            <div style="margin-left:auto; width:10px; height:24px; background:{{ sheetColor }}"></div>
+          </div>
+          <div style="padding:0 20px; display:flex; flex-wrap:wrap; gap:8px">
+            <sc-for list="{{ sheetPlayers }}" as="p" hint-placeholder-count="5">
+              <button onClick="{{ p.pick }}" style="display:flex; align-items:center; gap:9px; height:48px; padding:0 16px 0 6px; background:#262A31; border:none; border-radius:999px; cursor:pointer">
+                <div style="width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; background:{{ p.avBg }}; color:{{ p.avFg }}">{{ p.initials }}</div>
+                <div style="font-family:'DM Sans',sans-serif; font-size:14.5px; color:#ECEFF3">{{ p.name }}</div>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetAssist }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; z-index:85; display:flex; flex-direction:column; justify-content:flex-end">
+        <div onClick="{{ closeSheet }}" style="position:absolute; inset:0; background:rgba(9,10,12,.72); animation:jgFade 180ms ease both"></div>
+        <div style="position:relative; background:#1A1D22; border-top:1px solid #3B4149; border-radius:24px 24px 0 0; padding:14px 0 42px; animation:jgSheet 300ms cubic-bezier(.4,0,.2,1) both">
+          <div style="width:44px; height:4px; background:#3B4149; border-radius:999px; margin:0 auto 16px"></div>
+          <div style="padding:0 20px 6px; font-family:Anton,sans-serif; font-size:26px; text-transform:uppercase">Teve assistência?</div>
+          <div style="padding:0 20px 14px; font-size:12.5px; color:#7A828E">Gol de {{ pendingScorer }}</div>
+          <div style="padding:0 20px; display:flex; flex-wrap:wrap; gap:8px">
+            <sc-for list="{{ assistPlayers }}" as="p" hint-placeholder-count="4">
+              <button onClick="{{ p.pick }}" style="display:flex; align-items:center; gap:9px; height:48px; padding:0 16px 0 6px; background:#262A31; border:none; border-radius:999px; cursor:pointer">
+                <div style="width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; background:#FFD84A; color:#090A0C">{{ p.initials }}</div>
+                <div style="font-family:'DM Sans',sans-serif; font-size:14.5px; color:#ECEFF3">{{ p.name }}</div>
+              </button>
+            </sc-for>
+            <button onClick="{{ noAssist }}" style="height:48px; padding:0 18px; background:transparent; border:1px dashed #3B4149; border-radius:999px; color:#A7AEB9; font-family:'DM Sans',sans-serif; font-size:14px; cursor:pointer">Sem assistência</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ celebrating }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; z-index:95; display:flex; align-items:center; justify-content:center; background:rgba(9,10,12,.55); overflow:hidden; pointer-events:none; animation:jgFade 120ms ease both">
+        <div style="position:absolute; left:0; right:0; height:150px; background:linear-gradient(90deg,transparent,{{ celebrateGlow }},transparent); width:60%; animation:jgSweep 700ms cubic-bezier(.4,0,.2,1) both"></div>
+        <div style="position:relative; text-align:center">
+          <div style="font-family:Anton,sans-serif; font-size:66px; line-height:.9; color:{{ celebrateColor }}; animation:jgPop 420ms cubic-bezier(.2,1.3,.35,1) both">GOOOL</div>
+          <div style="font-family:Anton,sans-serif; font-size:22px; margin-top:10px; animation:jgRise 300ms ease 120ms both">{{ celebrateName }}</div>
+          <div style="font-size:12px; color:#A7AEB9; margin-top:6px; animation:jgFade 300ms ease 220ms both">{{ celebrateSub }}</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; left:16px; right:16px; bottom:110px; z-index:96; display:flex; align-items:center; gap:11px; padding:14px 16px; background:#1A1D22; border:1px solid #35E87866; border-left:3px solid #35E878; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.6); animation:jgRise 240ms cubic-bezier(.2,1.3,.35,1) both">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#35E878" stroke-width="2.4" stroke-linecap="round"><path d="M5 12.5l4.2 4.2L19 7"></path></svg>
+        <div style="font-size:13.5px">{{ toastText }}</div>
+      </div>
+    </sc-if>
+
+  </div>
+
+</x-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:960}}">
+const TEAM_META = [
+  { key: 'verde', label: 'TIME VERDE', color: '#35E878' },
+  { key: 'amarelo', label: 'TIME AMARELO', color: '#FFD84A' },
+  { key: 'vermelho', label: 'TIME VERMELHO', color: '#FF4D4D' },
+  { key: 'rosa', label: 'TIME ROSA', color: '#FF4FA3' }
+];
+
+const RAW_DEFAULT = [
+  'LISTA QUINTA 20:30 - ARENA FAROFA',
+  '1. Salles',
+  '2. Guilherme (GK)',
+  '3. Marcos',
+  '4. Deivão',
+  '5. Alexandre',
+  '6. Igão',
+  '7. Pedrão',
+  '8. Heitor (GK)',
+  '9. Kaique',
+  '10. Pablo',
+  '11. Lucas',
+  '12. Ney',
+  '13. Kauã',
+  '14. Tomás',
+  '15. Juan',
+  '16. Thalysson',
+  '17. Dhener (GK)',
+  '18. Danilo (GK)',
+  '19. Jorge',
+  '20. Agnaldo',
+  '21. Igao',
+  'ESPERA',
+  'Carlão',
+  'Juliel'
+].join('\n');
+
+const SEED = {
+  'Pedrão': [12, 4, 9], 'Deivão': [9, 6, 11], 'Igão': [8, 3, 10], 'Kaique': [7, 5, 12],
+  'Salles': [6, 11, 14], 'Marcos': [6, 4, 12], 'Ney': [5, 7, 9], 'Lucas': [5, 2, 8],
+  'Juan': [4, 6, 11], 'Pablo': [4, 3, 7], 'Tomás': [3, 5, 10], 'Kauã': [3, 2, 6],
+  'Jorge': [2, 4, 9], 'Thalysson': [2, 3, 8], 'Alexandre': [2, 6, 13], 'Agnaldo': [1, 2, 7],
+  'Guilherme': [0, 1, 12], 'Heitor': [0, 0, 10], 'Dhener': [0, 1, 9], 'Danilo': [0, 0, 6],
+  'Carlão': [1, 1, 4], 'Juliel': [0, 1, 3]
+};
+
+const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '');
+const initialsOf = n => n.replace(/[^A-Za-zÀ-ÿ]/g, '').slice(0, 2).toUpperCase();
+const hash = s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 997; return h; };
+
+class Component extends DCLogic {
+  state = {
+    screen: 'splash', raw: RAW_DEFAULT, parsed: null, aliasResolved: false,
+    mode: 'balanced', teams: null, drawSeed: 0,
+    pairing: [0, 3], gameNo: 1, scoreA: 0, scoreB: 0, sec: 0, events: [], pulse: '',
+    sheet: null, pendingSide: null, pendingScorer: null,
+    celebrate: null, toast: null, period: 'mes', metric: 'gols', queue: [1, 2]
+  };
+
+  componentDidMount() {
+    this._splash = setTimeout(() => this.setState({ screen: 'home' }), 1900);
+    this._tick = setInterval(() => {
+      if (this.state.screen === 'live') this.setState(s => ({ sec: s.sec + 1 }));
+    }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this._tick); clearTimeout(this._splash); }
+
+  parse() {
+    const lines = this.state.raw.split('\n').map(l => l.trim()).filter(Boolean);
+    const confirmed = [], waiting = [], warnings = [];
+    let inWaiting = false;
+    const seen = {};
+    lines.forEach(line => {
+      const clean = line.replace(/^\d+\s*[\.\)\-]?\s*/, '').trim();
+      if (/^(lista|fut|rodada)/i.test(clean) && !/\(/.test(clean)) return;
+      if (/^(espera|reserva|fila)/i.test(clean) && clean.length < 14) { inWaiting = true; return; }
+      const gk = /\(?\bgk\b\)?|goleiro/i.test(clean);
+      let name = clean.replace(/\(.*?\)/g, '').replace(/\s*-\s*gk/i, '').trim();
+      if (!name) return;
+      const wait = inWaiting || /espera/i.test(clean);
+      const key = norm(name);
+      if (seen[key] !== undefined) { warnings.push({ a: seen[key], b: name }); return; }
+      seen[key] = name;
+      const p = { name, gk, initials: initialsOf(name), skill: 60 + (hash(name) % 36) };
+      if (wait) waiting.push(p); else confirmed.push(p);
+    });
+    return { confirmed, waiting, warnings };
+  }
+
+  build(parsed, mode, seed) {
+    const list = parsed.confirmed.slice();
+    const gks = list.filter(p => p.gk);
+    let line = list.filter(p => !p.gk);
+    const rnd = (n) => { const h = hash(String(seed) + n); return h / 997; };
+    if (mode === 'random') {
+      line = line.map((p, i) => ({ p, k: rnd(p.name + i) })).sort((a, b) => a.k - b.k).map(x => x.p);
+    } else {
+      line = line.slice().sort((a, b) => b.skill - a.skill);
+    }
+    const teams = TEAM_META.map((m, i) => ({ ...m, num: '0' + (i + 1), players: gks[i] ? [gks[i]] : [] }));
+    if (mode === 'random') {
+      line.forEach((p, i) => teams[i % 4].players.push(p));
+    } else {
+      line.forEach((p, i) => {
+        const round = Math.floor(i / 4);
+        const idx = round % 2 === 0 ? i % 4 : 3 - (i % 4);
+        teams[idx].players.push(p);
+      });
+    }
+    return teams;
+  }
+
+  ensure() {
+    if (this.state.parsed) return this.state.parsed;
+    const parsed = this.parse();
+    this.setState({ parsed });
+    return parsed;
+  }
+
+  ensureTeams() {
+    if (this.state.teams) return this.state.teams;
+    const teams = this.build(this.ensure(), this.state.mode, this.state.drawSeed);
+    this.setState({ teams });
+    return teams;
+  }
+
+  draw() {
+    const parsed = this.ensure();
+    const seed = this.state.drawSeed + 1;
+    const teams = this.build(parsed, this.state.mode, seed);
+    this.setState({ screen: 'drawing', teams, drawSeed: seed });
+    clearTimeout(this._draw);
+    this._draw = setTimeout(() => this.setState({ screen: 'teams' }), 1500);
+  }
+
+  flash(text) {
+    this.setState({ toast: text });
+    clearTimeout(this._toast);
+    this._toast = setTimeout(() => this.setState({ toast: null }), 2200);
+  }
+
+  commitGoal(assist) {
+    const teams = this.ensureTeams();
+    const side = this.state.pendingSide;
+    const t = teams[this.state.pairing[side === 'a' ? 0 : 1]];
+    const scorer = this.state.pendingScorer;
+    const min = String(Math.floor(this.state.sec / 60)).padStart(2, '0') + "'";
+    this.setState(s => {
+      const events = [{ min, scorer, assist, color: t.color, team: t.label }].concat(s.events);
+      return {
+        events, sheet: null, pendingScorer: null, pulse: side,
+        scoreA: side === 'a' ? s.scoreA + 1 : s.scoreA,
+        scoreB: side === 'b' ? s.scoreB + 1 : s.scoreB,
+        celebrate: { name: scorer, sub: assist ? 'assistência de ' + assist : 'sem assistência', color: t.color }
+      };
+    });
+    clearTimeout(this._cel);
+    this._cel = setTimeout(() => this.setState({ celebrate: null, pulse: '' }), 1100);
+  }
+
+  ranking(metric, period) {
+    const idx = metric === 'gols' ? 0 : metric === 'assist' ? 1 : 2;
+    const mult = period === 'rodada' ? 0 : period === 'mes' ? 1 : 2.4;
+    const live = {};
+    this.state.events.forEach(e => {
+      live[e.scorer] = live[e.scorer] || [0, 0, 0];
+      live[e.scorer][0] += 1;
+      if (e.assist) { live[e.assist] = live[e.assist] || [0, 0, 0]; live[e.assist][1] += 1; }
+    });
+    const names = Object.keys(SEED);
+    return names.map(n => {
+      const base = Math.round((SEED[n][idx] || 0) * mult);
+      const extra = (live[n] && live[n][idx]) || (idx === 2 && period !== 'rodada' ? 0 : 0);
+      const value = base + (idx === 2 ? (period === 'rodada' ? 1 : 0) : (live[n] ? live[n][idx] : 0));
+      return { name: n, value, initials: initialsOf(n) };
+    }).filter(r => r.value > 0).sort((a, b) => b.value - a.value || a.name.localeCompare(b.name));
+  }
+
+  renderVals() {
+    const s = this.state;
+    const parsed = s.parsed || { confirmed: [], waiting: [], warnings: [] };
+    const av = p => {
+      const h = hash(p.name);
+      if (p.gk) return { avBg: '#FFD84A', avFg: '#090A0C' };
+      return h % 3 === 0 ? { avBg: '#262A31', avFg: '#ECEFF3' } : { avBg: '#1F232A', avFg: '#A7AEB9' };
+    };
+    const dress = (p, i, delay) => Object.assign({}, p, av(p), {
+      num: String(i + 1).padStart(2, '0'),
+      anim: delay === undefined ? 'none' : 'jgLand 320ms cubic-bezier(.2,1.3,.35,1) ' + delay + 'ms both'
+    });
+
+    const teams = s.teams || [];
+    const teamsOut = teams.map((t, ti) => ({
+      label: t.label, color: t.color, num: t.num,
+      anim: 'jgLand 340ms cubic-bezier(.2,1.3,.35,1) ' + (ti * 90) + 'ms both',
+      players: t.players.map((p, pi) => dress(p, pi, ti * 90 + 120 + pi * 45))
+    }));
+
+    const pair = s.pairing.map(i => teams[i]).filter(Boolean);
+    const tA = pair[0] || { label: 'VERDE', color: '#35E878', players: [] };
+    const tB = pair[1] || { label: 'ROSA', color: '#FF4FA3', players: [] };
+    const shortName = t => t.label.replace('TIME ', '');
+
+    const sheetTeam = s.pendingSide === 'b' ? tB : tA;
+    const sheetPlayers = (sheetTeam.players || []).filter(p => !p.gk).map(p => Object.assign({}, p, av(p), {
+      pick: () => this.setState({ sheet: 'assist', pendingScorer: p.name })
+    }));
+    const assistPlayers = (sheetTeam.players || []).filter(p => p.name !== s.pendingScorer).map(p => Object.assign({}, p, {
+      pick: () => this.commitGoal(p.name)
+    }));
+
+    const rank = this.ranking(s.metric, s.period);
+    const unit = s.metric === 'gols' ? 'gols' : s.metric === 'assist' ? 'assistências' : 'presenças';
+    const ghosts = ['rgba(255,216,74,.34)', 'rgba(236,239,243,.16)', 'rgba(255,79,163,.24)'];
+    const podium = rank.slice(0, 3).map((r, i) => ({
+      pos: String(i + 1), name: r.name, value: r.value, initials: r.initials,
+      sub: r.value + ' ' + unit + ' · ' + (i === 0 ? 'líder' : i === 1 ? 'a ' + (rank[0].value - r.value) + ' do topo' : 'top 3'),
+      avBg: i === 0 ? '#FFD84A' : i === 2 ? '#FF4FA3' : '#262A31',
+      avFg: i === 1 ? '#ECEFF3' : '#090A0C',
+      valColor: i === 0 ? '#FFD84A' : '#ECEFF3',
+      ghost: ghosts[i],
+      anim: 'jgLand 320ms cubic-bezier(.2,1.3,.35,1) ' + (i * 70) + 'ms both'
+    }));
+    const rest = rank.slice(3, 12).map((r, i) => ({
+      pos: String(i + 4), name: r.name, value: r.value, initials: r.initials,
+      avBg: '#262A31', avFg: '#ECEFF3'
+    }));
+
+    const shareText = teams.length
+      ? 'TIMES DE HOJE — QUINTA 20:30\nArena Farofa · Campo 03\n\n'
+        + teams.map(t => shortName(t) + '\n' + t.players.map(p => p.name + (p.gk ? ' (GK)' : '')).join('\n')).join('\n\n')
+        + '\n\nEspera: ' + (parsed.waiting.map(p => p.name).join(', ') || '—') + '\n\nfeito no Jogaê'
+      : 'Monte os times para gerar o texto.';
+
+    const mm = String(Math.floor(s.sec / 60)).padStart(2, '0');
+    const ss = String(s.sec % 60).padStart(2, '0');
+    const tallyOf = name => {
+      let n = 0;
+      return s.events.slice().reverse().map(e => { if (e.scorer === name) n++; return n; }).pop();
+    };
+
+    const chip = on => on
+      ? { bg: '#FFD84A', bd: '#FFD84A', fg: '#090A0C' }
+      : { bg: 'transparent', bd: '#262A31', fg: '#A7AEB9' };
+    const cg = chip(s.metric === 'gols'), ca = chip(s.metric === 'assist'), cp = chip(s.metric === 'presenca');
+    const navC = k => s.screen === k ? '#35E878' : '#7A828E';
+    const winner = s.scoreA === s.scoreB ? 'Empate. Segue o jogo.' : (s.scoreA > s.scoreB ? shortName(tA) : shortName(tB)) + ' venceu';
+
+    return {
+      isSplash: s.screen === 'splash',
+      showChrome: ['home', 'rodada', 'importar', 'revisao', 'presorteio', 'teams', 'share', 'live', 'fim', 'ranking', 'perfil'].indexOf(s.screen) >= 0,
+      isHome: s.screen === 'home', isRodada: s.screen === 'rodada', isImportar: s.screen === 'importar',
+      isParsing: s.screen === 'parsing', isRevisao: s.screen === 'revisao', isPresorteio: s.screen === 'presorteio',
+      isDrawing: s.screen === 'drawing', isTimes: s.screen === 'teams', isShare: s.screen === 'share',
+      isLive: s.screen === 'live', isFim: s.screen === 'fim', isRanking: s.screen === 'ranking', isPerfil: s.screen === 'perfil',
+      isLiveOn: s.events.length > 0 && s.screen !== 'fim',
+
+      goHome: () => this.setState({ screen: 'home' }),
+      goRodada: () => { this.ensure(); this.setState({ screen: 'rodada' }); },
+      goImportar: () => this.setState({ screen: 'importar' }),
+      goPresorteio: () => { this.ensure(); this.setState({ screen: 'presorteio' }); },
+      goShare: () => this.setState({ screen: 'share' }),
+      goRanking: () => this.setState({ screen: 'ranking' }),
+      goPerfil: () => this.setState({ screen: 'perfil' }),
+      goLive: () => { this.ensureTeams(); this.setState({ screen: 'live' }); },
+
+      raw: s.raw, rawLines: s.raw.split('\n').filter(l => l.trim()).length,
+      setRaw: e => this.setState({ raw: e.target.value }),
+      parseList: () => {
+        this.setState({ screen: 'parsing' });
+        clearTimeout(this._parse);
+        this._parse = setTimeout(() => this.setState({ screen: 'revisao', parsed: this.parse(), aliasResolved: false }), 1400);
+      },
+
+      confirmedList: parsed.confirmed.map((p, i) => dress(p, i)),
+      waitingList: parsed.waiting.map((p, i) => Object.assign({}, p, av(p))),
+      confirmedCount: parsed.confirmed.length,
+      waitingCount: parsed.waiting.length,
+      gkCount: parsed.confirmed.filter(p => p.gk).length,
+      hasWarning: parsed.warnings.length > 0 && !s.aliasResolved,
+      warningText: parsed.warnings.length
+        ? '“' + parsed.warnings[0].b + '” parece ser o mesmo “' + parsed.warnings[0].a + '”. Juntei os dois numa pessoa — confirma?'
+        : '',
+      mergeAlias: () => { this.setState({ aliasResolved: true }); this.flash('Beleza. Um Igão só.'); },
+      keepAlias: () => { this.setState({ aliasResolved: true }); this.flash('Mantive separados.'); },
+
+      mode: s.mode,
+      modeLabel: s.mode === 'random' ? 'Sorteio aleatório' : 'Times equilibrados',
+      modeHint: s.mode === 'random' ? 'Puro sorteio. Ninguém reclama do critério.' : 'Distribui por histórico de gols e presença, em zigue-zague.',
+      randomBg: s.mode === 'random' ? '#ECEFF3' : 'transparent',
+      randomFg: s.mode === 'random' ? '#090A0C' : '#A7AEB9',
+      balancedBg: s.mode === 'balanced' ? '#ECEFF3' : 'transparent',
+      balancedFg: s.mode === 'balanced' ? '#090A0C' : '#A7AEB9',
+      setRandom: () => this.setState({ mode: 'random' }),
+      setBalanced: () => this.setState({ mode: 'balanced' }),
+      drawTeams: () => this.draw(),
+      skipDraw: () => { clearTimeout(this._draw); this.setState({ screen: 'teams' }); },
+      drawHint: s.mode === 'random' ? 'Embaralhando 20 nomes' : 'Equilibrando por histórico',
+      teams: teamsOut,
+
+      shareText,
+      copyShare: () => this.flash('Copiado. Cola no grupo.'),
+
+      startMatch: () => { this.ensureTeams(); this.setState({ screen: 'live', sec: 0, scoreA: 0, scoreB: 0, events: [], gameNo: 1, pairing: [0, 3] }); },
+      clock: mm + ':' + ss,
+      gameNo: s.gameNo,
+      nameA: shortName(tA), nameB: shortName(tB), colorA: tA.color, colorB: tB.color,
+      scoreA: s.scoreA, scoreB: s.scoreB,
+      popA: s.pulse === 'a' ? 'jgScorePop 420ms cubic-bezier(.2,1.3,.35,1) both' : 'none',
+      popB: s.pulse === 'b' ? 'jgScorePop 420ms cubic-bezier(.2,1.3,.35,1) both' : 'none',
+      goalA: () => { this.ensureTeams(); this.setState({ sheet: 'gol', pendingSide: 'a' }); },
+      goalB: () => { this.ensureTeams(); this.setState({ sheet: 'gol', pendingSide: 'b' }); },
+      undo: () => {
+        if (!s.events.length) return this.flash('Nada pra desfazer.');
+        const last = s.events[0];
+        const isA = last.team === tA.label;
+        this.setState(st => ({
+          events: st.events.slice(1),
+          scoreA: isA ? Math.max(0, st.scoreA - 1) : st.scoreA,
+          scoreB: !isA ? Math.max(0, st.scoreB - 1) : st.scoreB
+        }));
+        this.flash('Lance desfeito.');
+      },
+      endMatch: () => this.setState({ screen: 'fim' }),
+      nextMatch: () => {
+        const nextPair = [s.pairing[1], s.queue[0]];
+        this.setState({ screen: 'live', pairing: nextPair, queue: [s.queue[1], s.pairing[0]], gameNo: s.gameNo + 1, scoreA: 0, scoreB: 0, sec: 0 });
+      },
+      resultLabel: winner,
+      nextGame: teams.length ? shortName(teams[s.queue[0]] || teams[1]) + ' entra' : 'Amarelo entra',
+      events: s.events.map(e => ({
+        min: e.min, scorer: e.scorer, color: e.color,
+        detail: e.assist ? 'assist. ' + e.assist + ' · ' + e.team.replace('TIME ', '') : e.team.replace('TIME ', ''),
+        tally: ''
+      })),
+      hasEvents: s.events.length > 0,
+      noEvents: s.events.length === 0,
+
+      sheetGol: s.sheet === 'gol', sheetAssist: s.sheet === 'assist',
+      sheetColor: sheetTeam.color, sheetPlayers, assistPlayers,
+      pendingScorer: s.pendingScorer || '',
+      noAssist: () => this.commitGoal(null),
+      closeSheet: () => this.setState({ sheet: null, pendingScorer: null }),
+
+      celebrating: !!s.celebrate,
+      celebrateName: s.celebrate ? s.celebrate.name : '',
+      celebrateSub: s.celebrate ? s.celebrate.sub : '',
+      celebrateColor: s.celebrate ? s.celebrate.color : '#FF4D4D',
+      celebrateGlow: s.celebrate ? s.celebrate.color + '2E' : 'transparent',
+
+      period: s.period,
+      setPeriodRodada: () => this.setState({ period: 'rodada' }),
+      setPeriodMes: () => this.setState({ period: 'mes' }),
+      setPeriodGeral: () => this.setState({ period: 'geral' }),
+      pRodadaC: s.period === 'rodada' ? '#ECEFF3' : '#7A828E',
+      pMesC: s.period === 'mes' ? '#ECEFF3' : '#7A828E',
+      pGeralC: s.period === 'geral' ? '#ECEFF3' : '#7A828E',
+      pRodadaU: s.period === 'rodada' ? 'inset 0 -2px 0 #35E878' : 'none',
+      pMesU: s.period === 'mes' ? 'inset 0 -2px 0 #35E878' : 'none',
+      pGeralU: s.period === 'geral' ? 'inset 0 -2px 0 #35E878' : 'none',
+      setMetricG: () => this.setState({ metric: 'gols' }),
+      setMetricA: () => this.setState({ metric: 'assist' }),
+      setMetricP: () => this.setState({ metric: 'presenca' }),
+      mGBg: cg.bg, mGB: cg.bd, mGC: cg.fg,
+      mABg: ca.bg, mAB: ca.bd, mAC: ca.fg,
+      mPBg: cp.bg, mPB: cp.bd, mPC: cp.fg,
+      podium, rest,
+
+      navHome: navC('home'), navRodada: navC('rodada'), navRanking: navC('ranking'), navPerfil: navC('perfil'),
+      toast: !!s.toast, toastText: s.toast || ''
+    };
+  }
+}
+
+</script>
+</body>
+</html>

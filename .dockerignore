@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.claude
+.windsurf
+.env*
+coverage
+*.log
+*.tsbuildinfo
+docs
+README.md
+STATUS.md
+HANDOFF.md
+AGENTS.md
+CLAUDE.md

@@ -1,0 +1,392 @@
+// Jogaê — camada operacional do fut.
+// Princípio: multi-grupo desde o modelo de dados. Nada de valor específico
+// (quinta-feira, 4 times, 5 na linha) vive no schema — tudo é config do grupo.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/db/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────
+// Identidade e acesso
+// ─────────────────────────────────────────────────────────────
+
+/// Quem entra no app. A identidade em si (senha, Google, OTP) vive no Supabase
+/// Auth; aqui fica só o perfil e o que o domínio precisa.
+model User {
+  id        String   @id @default(cuid())
+  /// `sub` do JWT do Supabase. Nulo enquanto o cadastro existir sem nunca ter
+  /// logado — é o caso do elenco importado e do convidado que ainda não entrou.
+  authId    String?  @unique
+  name      String
+  email     String   @unique
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships Membership[]
+}
+
+/// Convite pra ajudar a tocar um grupo.
+///
+/// Não tem token: a capacidade é controlar o e-mail, e quem verifica isso é o
+/// Supabase (Google ou código por e-mail). Quando alguém entra, todo convite
+/// aberto pro e-mail dele vira vínculo. É mais simples e mais forte do que um
+/// link secreto que pode ser encaminhado.
+model Invite {
+  id         String    @id @default(cuid())
+  email      String
+  groupId    String
+  role       Role
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  group FootballGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([email, consumedAt])
+  @@index([groupId])
+  @@index([expiresAt])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  ASSISTANT
+}
+
+model Membership {
+  id      String @id @default(cuid())
+  userId  String
+  groupId String
+  role    Role   @default(ADMIN)
+
+  createdAt DateTime @default(now())
+
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group FootballGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@index([groupId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Grupo de Fut — a entidade central
+// ─────────────────────────────────────────────────────────────
+
+enum SportType {
+  SOCIETY
+  FUTSAL
+  CAMPO
+  CUSTOM
+}
+
+/// Como o grupo trata goleiro. Configurável por grupo (plano §16).
+enum GoalkeeperMode {
+  /// Cada time recebe um goleiro fixo na rodada.
+  FIXED_PER_TEAM
+  /// Goleiros formam um pool próprio e são alocados por partida.
+  POOL
+  /// Não há goleiro dedicado — revezamento entre jogadores de linha.
+  ROTATING
+  /// O time que está de fora empresta o goleiro.
+  BORROWED
+}
+
+model FootballGroup {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  logoUrl     String?
+  sportType   SportType @default(SOCIETY)
+  timezone    String    @default("America/Sao_Paulo")
+
+  // Local padrão
+  defaultVenue       String?
+  defaultVenueUrl    String?
+
+  // Recorrência padrão — 0=domingo … 6=sábado
+  recurringWeekdays  Int[]   @default([])
+  defaultStartTime   String? // "20:30"
+  defaultDurationMin Int     @default(90)
+
+  // Formato padrão do fut
+  teamCount           Int            @default(4)
+  fieldPlayersPerTeam Int            @default(5)
+  goalkeepersPerTeam  Int            @default(1)
+  goalkeeperMode      GoalkeeperMode @default(FIXED_PER_TEAM)
+  waitlistLimit       Int            @default(10)
+
+  /// Configurações avançadas e opcionais (regras de partida, ranking, cores).
+  settings Json @default("{}")
+
+  /// Token não previsível para links públicos (plano §39).
+  publicToken String @unique @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships Membership[]
+  invites     Invite[]
+  players     Player[]
+  rounds      Round[]
+}
+
+// ─────────────────────────────────────────────────────────────
+// Jogadores
+// ─────────────────────────────────────────────────────────────
+
+enum PreferredRole {
+  GOALKEEPER
+  DEFENDER
+  MIDFIELDER
+  FORWARD
+  VERSATILE
+}
+
+model Player {
+  id      String @id @default(cuid())
+  groupId String
+
+  displayName String
+  nickname    String?
+  avatarUrl   String?
+
+  /// Nível técnico 1–5. Privado: nunca exposto em rota pública (plano §13).
+  skillLevel    Int           @default(3)
+  preferredRole PreferredRole @default(VERSATILE)
+  isGoalkeeper  Boolean       @default(false)
+  active        Boolean       @default(true)
+  notes         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  group       FootballGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  aliases     PlayerAlias[]
+  attendances Attendance[]
+  teamPlayers TeamPlayer[]
+  goals       MatchEvent[]  @relation("EventAuthor")
+  assists     MatchEvent[]  @relation("EventAssist")
+
+  @@index([groupId, active])
+}
+
+/// Apelidos que o organizador confirmou uma vez e o grupo "aprendeu" (plano §12).
+model PlayerAlias {
+  id       String @id @default(cuid())
+  playerId String
+  alias    String
+  /// Forma normalizada (sem acento, minúscula, sem pontuação) usada no match.
+  normalized String
+
+  createdAt DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, normalized])
+  @@index([normalized])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Rodadas
+// ─────────────────────────────────────────────────────────────
+
+enum RoundStatus {
+  OPEN
+  CONFIRMED
+  LIVE
+  FINISHED
+  CANCELLED
+}
+
+model Round {
+  id      String @id @default(cuid())
+  groupId String
+
+  date     DateTime
+  startsAt DateTime?
+  endsAt   DateTime?
+  venue    String?
+  venueUrl String?
+  notes    String?
+
+  status RoundStatus @default(OPEN)
+
+  // Snapshot do formato no momento da rodada — o grupo pode mudar depois.
+  teamCount           Int
+  fieldPlayersPerTeam Int
+  goalkeeperMode      GoalkeeperMode
+
+  // Rastro do sorteio (plano §35 — transparência)
+  drawMode     DrawMode?
+  drawSeed     String?
+  drawnAt      DateTime?
+  manualEdits  Int       @default(0)
+
+  /// Token do link público da rodada.
+  publicToken String @unique @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  group       FootballGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  attendances Attendance[]
+  teams       Team[]
+  matches     Match[]
+
+  @@index([groupId, date])
+}
+
+enum DrawMode {
+  RANDOM
+  BALANCED
+  MANUAL
+}
+
+enum AttendanceStatus {
+  CONFIRMED
+  WAITING
+  ABSENT
+}
+
+model Attendance {
+  id       String @id @default(cuid())
+  roundId  String
+  playerId String
+
+  status AttendanceStatus @default(CONFIRMED)
+  /// Posição na lista (ordem de chegada / ordem na espera).
+  order  Int
+  /// Confirmado especificamente como goleiro nesta rodada.
+  asGoalkeeper Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  round  Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([roundId, playerId])
+  @@index([roundId, status, order])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Times
+// ─────────────────────────────────────────────────────────────
+
+model Team {
+  id      String @id @default(cuid())
+  roundId String
+
+  name  String
+  /// Slot de cor do design system: green | yellow | red | pink | …
+  color String
+  order Int
+
+  createdAt DateTime @default(now())
+
+  round   Round        @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  players TeamPlayer[]
+
+  matchesAsA Match[]      @relation("TeamA")
+  matchesAsB Match[]      @relation("TeamB")
+  events     MatchEvent[]
+
+  @@unique([roundId, order])
+  @@index([roundId])
+}
+
+model TeamPlayer {
+  id       String @id @default(cuid())
+  teamId   String
+  playerId String
+
+  isGoalkeeper Boolean @default(false)
+  /// Jogador travado pelo organizador — sorteios seguintes não o movem.
+  locked       Boolean @default(false)
+
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, playerId])
+  @@index([playerId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Partidas e eventos
+// ─────────────────────────────────────────────────────────────
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  FINISHED
+}
+
+model Match {
+  id      String @id @default(cuid())
+  roundId String
+
+  teamAId String
+  teamBId String
+
+  scoreA Int         @default(0)
+  scoreB Int         @default(0)
+  status MatchStatus @default(SCHEDULED)
+  order  Int
+
+  startedAt DateTime?
+  endedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  round  Round        @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  teamA  Team         @relation("TeamA", fields: [teamAId], references: [id], onDelete: Cascade)
+  teamB  Team         @relation("TeamB", fields: [teamBId], references: [id], onDelete: Cascade)
+  events MatchEvent[]
+
+  @@index([roundId, order])
+}
+
+enum MatchEventType {
+  GOAL
+  OWN_GOAL
+}
+
+model MatchEvent {
+  id      String @id @default(cuid())
+  matchId String
+
+  type   MatchEventType @default(GOAL)
+  /// Time que marcou o ponto (para gol contra, é o time beneficiado).
+  teamId String
+  /// Autor. Pode ser nulo quando o organizador registra "gol sem autor".
+  playerId       String?
+  assistPlayerId String?
+
+  /// Minuto do lance dentro da partida, quando houver cronômetro.
+  minute Int?
+
+  /// Id gerado no celular antes de o gol sair da fila offline (plano §40).
+  /// É o que impede o mesmo gol entrar duas vezes quando a sincronização repete.
+  clientEventId String? @unique
+
+  /// Desfazer é soft-delete: mantém rastro e corrige estatística (plano §19).
+  voidedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  match        Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  team         Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  player       Player? @relation("EventAuthor", fields: [playerId], references: [id], onDelete: SetNull)
+  assistPlayer Player? @relation("EventAssist", fields: [assistPlayerId], references: [id], onDelete: SetNull)
+
+  @@index([matchId, createdAt])
+  @@index([playerId])
+}

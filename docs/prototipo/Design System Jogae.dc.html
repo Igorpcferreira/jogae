@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; background:#090A0C; }
+  * { box-sizing:border-box; }
+  a { color:#35E878; text-decoration:none; }
+  a:hover { color:#FFD84A; }
+  ::selection { background:#FF4FA3; color:#090A0C; }
+  @keyframes jgScorePop { 0%{transform:translateY(28%) scale(.86);opacity:0} 55%{transform:translateY(0) scale(1.08);opacity:1} 100%{transform:translateY(0) scale(1);opacity:1} }
+  @keyframes jgFlash { 0%{opacity:0} 20%{opacity:.9} 100%{opacity:0} }
+  @keyframes jgSweep { 0%{transform:translateX(-110%)} 100%{transform:translateX(210%)} }
+  @keyframes jgCheck { 0%{stroke-dashoffset:26} 100%{stroke-dashoffset:0} }
+  @keyframes jgBounce { 0%{transform:scale(.7)} 60%{transform:scale(1.12)} 100%{transform:scale(1)} }
+  @keyframes jgTrail { 0%{offset-distance:0%} 100%{offset-distance:100%} }
+  @keyframes jgDash { 0%{stroke-dashoffset:180} 100%{stroke-dashoffset:0} }
+  @keyframes jgSpin { to { transform:rotate(360deg) } }
+  @keyframes jgShimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+  @keyframes jgRise { 0%{transform:translateY(14px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+</style>
+</helmet>
+
+<div style="background:#090A0C; color:#ECEFF3; font-family:'DM Sans',system-ui,sans-serif; min-height:100vh; width:100%; overflow:hidden">
+
+  <div style="position:relative; padding:72px 56px 64px; border-bottom:1px solid #262A31; overflow:hidden">
+    <div style="position:absolute; inset:0; opacity:.5; background-image:linear-gradient(#ECEFF308 1px, transparent 1px), linear-gradient(90deg, #ECEFF308 1px, transparent 1px); background-size:48px 48px"></div>
+    <div aria-hidden="true" style="position:absolute; right:-24px; top:-56px; font-family:Anton,sans-serif; font-size:300px; line-height:.8; color:transparent; -webkit-text-stroke:1.5px rgba(236,239,243,.07); letter-spacing:-.02em">10</div>
+    <div style="position:relative; display:flex; flex-direction:column; gap:34px">
+      <div style="display:flex; align-items:center; gap:16px">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-label="Símbolo Jogaê">
+          <path d="M0 10 L10 0 H52 V42 L42 52 H0 Z" fill="#35E878"></path>
+          <circle cx="16" cy="38" r="6" fill="#090A0C"></circle>
+          <path d="M16 38 C31 38 37 25 37 12" stroke="#090A0C" stroke-width="5" stroke-linecap="round"></path>
+          <path d="M31 12 H43" stroke="#090A0C" stroke-width="5" stroke-linecap="round"></path>
+        </svg>
+        <div style="font-family:Anton,sans-serif; font-size:46px; line-height:1; letter-spacing:.005em; color:#ECEFF3">JOGAÊ</div>
+        <div style="align-self:flex-start; margin-top:2px; padding:5px 10px; border:1px solid #FF4FA3; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.16em; color:#FF4FA3">CODENAME</div>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:56px; align-items:flex-end; justify-content:space-between">
+        <div style="max-width:640px; display:flex; flex-direction:column; gap:18px">
+          <div style="font-family:Anton,sans-serif; font-size:64px; line-height:.94; letter-spacing:.004em; text-transform:uppercase; text-wrap:balance">Design System<br><span style="color:#35E878">seu fut, sem enrolação</span></div>
+          <div style="font-size:17px; line-height:1.55; color:#A7AEB9; max-width:560px; text-wrap:pretty">Fundações, tokens, componentes e motion spec da camada operacional do fut. Dark mode como experiência principal, quatro cores com função definida, placar legível a três metros de distância.</div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; max-width:420px">
+          <div style="padding:7px 13px; border:1px solid #262A31; border-radius:999px; font-size:12px; font-weight:500; color:#ECEFF3">sports tech</div>
+          <div style="padding:7px 13px; border:1px solid #262A31; border-radius:999px; font-size:12px; font-weight:500; color:#ECEFF3">streetwear</div>
+          <div style="padding:7px 13px; border:1px solid #262A31; border-radius:999px; font-size:12px; font-weight:500; color:#ECEFF3">scoreboard</div>
+          <div style="padding:7px 13px; border:1px solid #262A31; border-radius:999px; font-size:12px; font-weight:500; color:#ECEFF3">game UI</div>
+          <div style="padding:7px 13px; border:1px solid #262A31; border-radius:999px; font-size:12px; font-weight:500; color:#ECEFF3">resenha</div>
+          <div style="padding:7px 13px; border:1px solid #262A31; border-radius:999px; font-size:12px; font-weight:500; color:#ECEFF3">luz de estádio</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:0; align-items:stretch; border-bottom:1px solid #262A31; flex-wrap:wrap">
+    <div style="flex:1 1 240px; padding:26px 32px; border-right:1px solid #262A31">
+      <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:9px">01 — FUNDAÇÕES</div>
+      <div style="font-size:14px; color:#ECEFF3; line-height:1.5">Cor, tipografia, geometria, textura</div>
+    </div>
+    <div style="flex:1 1 240px; padding:26px 32px; border-right:1px solid #262A31">
+      <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:9px">02 — COMPONENTES</div>
+      <div style="font-size:14px; color:#ECEFF3; line-height:1.5">Ações, entradas, navegação, cards</div>
+    </div>
+    <div style="flex:1 1 240px; padding:26px 32px; border-right:1px solid #262A31">
+      <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:9px">03 — FUTEBOL</div>
+      <div style="font-size:14px; color:#ECEFF3; line-height:1.5">Placar, times, jogadores, ranking</div>
+    </div>
+    <div style="flex:1 1 240px; padding:26px 32px">
+      <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:9px">04 — MOTION</div>
+      <div style="font-size:14px; color:#ECEFF3; line-height:1.5">Tokens, sequências, reduced motion</div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">01.1 — MARCA</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:12px">Assinatura visual</div>
+    <div style="font-size:16px; line-height:1.55; color:#A7AEB9; max-width:660px; margin-bottom:44px; text-wrap:pretty">O símbolo é um chute: bola parada, trajetória subindo e saindo do quadro. O quadro tem canto chanfrado — o mesmo corte aparece em score blocks e headers de time. Nada de bola detalhada, nada de gramado.</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; margin-bottom:22px">
+      <div style="background:#111317; border:1px solid #262A31; padding:28px; display:flex; flex-direction:column; gap:22px; border-radius:4px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">SÍMBOLO / DARK</div>
+        <div style="display:flex; align-items:center; justify-content:center; padding:26px 0">
+          <svg width="88" height="88" viewBox="0 0 52 52" fill="none">
+            <path d="M0 10 L10 0 H52 V42 L42 52 H0 Z" fill="#35E878"></path>
+            <circle cx="16" cy="38" r="6" fill="#090A0C"></circle>
+            <path d="M16 38 C31 38 37 25 37 12" stroke="#090A0C" stroke-width="5" stroke-linecap="round"></path>
+            <path d="M31 12 H43" stroke="#090A0C" stroke-width="5" stroke-linecap="round"></path>
+          </svg>
+        </div>
+        <div style="font-size:13px; color:#7A828E">Verde sobre Ink 900. Uso padrão.</div>
+      </div>
+      <div style="background:#F7F8FA; border:1px solid #262A31; padding:28px; display:flex; flex-direction:column; gap:22px; border-radius:4px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#6B7280">SÍMBOLO / LIGHT</div>
+        <div style="display:flex; align-items:center; justify-content:center; padding:26px 0">
+          <svg width="88" height="88" viewBox="0 0 52 52" fill="none">
+            <path d="M0 10 L10 0 H52 V42 L42 52 H0 Z" fill="#090A0C"></path>
+            <circle cx="16" cy="38" r="6" fill="#35E878"></circle>
+            <path d="M16 38 C31 38 37 25 37 12" stroke="#35E878" stroke-width="5" stroke-linecap="round"></path>
+            <path d="M31 12 H43" stroke="#35E878" stroke-width="5" stroke-linecap="round"></path>
+          </svg>
+        </div>
+        <div style="font-size:13px; color:#6B7280">Ink sobre Cloud 50. Impressão e claro.</div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; padding:28px; display:flex; flex-direction:column; gap:22px; border-radius:4px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">MONOCROMO</div>
+        <div style="display:flex; align-items:center; justify-content:center; padding:26px 0">
+          <svg width="88" height="88" viewBox="0 0 52 52" fill="none">
+            <path d="M0 10 L10 0 H52 V42 L42 52 H0 Z" fill="none" stroke="#ECEFF3" stroke-width="2"></path>
+            <circle cx="16" cy="38" r="6" fill="#ECEFF3"></circle>
+            <path d="M16 38 C31 38 37 25 37 12" stroke="#ECEFF3" stroke-width="5" stroke-linecap="round"></path>
+            <path d="M31 12 H43" stroke="#ECEFF3" stroke-width="5" stroke-linecap="round"></path>
+          </svg>
+        </div>
+        <div style="font-size:13px; color:#7A828E">Outline para watermark e share cards.</div>
+      </div>
+      <div style="background:#1A1D22; border:1px solid #262A31; padding:28px; display:flex; flex-direction:column; gap:22px; border-radius:4px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">LOCKUP HORIZONTAL</div>
+        <div style="display:flex; align-items:center; justify-content:center; gap:12px; padding:26px 0">
+          <svg width="40" height="40" viewBox="0 0 52 52" fill="none">
+            <path d="M0 10 L10 0 H52 V42 L42 52 H0 Z" fill="#35E878"></path>
+            <circle cx="16" cy="38" r="6" fill="#090A0C"></circle>
+            <path d="M16 38 C31 38 37 25 37 12" stroke="#090A0C" stroke-width="5" stroke-linecap="round"></path>
+            <path d="M31 12 H43" stroke="#090A0C" stroke-width="5" stroke-linecap="round"></path>
+          </svg>
+          <div style="font-family:Anton,sans-serif; font-size:34px; line-height:1">JOGAÊ</div>
+        </div>
+        <div style="font-size:13px; color:#7A828E">Wordmark trocável: a marca é codename.</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:14px; flex-wrap:wrap">
+      <div style="flex:1 1 300px; padding:18px 20px; background:#111317; border-left:3px solid #35E878; border-radius:0 4px 4px 0; font-size:14px; line-height:1.5; color:#A7AEB9"><span style="color:#ECEFF3; font-weight:700">Faça:</span> símbolo isolado em nav e favicon; wordmark só em splash, share cards e login.</div>
+      <div style="flex:1 1 300px; padding:18px 20px; background:#111317; border-left:3px solid #FF4D4D; border-radius:0 4px 4px 0; font-size:14px; line-height:1.5; color:#A7AEB9"><span style="color:#ECEFF3; font-weight:700">Não faça:</span> girar o símbolo, aplicar gradiente, colocar sobre foto de gramado ou trocar o verde por outra cor da paleta.</div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">01.2 — COR</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:12px">Quatro cores, quatro funções</div>
+    <div style="font-size:16px; line-height:1.55; color:#A7AEB9; max-width:660px; margin-bottom:44px; text-wrap:pretty">Neutros são o palco: 90% da tela. As quatro cores entram como energia e hierarquia — uma por função, nunca competindo na mesma região.</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:20px; margin-bottom:56px">
+      <div style="border:1px solid #262A31; border-radius:4px; overflow:hidden">
+        <div style="height:132px; background:#35E878; display:flex; align-items:flex-end; padding:16px"><div style="font-family:Anton,sans-serif; font-size:34px; color:#090A0C; line-height:.9">ENERGY<br>GREEN</div></div>
+        <div style="padding:18px 18px 20px; background:#111317; display:flex; flex-direction:column; gap:10px">
+          <div style="display:flex; justify-content:space-between; font-size:12px"><span style="color:#7A828E">color.action.primary</span><span style="font-weight:700; letter-spacing:.04em">#35E878</span></div>
+          <div style="font-size:13px; line-height:1.5; color:#A7AEB9">CTA principal · confirmado · vitória · presença · estado positivo</div>
+          <div style="display:flex; gap:6px; margin-top:4px">
+            <div style="flex:1; height:6px; background:#0E2C1A"></div><div style="flex:1; height:6px; background:#166B39"></div><div style="flex:1; height:6px; background:#1E7A45"></div><div style="flex:1; height:6px; background:#35E878"></div><div style="flex:1; height:6px; background:#8DF3B6"></div>
+          </div>
+        </div>
+      </div>
+      <div style="border:1px solid #262A31; border-radius:4px; overflow:hidden">
+        <div style="height:132px; background:#FFD84A; display:flex; align-items:flex-end; padding:16px"><div style="font-family:Anton,sans-serif; font-size:34px; color:#090A0C; line-height:.9">MATCH<br>YELLOW</div></div>
+        <div style="padding:18px 18px 20px; background:#111317; display:flex; flex-direction:column; gap:10px">
+          <div style="display:flex; justify-content:space-between; font-size:12px"><span style="color:#7A828E">color.accent.stat</span><span style="font-weight:700; letter-spacing:.04em">#FFD84A</span></div>
+          <div style="font-size:13px; line-height:1.5; color:#A7AEB9">Assistência · ranking · medalha · aviso não crítico · estatística</div>
+          <div style="display:flex; gap:6px; margin-top:4px">
+            <div style="flex:1; height:6px; background:#332B0D"></div><div style="flex:1; height:6px; background:#6B5A16"></div><div style="flex:1; height:6px; background:#B99A22"></div><div style="flex:1; height:6px; background:#FFD84A"></div><div style="flex:1; height:6px; background:#FFEBA1"></div>
+          </div>
+        </div>
+      </div>
+      <div style="border:1px solid #262A31; border-radius:4px; overflow:hidden">
+        <div style="height:132px; background:#FF4D4D; display:flex; align-items:flex-end; padding:16px"><div style="font-family:Anton,sans-serif; font-size:34px; color:#090A0C; line-height:.9">GOAL<br>RED</div></div>
+        <div style="padding:18px 18px 20px; background:#111317; display:flex; flex-direction:column; gap:10px">
+          <div style="display:flex; justify-content:space-between; font-size:12px"><span style="color:#7A828E">color.live</span><span style="font-weight:700; letter-spacing:.04em">#FF4D4D</span></div>
+          <div style="font-size:13px; line-height:1.5; color:#A7AEB9">Ao vivo · gol · urgência · remoção destrutiva</div>
+          <div style="display:flex; gap:6px; margin-top:4px">
+            <div style="flex:1; height:6px; background:#330F0F"></div><div style="flex:1; height:6px; background:#6B1D1D"></div><div style="flex:1; height:6px; background:#B93131"></div><div style="flex:1; height:6px; background:#FF4D4D"></div><div style="flex:1; height:6px; background:#FFA3A3"></div>
+          </div>
+        </div>
+      </div>
+      <div style="border:1px solid #262A31; border-radius:4px; overflow:hidden">
+        <div style="height:132px; background:#FF4FA3; display:flex; align-items:flex-end; padding:16px"><div style="font-family:Anton,sans-serif; font-size:34px; color:#090A0C; line-height:.9">PULSE<br>PINK</div></div>
+        <div style="padding:18px 18px 20px; background:#111317; display:flex; flex-direction:column; gap:10px">
+          <div style="display:flex; justify-content:space-between; font-size:12px"><span style="color:#7A828E">color.accent.social</span><span style="font-weight:700; letter-spacing:.04em">#FF4FA3</span></div>
+          <div style="font-size:13px; line-height:1.5; color:#A7AEB9">Social · badge · perfil · momento especial · marca</div>
+          <div style="display:flex; gap:6px; margin-top:4px">
+            <div style="flex:1; height:6px; background:#330F22"></div><div style="flex:1; height:6px; background:#6B1D46"></div><div style="flex:1; height:6px; background:#B93177"></div><div style="flex:1; height:6px; background:#FF4FA3"></div><div style="flex:1; height:6px; background:#FFA4CE"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:36px">
+      <div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:16px">NEUTROS — O PALCO</div>
+        <div style="display:flex; flex-direction:column; border:1px solid #262A31; border-radius:4px; overflow:hidden">
+          <div style="display:flex; align-items:center; gap:14px; padding:12px 14px; background:#111317"><div style="width:40px; height:40px; background:#090A0C; border:1px solid #262A31"></div><div style="flex:1; font-size:13px; color:#ECEFF3">color.bg.canvas</div><div style="font-size:12px; color:#7A828E">Ink 950 · #090A0C</div></div>
+          <div style="display:flex; align-items:center; gap:14px; padding:12px 14px; background:#0F1114"><div style="width:40px; height:40px; background:#111317"></div><div style="flex:1; font-size:13px; color:#ECEFF3">color.bg.surface</div><div style="font-size:12px; color:#7A828E">Ink 900 · #111317</div></div>
+          <div style="display:flex; align-items:center; gap:14px; padding:12px 14px; background:#111317"><div style="width:40px; height:40px; background:#1A1D22"></div><div style="flex:1; font-size:13px; color:#ECEFF3">color.bg.elevated</div><div style="font-size:12px; color:#7A828E">Ink 800 · #1A1D22</div></div>
+          <div style="display:flex; align-items:center; gap:14px; padding:12px 14px; background:#0F1114"><div style="width:40px; height:40px; background:#262A31"></div><div style="flex:1; font-size:13px; color:#ECEFF3">color.border.default</div><div style="font-size:12px; color:#7A828E">Ink 700 · #262A31</div></div>
+          <div style="display:flex; align-items:center; gap:14px; padding:12px 14px; background:#111317"><div style="width:40px; height:40px; background:#3B4149"></div><div style="flex:1; font-size:13px; color:#ECEFF3">color.border.strong</div><div style="font-size:12px; color:#7A828E">Ink 600 · #3B4149</div></div>
+          <div style="display:flex; align-items:center; gap:14px; padding:12px 14px; background:#0F1114"><div style="width:40px; height:40px; background:#7A828E"></div><div style="flex:1; font-size:13px; color:#ECEFF3">color.text.secondary</div><div style="font-size:12px; color:#7A828E">Slate · #A7AEB9</div></div>
+          <div style="display:flex; align-items:center; gap:14px; padding:12px 14px; background:#111317"><div style="width:40px; height:40px; background:#ECEFF3"></div><div style="flex:1; font-size:13px; color:#ECEFF3">color.text.primary</div><div style="font-size:12px; color:#7A828E">Cloud 100 · #ECEFF3</div></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:16px">CONTRASTE VERIFICADO (WCAG)</div>
+        <div style="display:flex; flex-direction:column; gap:10px">
+          <div style="display:flex; align-items:center; gap:14px; padding:14px 16px; background:#35E878; border-radius:2px"><div style="font-family:Anton,sans-serif; font-size:22px; color:#090A0C">TEXTO INK / VERDE</div><div style="margin-left:auto; font-size:12px; font-weight:700; color:#090A0C">14.8:1 · AAA</div></div>
+          <div style="display:flex; align-items:center; gap:14px; padding:14px 16px; background:#111317; border:1px solid #262A31; border-radius:2px"><div style="font-family:Anton,sans-serif; font-size:22px; color:#35E878">VERDE / INK 900</div><div style="margin-left:auto; font-size:12px; font-weight:700; color:#A7AEB9">11.2:1 · AAA</div></div>
+          <div style="display:flex; align-items:center; gap:14px; padding:14px 16px; background:#111317; border:1px solid #262A31; border-radius:2px"><div style="font-family:Anton,sans-serif; font-size:22px; color:#FF4D4D">VERMELHO / INK 900</div><div style="margin-left:auto; font-size:12px; font-weight:700; color:#A7AEB9">4.9:1 · AA</div></div>
+          <div style="display:flex; align-items:center; gap:14px; padding:14px 16px; background:#111317; border:1px solid #262A31; border-radius:2px"><div style="font-size:14px; color:#A7AEB9">Secundário / Ink 900</div><div style="margin-left:auto; font-size:12px; font-weight:700; color:#A7AEB9">7.4:1 · AAA</div></div>
+        </div>
+        <div style="margin-top:18px; padding:16px 18px; background:#1A1D22; border:1px solid #262A31; border-radius:4px; font-size:13px; line-height:1.55; color:#A7AEB9">Vermelho e rosa nunca carregam texto pequeno sobre si. Estado nunca é só cor: sempre cor + ícone ou cor + rótulo. Ao vivo = vermelho + ponto pulsando + a palavra AO VIVO.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">01.3 — TIPOGRAFIA</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:12px">Anton × DM Sans</div>
+    <div style="font-size:16px; line-height:1.55; color:#A7AEB9; max-width:660px; margin-bottom:44px; text-wrap:pretty">Anton para display, títulos e todo número de placar: condensada, atlética, ocupa pouca largura com muita presença. DM Sans para tudo que se lê — UI, listas, microcopy — com acentuação completa do português.</div>
+
+    <div style="display:flex; flex-direction:column; gap:2px; margin-bottom:44px">
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">DISPLAY XL</div>
+        <div style="font-family:Anton,sans-serif; font-size:72px; line-height:.92; letter-spacing:.004em; text-transform:uppercase">Times prontos</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">Anton 400<br>72/66 · +0.4%</div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">DISPLAY L</div>
+        <div style="font-family:Anton,sans-serif; font-size:52px; line-height:.95; text-transform:uppercase">Bora montar os times?</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">Anton 400<br>52/50 · +0.4%</div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">SCORE XL</div>
+        <div style="font-family:Anton,sans-serif; font-size:104px; line-height:.82; letter-spacing:-.01em; font-variant-numeric:tabular-nums">3<span style="color:#3B4149; margin:0 14px">:</span>2</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">Anton 400 · tabular<br>104/86 · -1%</div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">SCORE M</div>
+        <div style="font-family:Anton,sans-serif; font-size:44px; line-height:.9; font-variant-numeric:tabular-nums">12</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">Anton 400 · tabular<br>44/40 · 0</div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">H1</div>
+        <div style="font-family:Anton,sans-serif; font-size:34px; line-height:1.05; text-transform:uppercase">Rodada de quinta</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">Anton 400<br>34/36 · +0.5%</div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">H2</div>
+        <div style="font-size:22px; font-weight:700; line-height:1.25; letter-spacing:-.01em">Confirmados e espera</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">DM Sans 700<br>22/28 · -1%</div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">H3</div>
+        <div style="font-size:13px; font-weight:700; line-height:1.3; letter-spacing:.14em; text-transform:uppercase">Goleiros do dia</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">DM Sans 700 · caps<br>13/17 · +14%</div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">BODY L</div>
+        <div style="font-size:18px; line-height:1.55; max-width:520px">Cole a lista do grupo e o Jogaê separa confirmados, goleiros e espera.</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">DM Sans 400<br>18/28 · 0</div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">BODY</div>
+        <div style="font-size:15px; line-height:1.55; max-width:520px">20 confirmados. Fechou. Faltam 2 pra fechar o quarto time.</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">DM Sans 400<br>15/23 · 0</div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">BODY S</div>
+        <div style="font-size:13px; line-height:1.5; color:#A7AEB9; max-width:520px">Arena Farofa · Campo 03 · chegou 18h05</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">DM Sans 400<br>13/20 · 0</div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">LABEL</div>
+        <div style="font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase">Montar times</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">DM Sans 700 · caps<br>12/16 · +10%</div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:32px; padding:22px 0; border-top:1px solid #262A31; border-bottom:1px solid #262A31; flex-wrap:wrap">
+        <div style="width:150px; flex:none; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">CAPTION</div>
+        <div style="font-size:11px; font-weight:500; letter-spacing:.06em; color:#7A828E; text-transform:uppercase">2 na espera</div>
+        <div style="margin-left:auto; font-size:12px; color:#7A828E; text-align:right; line-height:1.6">DM Sans 500<br>11/15 · +6%</div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px">
+      <div style="background:#111317; border:1px solid #262A31; border-radius:4px; padding:24px">
+        <div style="font-family:Anton,sans-serif; font-size:56px; line-height:1; color:#ECEFF3">ÁÉÍÓÚÃÕÂÊÔÇ</div>
+        <div style="font-size:13px; color:#7A828E; margin-top:12px">Anton — acentuação latin-ext validada</div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:4px; padding:24px">
+        <div style="font-size:34px; font-weight:500; line-height:1.2">ção ã ê õ â ú<br>0123456789</div>
+        <div style="font-size:13px; color:#7A828E; margin-top:12px">DM Sans — tabular-nums em toda estatística</div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:4px; padding:24px; display:flex; flex-direction:column; gap:10px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">REGRAS</div>
+        <div style="font-size:13.5px; line-height:1.6; color:#A7AEB9">Anton é sempre caixa alta. Nunca abaixo de 20px. Nunca em blocos de texto corrido. Placar sempre tabular. UI nunca abaixo de 13px; ações no campo a partir de 16px.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">01.4 — GEOMETRIA E SUPERFÍCIES</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:12px">Pill contra bloco</div>
+    <div style="font-size:16px; line-height:1.55; color:#A7AEB9; max-width:660px; margin-bottom:44px; text-wrap:pretty">A tensão da geometria é a assinatura: o que é status ou pessoa é pill total; o que é número ou resultado é bloco reto com canto chanfrado. Card intermediário, radius 16.</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; margin-bottom:20px">
+      <div style="background:#111317; border:1px solid #262A31; border-radius:4px; padding:26px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:22px">RADIUS</div>
+        <div style="display:flex; flex-direction:column; gap:14px">
+          <div style="display:flex; align-items:center; gap:14px"><div style="width:64px; height:44px; background:#262A31; border-radius:0"></div><div style="font-size:13px"><span style="font-weight:700">radius.none</span> · 0 — score block, stripe</div></div>
+          <div style="display:flex; align-items:center; gap:14px"><div style="width:64px; height:44px; background:#262A31; border-radius:4px"></div><div style="font-size:13px"><span style="font-weight:700">radius.sm</span> · 4 — inputs, tags, painéis</div></div>
+          <div style="display:flex; align-items:center; gap:14px"><div style="width:64px; height:44px; background:#262A31; border-radius:10px"></div><div style="font-size:13px"><span style="font-weight:700">radius.md</span> · 10 — botões, avatar quadrado</div></div>
+          <div style="display:flex; align-items:center; gap:14px"><div style="width:64px; height:44px; background:#262A31; border-radius:16px"></div><div style="font-size:13px"><span style="font-weight:700">radius.lg</span> · 16 — cards</div></div>
+          <div style="display:flex; align-items:center; gap:14px"><div style="width:64px; height:44px; background:#262A31; border-radius:24px 24px 0 0"></div><div style="font-size:13px"><span style="font-weight:700">radius.xl</span> · 24 — bottom sheet</div></div>
+          <div style="display:flex; align-items:center; gap:14px"><div style="width:64px; height:44px; background:#262A31; border-radius:999px"></div><div style="font-size:13px"><span style="font-weight:700">radius.pill</span> · 999 — chips, status</div></div>
+          <div style="display:flex; align-items:center; gap:14px"><div style="width:64px; height:44px; background:#262A31; clip-path:polygon(0 0,100% 0,100% 62%,84% 100%,0 100%)"></div><div style="font-size:13px"><span style="font-weight:700">cut.corner</span> · chanfro 16 — placar, header de time</div></div>
+        </div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:4px; padding:26px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:22px">ESPAÇAMENTO — BASE 4</div>
+        <div style="display:flex; flex-direction:column; gap:9px">
+          <div style="display:flex; align-items:center; gap:12px"><div style="width:4px; height:14px; background:#35E878"></div><div style="font-size:12.5px; color:#A7AEB9">space.1 · 4</div></div>
+          <div style="display:flex; align-items:center; gap:12px"><div style="width:8px; height:14px; background:#35E878"></div><div style="font-size:12.5px; color:#A7AEB9">space.2 · 8 — gap interno de chip</div></div>
+          <div style="display:flex; align-items:center; gap:12px"><div style="width:12px; height:14px; background:#35E878"></div><div style="font-size:12.5px; color:#A7AEB9">space.3 · 12 — gap de lista</div></div>
+          <div style="display:flex; align-items:center; gap:12px"><div style="width:16px; height:14px; background:#35E878"></div><div style="font-size:12.5px; color:#A7AEB9">space.4 · 16 — padding de card mobile</div></div>
+          <div style="display:flex; align-items:center; gap:12px"><div style="width:20px; height:14px; background:#35E878"></div><div style="font-size:12.5px; color:#A7AEB9">space.5 · 20</div></div>
+          <div style="display:flex; align-items:center; gap:12px"><div style="width:24px; height:14px; background:#35E878"></div><div style="font-size:12.5px; color:#A7AEB9">space.6 · 24 — padding de card desktop</div></div>
+          <div style="display:flex; align-items:center; gap:12px"><div style="width:32px; height:14px; background:#35E878"></div><div style="font-size:12.5px; color:#A7AEB9">space.8 · 32 — entre blocos</div></div>
+          <div style="display:flex; align-items:center; gap:12px"><div style="width:40px; height:14px; background:#35E878"></div><div style="font-size:12.5px; color:#A7AEB9">space.10 · 40</div></div>
+          <div style="display:flex; align-items:center; gap:12px"><div style="width:48px; height:14px; background:#35E878"></div><div style="font-size:12.5px; color:#A7AEB9">space.12 · 48 — entre seções</div></div>
+          <div style="display:flex; align-items:center; gap:12px"><div style="width:80px; height:14px; background:#1E7A45"></div><div style="font-size:12.5px; color:#A7AEB9">space.20 · 80 — respiro de página</div></div>
+        </div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:4px; padding:26px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:22px">ELEVAÇÃO E BORDA</div>
+        <div style="display:flex; flex-direction:column; gap:16px">
+          <div style="padding:14px 16px; background:#111317; border:1px solid #262A31; border-radius:10px; font-size:13px">shadow.0 · plano — borda faz o trabalho</div>
+          <div style="padding:14px 16px; background:#1A1D22; border:1px solid #262A31; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.4); font-size:13px">shadow.1 · card</div>
+          <div style="padding:14px 16px; background:#1A1D22; border:1px solid #3B4149; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.5); font-size:13px">shadow.2 · popover</div>
+          <div style="padding:14px 16px; background:#1A1D22; border:1px solid #3B4149; border-radius:10px; box-shadow:0 -12px 40px rgba(0,0,0,.6); font-size:13px">shadow.3 · bottom sheet</div>
+          <div style="padding:14px 16px; background:#1A1D22; border:1px solid #35E878; border-radius:10px; box-shadow:0 0 0 1px #35E87833, 0 6px 28px rgba(53,232,120,.18); font-size:13px">glow.team · 18% máx, só em live e time ativo</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px">
+      <div style="position:relative; height:190px; background:#111317; border:1px solid #262A31; border-radius:4px; overflow:hidden">
+        <div style="position:absolute; inset:0; background-image:linear-gradient(#ECEFF30D 1px,transparent 1px),linear-gradient(90deg,#ECEFF30D 1px,transparent 1px); background-size:26px 26px"></div>
+        <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:120px; height:120px; border:1px solid #ECEFF31F; border-radius:50%"></div>
+        <div style="position:absolute; left:50%; top:0; bottom:0; width:1px; background:#ECEFF31F"></div>
+        <div style="position:absolute; bottom:14px; left:16px; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">TEXTURA · GRID TÉCNICO + CÍRCULO CENTRAL</div>
+      </div>
+      <div style="position:relative; height:190px; background:#111317; border:1px solid #262A31; border-radius:4px; overflow:hidden">
+        <div aria-hidden="true" style="position:absolute; right:-10px; top:-40px; font-family:Anton,sans-serif; font-size:200px; line-height:.8; color:transparent; -webkit-text-stroke:1.5px rgba(236,239,243,.1)">09</div>
+        <div style="position:absolute; bottom:14px; left:16px; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">TEXTURA · NÚMERO DE CAMISA EM OUTLINE</div>
+      </div>
+      <div style="position:relative; height:190px; background:#111317; border:1px solid #262A31; border-radius:4px; overflow:hidden">
+        <svg viewBox="0 0 300 190" style="position:absolute; inset:0; width:100%; height:100%">
+          <path d="M-10 170 C90 170 150 110 300 20" stroke="#FF4FA3" stroke-width="2" stroke-dasharray="5 8" fill="none" opacity=".7"></path>
+          <circle cx="24" cy="166" r="5" fill="#FF4FA3"></circle>
+        </svg>
+        <div style="position:absolute; bottom:14px; left:16px; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">TEXTURA · TRAJETÓRIA</div>
+      </div>
+      <div style="position:relative; height:190px; background:#111317; border:1px solid #262A31; border-radius:4px; overflow:hidden; display:flex; flex-direction:column; justify-content:center; gap:0">
+        <div style="height:10px; background:#35E878"></div>
+        <div style="height:10px; background:#FFD84A"></div>
+        <div style="height:10px; background:#FF4D4D"></div>
+        <div style="height:10px; background:#FF4FA3"></div>
+        <div style="position:absolute; bottom:14px; left:16px; font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">STRIPE DE TIMES · 4 CORES</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">01.5 — ICONOGRAFIA</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:12px">Outline 1,75 · grid 24</div>
+    <div style="font-size:16px; line-height:1.55; color:#A7AEB9; max-width:660px; margin-bottom:40px; text-wrap:pretty">Traço único de 1,75px, cantos arredondados, sem preenchimento — exceto quando o ícone virar estado ativo, aí ganha fundo pill na cor da função. Área de toque mínima 44×44.</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(112px,1fr)); gap:1px; background:#262A31; border:1px solid #262A31; border-radius:4px; overflow:hidden">
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.2l4.4 3.2-1.7 5.2H9.3l-1.7-5.2z"></path><path d="M12 3v4.2M20.6 10.4l-4 0M16.7 19.6l-2-4M7.3 19.6l2-4M3.4 10.4l4 0"></path></svg><div style="font-size:11px; color:#7A828E">bola</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V9h6l4.5 2.2 5 1.3A3 3 0 0 1 21 15.4V18H3z"></path><path d="M6 18v2M10 18v2M14 18v2M18 18v2"></path></svg><div style="font-size:11px; color:#7A828E">chuteira</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 19V7h20v12"></path><path d="M6 19V11h12v8M2 19h20M10 11v8M14 11v8M6 15h12"></path></svg><div style="font-size:11px; color:#7A828E">gol</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21v-9a1.9 1.9 0 0 1 3.8 0V7.5a1.6 1.6 0 0 1 3.2 0v5.2l2.6 1.5A3 3 0 0 1 18 16.8V21z"></path><path d="M7 17h11"></path></svg><div style="font-size:11px; color:#7A828E">goleiro</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="13.5" r="4.5"></circle><path d="M13 11.8h8v3.4h-8M17 8.6l-3.6 2"></path></svg><div style="font-size:11px; color:#7A828E">apito</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="12" rx="2"></rect><path d="M12 5v12M6 10v2M17 10v2M8 20h8"></path></svg><div style="font-size:11px; color:#7A828E">placar</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3.5h8v5a4 4 0 0 1-8 0z"></path><path d="M12 12.5V16M8.5 20h7M8 4.5H5.5v2A3.5 3.5 0 0 0 8.6 10M16 4.5h2.5v2A3.5 3.5 0 0 1 15.4 10"></path></svg><div style="font-size:11px; color:#7A828E">troféu</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="5.2"></circle><path d="M9 3.5l2.2 5.5M15 3.5l-2.2 5.5M12 13v4"></path></svg><div style="font-size:11px; color:#7A828E">medalha</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 18.5C8 18.5 10 7.5 20.5 5.5" stroke-dasharray="3 3"></path><circle cx="4" cy="18.5" r="2"></circle><path d="M20.5 5.5l-4 .3M20.5 5.5l-.3 4"></path></svg><div style="font-size:11px; color:#7A828E">assistência</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3 20v-1.5A4.5 4.5 0 0 1 7.5 14h3A4.5 4.5 0 0 1 15 18.5V20"></path><path d="M16 5.4a3.2 3.2 0 0 1 0 5.2M17.5 14h.5a3.5 3.5 0 0 1 3.5 3.5V20"></path></svg><div style="font-size:11px; color:#7A828E">jogadores</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="2"></rect><circle cx="8" cy="8" r="1.4" fill="#ECEFF3"></circle><circle cx="16" cy="8" r="1.4" fill="#ECEFF3"></circle><circle cx="12" cy="12" r="1.4" fill="#ECEFF3"></circle><circle cx="8" cy="16" r="1.4" fill="#ECEFF3"></circle><circle cx="16" cy="16" r="1.4" fill="#ECEFF3"></circle></svg><div style="font-size:11px; color:#7A828E">formação</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5h4l10 11h4M3 17.5h4l3-3.2M14 9.7l3-3.2h4"></path><path d="M18.5 4l2.5 2.5-2.5 2.5M18.5 15l2.5 2.5-2.5 2.5"></path></svg><div style="font-size:11px; color:#7A828E">sorteio</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="15" rx="2"></rect><path d="M3 10h18M8 3.5v4M16 3.5v4"></path></svg><div style="font-size:11px; color:#7A828E">calendário</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11z"></path><circle cx="12" cy="10" r="2.6"></circle></svg><div style="font-size:11px; color:#7A828E">local</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5.2l3.4 2"></path></svg><div style="font-size:11px; color:#7A828E">relógio</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="6" r="2.8"></circle><circle cx="6" cy="12" r="2.8"></circle><circle cx="18" cy="18" r="2.8"></circle><path d="M8.5 10.7l7-3.4M8.5 13.3l7 3.4"></path></svg><div style="font-size:11px; color:#7A828E">compartilhar</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="12" height="12" rx="2"></rect><path d="M15.5 5.5H5.5a2 2 0 0 0-2 2v10"></path></svg><div style="font-size:11px; color:#7A828E">copiar</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h11a5 5 0 0 1 0 10H9"></path><path d="M8 4.5L3.5 9 8 13.5"></path></svg><div style="font-size:11px; color:#7A828E">desfazer</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l11-11-4-4L4 16z"></path><path d="M13.5 5.5l4 4"></path></svg><div style="font-size:11px; color:#7A828E">editar</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V13M10 20V8M16 20V15M22 20H2"></path><path d="M20 20V4"></path></svg><div style="font-size:11px; color:#7A828E">ranking</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 1 2.6 6.1"></path><path d="M3.5 18.5V13H9"></path><path d="M12 8v4.3l3 1.8"></path></svg><div style="font-size:11px; color:#7A828E">histórico</div></div>
+      <div style="background:#111317; padding:20px 10px; display:flex; flex-direction:column; align-items:center; gap:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#35E878" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.4l2.8 2.8L16.5 9.5"></path></svg><div style="font-size:11px; color:#35E878">presente</div></div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">02.1 — AÇÕES</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:12px">Botões</div>
+    <div style="font-size:16px; line-height:1.55; color:#A7AEB9; max-width:660px; margin-bottom:40px; text-wrap:pretty">Altura 52 no mobile para ação crítica, 44 padrão, 36 compacto. Rótulo em caixa alta com tracking. Pressed afunda 1px e escurece; nunca há dois primários verdes na mesma tela.</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1px; background:#262A31; border:1px solid #262A31; border-radius:4px; overflow:hidden">
+      <div style="background:#111317; padding:28px; display:flex; flex-direction:column; gap:18px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">PRIMARY · btn.primary</div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <button style="height:52px; background:#35E878; color:#090A0C; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; transition:transform 120ms ease, background 120ms ease" style-hover="background:#5CEF92" style-active="transform:translateY(1px); background:#26C463">Montar times</button>
+          <div style="display:flex; gap:10px; align-items:center"><div style="flex:1; height:44px; background:#5CEF92; color:#090A0C; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; letter-spacing:.08em">HOVER</div><div style="flex:1; height:44px; background:#26C463; color:#090A0C; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; letter-spacing:.08em">PRESSED</div></div>
+          <div style="display:flex; gap:10px; align-items:center"><div style="flex:1; height:44px; background:#35E878; color:#090A0C; border-radius:10px; display:flex; align-items:center; justify-content:center; gap:9px; font-size:13px; font-weight:700; letter-spacing:.08em; box-shadow:0 0 0 2px #090A0C, 0 0 0 4px #FFD84A">FOCUS</div><div style="flex:1; height:44px; background:#1E2A22; color:#4C7A5D; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; letter-spacing:.08em">DISABLED</div></div>
+          <div style="height:44px; background:#26C463; color:#090A0C; border-radius:10px; display:flex; align-items:center; justify-content:center; gap:10px; font-size:13px; font-weight:700; letter-spacing:.08em; overflow:hidden; position:relative"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#090A0C" stroke-width="2.5" stroke-linecap="round" style="animation:jgSpin 800ms linear infinite"><path d="M12 3a9 9 0 0 1 9 9"></path></svg>SORTEANDO</div>
+        </div>
+      </div>
+      <div style="background:#111317; padding:28px; display:flex; flex-direction:column; gap:18px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">SECONDARY · GHOST · DESTRUCTIVE</div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <button style="height:52px; background:transparent; color:#ECEFF3; border:1px solid #3B4149; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; transition:all 120ms ease" style-hover="border-color:#ECEFF3; background:#1A1D22" style-active="transform:translateY(1px)">Sortear de novo</button>
+          <button style="height:44px; background:transparent; color:#A7AEB9; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; transition:all 120ms ease" style-hover="color:#ECEFF3; background:#1A1D22">Desfazer último lance</button>
+          <button style="height:44px; background:#FF4D4D14; color:#FF4D4D; border:1px solid #FF4D4D66; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; transition:all 120ms ease" style-hover="background:#FF4D4D; color:#090A0C; border-color:#FF4D4D">Remover jogador</button>
+          <div style="display:flex; gap:10px">
+            <div style="flex:1; height:44px; border:1px dashed #262A31; color:#3B4149; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; letter-spacing:.08em">DISABLED</div>
+            <div style="flex:1; height:44px; background:#1A1D22; border:1px solid #ECEFF3; color:#ECEFF3; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; letter-spacing:.08em">HOVER</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#111317; padding:28px; display:flex; flex-direction:column; gap:18px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">LIVE ACTION · ÍCONE · FAB</div>
+        <div style="display:flex; flex-direction:column; gap:14px">
+          <button style="height:60px; background:#FF4D4D; color:#090A0C; border:none; border-radius:12px; font-family:Anton,sans-serif; font-size:24px; letter-spacing:.02em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:12px; transition:transform 100ms ease" style-hover="background:#FF6666" style-active="transform:scale(.97)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#090A0C" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>GOL</button>
+          <div style="display:flex; gap:12px; align-items:center">
+            <button style="width:48px; height:48px; background:#1A1D22; border:1px solid #262A31; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 120ms ease" style-hover="border-color:#35E878"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l11-11-4-4L4 16z"></path></svg></button>
+            <button style="width:48px; height:48px; background:#1A1D22; border:1px solid #262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 120ms ease" style-hover="border-color:#FF4FA3"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ECEFF3" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="6" r="2.8"></circle><circle cx="6" cy="12" r="2.8"></circle><circle cx="18" cy="18" r="2.8"></circle><path d="M8.5 10.7l7-3.4M8.5 13.3l7 3.4"></path></svg></button>
+            <div style="margin-left:auto; display:flex; align-items:center; gap:10px">
+              <div style="font-size:11px; color:#7A828E">FAB 56</div>
+              <div style="width:56px; height:56px; background:#35E878; border-radius:18px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 24px rgba(53,232,120,.24)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#090A0C" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></div>
+            </div>
+          </div>
+          <div style="font-size:12.5px; color:#7A828E; line-height:1.5">Live action só existe na tela Ao Vivo. Nunca vermelho como CTA fora de partida.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">02.2 — ENTRADAS</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:40px">Inputs e controles</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:24px">
+      <div style="display:flex; flex-direction:column; gap:16px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">TEXT · SEARCH · ESTADOS</div>
+        <div style="display:flex; flex-direction:column; gap:7px">
+          <div style="font-size:12px; font-weight:700; letter-spacing:.1em; color:#A7AEB9; text-transform:uppercase">Nome do grupo</div>
+          <input type="text" value="Fut da Quinta" style="height:48px; background:#111317; border:1px solid #262A31; border-radius:10px; padding:0 16px; color:#ECEFF3; font-family:'DM Sans',sans-serif; font-size:15px; outline:none; transition:border-color 120ms ease" style-focus="border-color:#35E878; box-shadow:0 0 0 3px #35E87826">
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; height:48px; background:#111317; border:1px solid #262A31; border-radius:999px; padding:0 18px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A828E" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
+          <div style="font-size:15px; color:#7A828E">Buscar jogador</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:7px">
+          <div style="height:48px; background:#111317; border:1px solid #FF4D4D; border-radius:10px; padding:0 16px; display:flex; align-items:center; color:#ECEFF3; font-size:15px">Igão</div>
+          <div style="display:flex; align-items:center; gap:7px; font-size:12.5px; color:#FF4D4D"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4D4D" stroke-width="2.2" stroke-linecap="round"><path d="M12 8v5M12 16.5v.5"></path><circle cx="12" cy="12" r="9"></circle></svg>Nome já usado nesta rodada</div>
+        </div>
+        <div style="height:48px; background:#0F1114; border:1px dashed #262A31; border-radius:10px; padding:0 16px; display:flex; align-items:center; color:#3B4149; font-size:15px">Bloqueado após o sorteio</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:16px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">TEXTAREA · LISTA DO WHATSAPP</div>
+        <div style="background:#111317; border:1px solid #262A31; border-radius:10px; overflow:hidden">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid #262A31; background:#0F1114">
+            <div style="font-size:11px; font-weight:700; letter-spacing:.12em; color:#7A828E">COLE A LISTA DO GRUPO</div>
+            <div style="font-size:11px; color:#35E878; font-weight:700">22 linhas</div>
+          </div>
+          <div style="padding:16px; font-size:13.5px; line-height:1.85; color:#A7AEB9; font-variant-numeric:tabular-nums; min-height:168px"><span style="color:#ECEFF3">LISTA QUINTA 20:30</span><br>1. Salles<br>2. Guilherme (GK)<br>3. Marcos<br>4. Deivão<br><span style="color:#7A828E">…</span><br>21. Carlão (espera)<br>22. Juliel (espera)</div>
+          <div style="display:flex; gap:10px; padding:14px 16px; border-top:1px solid #262A31">
+            <div style="flex:1; height:48px; background:#35E878; color:#090A0C; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; letter-spacing:.08em; text-transform:uppercase">Interpretar lista</div>
+            <div style="width:48px; height:48px; border:1px solid #262A31; border-radius:10px; display:flex; align-items:center; justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A7AEB9" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="12" height="12" rx="2"></rect><path d="M15.5 5.5H5.5a2 2 0 0 0-2 2v10"></path></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">SELEÇÃO</div>
+        <div style="display:flex; background:#111317; border:1px solid #262A31; border-radius:999px; padding:4px">
+          <div style="flex:1; height:40px; background:#ECEFF3; color:#090A0C; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; letter-spacing:.06em">Aleatório</div>
+          <div style="flex:1; height:40px; color:#A7AEB9; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; letter-spacing:.06em">Equilibrado</div>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:#111317; border:1px solid #262A31; border-radius:10px">
+          <div style="font-size:14.5px">Goleiro fixo por time</div>
+          <div style="width:48px; height:28px; background:#35E878; border-radius:999px; padding:3px; display:flex; justify-content:flex-end"><div style="width:22px; height:22px; background:#090A0C; border-radius:999px"></div></div>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:#111317; border:1px solid #262A31; border-radius:10px">
+          <div style="font-size:14.5px; color:#A7AEB9">Rodar goleiro no intervalo</div>
+          <div style="width:48px; height:28px; background:#262A31; border-radius:999px; padding:3px; display:flex"><div style="width:22px; height:22px; background:#7A828E; border-radius:999px"></div></div>
+        </div>
+        <div style="display:flex; gap:22px; align-items:center">
+          <div style="display:flex; align-items:center; gap:10px"><div style="width:22px; height:22px; background:#35E878; border-radius:6px; display:flex; align-items:center; justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#090A0C" stroke-width="3.2" stroke-linecap="round"><path d="M6 12.5l4 4 8-9"></path></svg></div><div style="font-size:14px">Avisar no grupo</div></div>
+          <div style="display:flex; align-items:center; gap:10px"><div style="width:22px; height:22px; border:1px solid #3B4149; border-radius:6px"></div><div style="font-size:14px; color:#A7AEB9">Lista pública</div></div>
+        </div>
+        <div style="display:flex; gap:22px; align-items:center">
+          <div style="display:flex; align-items:center; gap:10px"><div style="width:22px; height:22px; border:2px solid #35E878; border-radius:999px; display:flex; align-items:center; justify-content:center"><div style="width:10px; height:10px; background:#35E878; border-radius:999px"></div></div><div style="font-size:14px">Society</div></div>
+          <div style="display:flex; align-items:center; gap:10px"><div style="width:22px; height:22px; border:1px solid #3B4149; border-radius:999px"></div><div style="font-size:14px; color:#A7AEB9">Futsal</div></div>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#111317; border:1px solid #262A31; border-radius:10px">
+          <div style="font-size:14.5px">Times</div>
+          <div style="display:flex; align-items:center; gap:14px">
+            <div style="width:36px; height:36px; border:1px solid #3B4149; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; color:#A7AEB9">−</div>
+            <div style="font-family:Anton,sans-serif; font-size:26px; min-width:26px; text-align:center">4</div>
+            <div style="width:36px; height:36px; border:1px solid #ECEFF3; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px">+</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">02.3 — NAVEGAÇÃO</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:40px">Bottom nav, sidebar, tabs</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:24px; align-items:start">
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">BOTTOM NAV MOBILE · 4 ITENS + AÇÃO</div>
+        <div style="background:#111317; border:1px solid #262A31; border-radius:20px 20px 4px 4px; padding:10px 8px 14px; display:flex; align-items:flex-end; justify-content:space-around">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; min-width:56px; padding:6px 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#35E878" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5V20H4z"></path></svg><div style="font-size:10.5px; font-weight:700; letter-spacing:.06em; color:#35E878">Home</div><div style="width:16px; height:2px; background:#35E878"></div></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; min-width:56px; padding:6px 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7A828E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="15" rx="2"></rect><path d="M3 10h18M8 3.5v4M16 3.5v4"></path></svg><div style="font-size:10.5px; font-weight:500; color:#7A828E">Rodada</div></div>
+          <div style="width:56px; height:56px; background:#FF4D4D; border-radius:18px; display:flex; align-items:center; justify-content:center; margin-bottom:6px; box-shadow:0 6px 20px rgba(255,77,77,.3)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#090A0C" stroke-width="2.4" stroke-linecap="round"><rect x="2.5" y="5" width="19" height="12" rx="2"></rect><path d="M12 5v12"></path></svg></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; min-width:56px; padding:6px 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7A828E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V13M10 20V8M16 20V15M22 20H2"></path></svg><div style="font-size:10.5px; font-weight:500; color:#7A828E">Ranking</div></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; min-width:56px; padding:6px 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7A828E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.5"></circle><path d="M5 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"></path></svg><div style="font-size:10.5px; font-weight:500; color:#7A828E">Perfil</div></div>
+        </div>
+        <div style="font-size:12.5px; color:#7A828E; line-height:1.5">Item ativo: ícone verde + rótulo verde + barra de 2px. Altura útil 56 + safe area.</div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-top:10px">TABS · CHIPS DE FILTRO</div>
+        <div style="display:flex; gap:26px; border-bottom:1px solid #262A31; padding:0 2px">
+          <div style="padding:12px 0; font-size:14px; font-weight:700; color:#ECEFF3; box-shadow:inset 0 -2px 0 #35E878">Rodada</div>
+          <div style="padding:12px 0; font-size:14px; color:#7A828E">Mês</div>
+          <div style="padding:12px 0; font-size:14px; color:#7A828E">Geral</div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <div style="padding:8px 14px; background:#FFD84A; color:#090A0C; border-radius:999px; font-size:12.5px; font-weight:700">Gols</div>
+          <div style="padding:8px 14px; border:1px solid #262A31; color:#A7AEB9; border-radius:999px; font-size:12.5px; font-weight:500">Assistências</div>
+          <div style="padding:8px 14px; border:1px solid #262A31; color:#A7AEB9; border-radius:999px; font-size:12.5px; font-weight:500">Vitórias</div>
+          <div style="padding:8px 14px; border:1px solid #262A31; color:#A7AEB9; border-radius:999px; font-size:12.5px; font-weight:500">Presença</div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">SIDEBAR DESKTOP · 248px</div>
+        <div style="display:flex; background:#0F1114; border:1px solid #262A31; border-radius:4px; overflow:hidden; min-height:340px">
+          <div style="width:210px; flex:none; background:#111317; border-right:1px solid #262A31; padding:18px 12px; display:flex; flex-direction:column; gap:4px">
+            <div style="display:flex; align-items:center; gap:10px; padding:6px 8px 18px">
+              <svg width="26" height="26" viewBox="0 0 52 52" fill="none"><path d="M0 10 L10 0 H52 V42 L42 52 H0 Z" fill="#35E878"></path><circle cx="16" cy="38" r="6" fill="#090A0C"></circle><path d="M16 38 C31 38 37 25 37 12" stroke="#090A0C" stroke-width="5" stroke-linecap="round"></path><path d="M31 12 H43" stroke="#090A0C" stroke-width="5" stroke-linecap="round"></path></svg>
+              <div style="font-family:Anton,sans-serif; font-size:20px">JOGAÊ</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; background:#1A1D22; border-radius:8px; border-left:2px solid #35E878; font-size:14px; font-weight:700; color:#ECEFF3">Dashboard</div>
+            <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; font-size:14px; color:#A7AEB9">Rodada</div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-radius:8px; font-size:14px; color:#A7AEB9">Team Builder<div style="padding:2px 7px; background:#FF4FA3; color:#090A0C; border-radius:999px; font-size:9.5px; font-weight:700; letter-spacing:.06em">NOVO</div></div>
+            <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; font-size:14px; color:#A7AEB9">Jogadores</div>
+            <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; font-size:14px; color:#A7AEB9">Ranking</div>
+            <div style="margin-top:auto; padding:12px; background:#1A1D22; border-radius:10px; display:flex; align-items:center; gap:10px">
+              <div style="width:8px; height:8px; background:#FF4D4D; border-radius:999px"></div>
+              <div style="font-size:12px; font-weight:700; letter-spacing:.06em; color:#FF4D4D">PARTIDA AO VIVO</div>
+            </div>
+          </div>
+          <div style="flex:1; padding:16px; display:flex; flex-direction:column; gap:12px">
+            <div style="display:flex; align-items:center; gap:12px; padding-bottom:14px; border-bottom:1px solid #262A31">
+              <div style="display:flex; align-items:center; gap:8px; padding:7px 12px; background:#1A1D22; border:1px solid #262A31; border-radius:999px; font-size:12.5px; font-weight:700">Fut da Quinta<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7A828E" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+              <div style="margin-left:auto; font-size:11.5px; color:#7A828E">Topbar · grupo + busca + perfil</div>
+            </div>
+            <div style="height:10px; width:60%; background:#1A1D22; border-radius:4px"></div>
+            <div style="height:10px; width:40%; background:#1A1D22; border-radius:4px"></div>
+            <div style="flex:1; border:1px dashed #262A31; border-radius:10px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">BARRA DE AÇÃO CONTEXTUAL</div>
+        <div style="background:#1A1D22; border:1px solid #3B4149; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px; box-shadow:0 8px 24px rgba(0,0,0,.5)">
+          <div style="font-family:Anton,sans-serif; font-size:22px; color:#FFD84A">3</div>
+          <div style="font-size:13.5px; color:#A7AEB9; line-height:1.4">jogadores<br>selecionados</div>
+          <div style="margin-left:auto; display:flex; gap:8px">
+            <div style="height:38px; padding:0 14px; border:1px solid #3B4149; border-radius:999px; display:flex; align-items:center; font-size:12.5px; font-weight:700">Mover</div>
+            <div style="height:38px; padding:0 14px; background:#35E878; color:#090A0C; border-radius:999px; display:flex; align-items:center; font-size:12.5px; font-weight:700">Confirmar</div>
+          </div>
+        </div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-top:10px">BREADCRUMB</div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#7A828E"><span>Rodadas</span><span style="color:#3B4149">/</span><span>12 set</span><span style="color:#3B4149">/</span><span style="color:#ECEFF3; font-weight:700">Team Builder</span></div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-top:10px">SELETOR DE GRUPO</div>
+        <div style="background:#111317; border:1px solid #262A31; border-radius:12px; overflow:hidden">
+          <div style="display:flex; align-items:center; gap:12px; padding:13px 15px; background:#1A1D22"><div style="width:30px; height:30px; background:#35E878; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:Anton,sans-serif; font-size:15px; color:#090A0C">FQ</div><div style="font-size:14px; font-weight:700">Fut da Quinta</div><svg style="margin-left:auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#35E878" stroke-width="2.6" stroke-linecap="round"><path d="M6 12.4l3.6 3.6L18 7.6"></path></svg></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:13px 15px; border-top:1px solid #262A31"><div style="width:30px; height:30px; background:#262A31; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:Anton,sans-serif; font-size:15px; color:#A7AEB9">FS</div><div style="font-size:14px; color:#A7AEB9">Fut de Sábado</div></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:13px 15px; border-top:1px solid #262A31; color:#7A828E; font-size:13.5px"><div style="width:30px; height:30px; border:1px dashed #3B4149; border-radius:8px; display:flex; align-items:center; justify-content:center">+</div>Criar grupo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">03.1 — JOGADORES</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:12px">Três níveis de jogador</div>
+    <div style="font-size:16px; line-height:1.55; color:#A7AEB9; max-width:660px; margin-bottom:40px; text-wrap:pretty">Chip para seleção rápida, row para escalação e listas, card para ranking, perfil e share. Avatar sempre com iniciais quando não há foto — nunca ícone genérico de pessoa.</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:24px; margin-bottom:36px">
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">CHIP · SELEÇÃO RÁPIDA · 44 DE ALTURA</div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px">
+          <div style="display:flex; align-items:center; gap:9px; height:44px; padding:0 16px 0 6px; background:#1A1D22; border:1px solid #262A31; border-radius:999px"><div style="width:32px; height:32px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#ECEFF3">SA</div><div style="font-size:14.5px; font-weight:500">Salles</div></div>
+          <div style="display:flex; align-items:center; gap:9px; height:44px; padding:0 16px 0 6px; background:#35E878; border:1px solid #35E878; border-radius:999px"><div style="width:32px; height:32px; background:#090A0C; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#35E878">DE</div><div style="font-size:14.5px; font-weight:700; color:#090A0C">Deivão</div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#090A0C" stroke-width="3" stroke-linecap="round"><path d="M6 12.4l3.6 3.6L18 7.6"></path></svg></div>
+          <div style="display:flex; align-items:center; gap:9px; height:44px; padding:0 16px 0 6px; background:#1A1D22; border:1px solid #FFD84A; border-radius:999px"><div style="width:32px; height:32px; background:#FFD84A; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#090A0C">GU</div><div style="font-size:14.5px; font-weight:500">Guilherme</div><div style="padding:3px 7px; background:#FFD84A; color:#090A0C; border-radius:999px; font-size:9.5px; font-weight:700; letter-spacing:.08em">GK</div></div>
+          <div style="display:flex; align-items:center; gap:9px; height:44px; padding:0 16px 0 6px; border:1px dashed #262A31; border-radius:999px; opacity:.55"><div style="width:32px; height:32px; background:#1A1D22; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#7A828E">CA</div><div style="font-size:14.5px; color:#7A828E">Carlão</div><div style="padding:3px 7px; border:1px solid #3B4149; color:#7A828E; border-radius:999px; font-size:9.5px; font-weight:700; letter-spacing:.08em">ESPERA</div></div>
+        </div>
+        <div style="font-size:12.5px; color:#7A828E; line-height:1.5">Estados: default · selecionado (fundo verde) · goleiro (borda amarela + GK) · espera (tracejado 55%) · indisponível (riscado).</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">ROSTER ROW · LISTA E ESCALAÇÃO</div>
+        <div style="background:#111317; border:1px solid #262A31; border-radius:14px; overflow:hidden">
+          <div style="display:flex; align-items:center; gap:12px; padding:13px 16px"><div style="font-family:Anton,sans-serif; font-size:14px; color:#7A828E; width:18px">01</div><div style="width:34px; height:34px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700">MA</div><div style="flex:1"><div style="font-size:14.5px; font-weight:700">Marcos</div><div style="font-size:11.5px; color:#7A828E">Linha · 12 presenças</div></div><div style="display:flex; align-items:center; gap:5px; font-family:Anton,sans-serif; font-size:19px; color:#FFD84A">7<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFD84A" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle></svg></div></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:13px 16px; border-top:1px solid #1A1D22; background:#1A1D22"><div style="font-family:Anton,sans-serif; font-size:14px; color:#7A828E; width:18px">02</div><div style="width:34px; height:34px; background:#FFD84A; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700; color:#090A0C">GU</div><div style="flex:1"><div style="font-size:14.5px; font-weight:700; display:flex; align-items:center; gap:7px">Guilherme<div style="padding:2px 6px; background:#FFD84A; color:#090A0C; border-radius:4px; font-size:9px; font-weight:700; letter-spacing:.08em">GK</div></div><div style="font-size:11.5px; color:#7A828E">Goleiro fixo</div></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A828E" stroke-width="1.9" stroke-linecap="round"><path d="M8 6l6 6-6 6"></path></svg></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:13px 16px; border-top:1px solid #1A1D22; opacity:.5"><div style="font-family:Anton,sans-serif; font-size:14px; color:#7A828E; width:18px">21</div><div style="width:34px; height:34px; border:1px dashed #3B4149; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700; color:#7A828E">JU</div><div style="flex:1"><div style="font-size:14.5px; font-weight:500; color:#A7AEB9">Juliel</div><div style="font-size:11.5px; color:#7A828E">Na espera · 2º</div></div><div style="height:32px; padding:0 12px; border:1px solid #3B4149; border-radius:999px; display:flex; align-items:center; font-size:11.5px; font-weight:700; color:#A7AEB9">Promover</div></div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">PLAYER CARD · RANKING, PERFIL, SHARE</div>
+        <div style="position:relative; background:#111317; border:1px solid #262A31; border-radius:18px; overflow:hidden; padding:20px">
+          <div aria-hidden="true" style="position:absolute; right:-6px; top:-30px; font-family:Anton,sans-serif; font-size:150px; line-height:.8; color:transparent; -webkit-text-stroke:1.4px rgba(255,79,163,.22)">09</div>
+          <div style="position:absolute; left:0; top:0; bottom:0; width:4px; background:#FF4FA3"></div>
+          <div style="position:relative; display:flex; flex-direction:column; gap:16px">
+            <div style="display:flex; align-items:center; gap:13px">
+              <div style="width:56px; height:56px; background:#FF4FA3; border-radius:16px; display:flex; align-items:center; justify-content:center; font-family:Anton,sans-serif; font-size:22px; color:#090A0C">PE</div>
+              <div>
+                <div style="font-family:Anton,sans-serif; font-size:26px; line-height:1; text-transform:uppercase">Pedrão</div>
+                <div style="font-size:12px; color:#7A828E; margin-top:5px">Linha · desde mar 2024</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px">
+              <div style="flex:1; padding:12px 14px; background:#1A1D22; border-radius:10px"><div style="font-family:Anton,sans-serif; font-size:30px; line-height:1; color:#FFD84A; font-variant-numeric:tabular-nums">14</div><div style="font-size:10.5px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:5px">GOLS</div></div>
+              <div style="flex:1; padding:12px 14px; background:#1A1D22; border-radius:10px"><div style="font-family:Anton,sans-serif; font-size:30px; line-height:1; font-variant-numeric:tabular-nums">6</div><div style="font-size:10.5px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:5px">ASSIST.</div></div>
+              <div style="flex:1; padding:12px 14px; background:#1A1D22; border-radius:10px"><div style="font-family:Anton,sans-serif; font-size:30px; line-height:1; color:#35E878; font-variant-numeric:tabular-nums">11</div><div style="font-size:10.5px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:5px">PRESENÇAS</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px">
+              <div style="padding:5px 10px; background:#FF4FA31F; border:1px solid #FF4FA366; color:#FF4FA3; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:.08em">ARTILHEIRO DO MÊS</div>
+              <div style="padding:5px 10px; border:1px solid #262A31; color:#7A828E; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:.08em">3 JOGOS SEGUIDOS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start">
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">AVATARES · 32 / 40 / 56 / 72</div>
+        <div style="display:flex; align-items:flex-end; gap:12px">
+          <div style="width:32px; height:32px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">KA</div>
+          <div style="width:40px; height:40px; background:#35E878; color:#090A0C; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700">NE</div>
+          <div style="position:relative; width:56px; height:56px; background:#FFD84A; color:#090A0C; border-radius:999px; display:flex; align-items:center; justify-content:center; font-family:Anton,sans-serif; font-size:20px">GU<div style="position:absolute; bottom:-2px; right:-2px; padding:2px 6px; background:#090A0C; border:1px solid #FFD84A; color:#FFD84A; border-radius:999px; font-size:8.5px; font-weight:700">GK</div></div>
+          <div style="width:72px; height:72px; background:#FF4FA3; color:#090A0C; border-radius:22px; display:flex; align-items:center; justify-content:center; font-family:Anton,sans-serif; font-size:26px">PE</div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">BADGES DE POSIÇÃO E ESTADO</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <div style="padding:6px 11px; background:#FFD84A; color:#090A0C; border-radius:6px; font-size:10.5px; font-weight:700; letter-spacing:.1em">GK</div>
+          <div style="padding:6px 11px; border:1px solid #3B4149; color:#A7AEB9; border-radius:6px; font-size:10.5px; font-weight:700; letter-spacing:.1em">LINHA</div>
+          <div style="padding:6px 11px; background:#35E8781F; border:1px solid #35E87866; color:#35E878; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:.1em">CONFIRMADO</div>
+          <div style="padding:6px 11px; border:1px dashed #3B4149; color:#7A828E; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:.1em">ESPERA · 1º</div>
+          <div style="display:flex; align-items:center; gap:6px; padding:6px 11px; background:#FF4D4D; color:#090A0C; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:.1em"><div style="width:6px; height:6px; background:#090A0C; border-radius:999px"></div>AO VIVO</div>
+          <div style="padding:6px 11px; background:#FF4FA3; color:#090A0C; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:.1em">CRAQUE DA RODADA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">03.2 — TIMES</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:12px">Verde, amarelo, vermelho, rosa</div>
+    <div style="font-size:16px; line-height:1.55; color:#A7AEB9; max-width:660px; margin-bottom:40px; text-wrap:pretty">Cada time recebe uma cor da paleta. A cor aparece no header chanfrado, na stripe lateral e no número — nunca preenchendo o corpo do card. Assim quatro times convivem na mesma tela sem ruído.</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:16px; margin-bottom:22px">
+      <div style="background:#111317; border:1px solid #262A31; border-radius:16px; overflow:hidden">
+        <div style="position:relative; background:#35E878; padding:14px 16px; clip-path:polygon(0 0,100% 0,100% 100%,18px 100%,0 calc(100% - 18px))">
+          <div style="display:flex; align-items:center; justify-content:space-between"><div style="font-family:Anton,sans-serif; font-size:22px; color:#090A0C; line-height:1">TIME VERDE</div><div style="font-family:Anton,sans-serif; font-size:22px; color:#090A0C1F">01</div></div>
+        </div>
+        <div style="padding:8px 0">
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#FFD84A; color:#090A0C; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">GU</div><div style="font-size:14px; font-weight:700">Guilherme</div><div style="margin-left:auto; font-size:9px; font-weight:700; letter-spacing:.08em; color:#FFD84A">GK</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">SA</div><div style="font-size:14px">Salles</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">DE</div><div style="font-size:14px">Deivão</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">KA</div><div style="font-size:14px">Kaique</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">JU</div><div style="font-size:14px">Juan</div></div>
+        </div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:16px; overflow:hidden">
+        <div style="background:#FFD84A; padding:14px 16px; clip-path:polygon(0 0,100% 0,100% 100%,18px 100%,0 calc(100% - 18px))">
+          <div style="display:flex; align-items:center; justify-content:space-between"><div style="font-family:Anton,sans-serif; font-size:22px; color:#090A0C; line-height:1">TIME AMARELO</div><div style="font-family:Anton,sans-serif; font-size:22px; color:#090A0C1F">02</div></div>
+        </div>
+        <div style="padding:8px 0">
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#FFD84A; color:#090A0C; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">HE</div><div style="font-size:14px; font-weight:700">Heitor</div><div style="margin-left:auto; font-size:9px; font-weight:700; letter-spacing:.08em; color:#FFD84A">GK</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">MA</div><div style="font-size:14px">Marcos</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">IG</div><div style="font-size:14px">Igão</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">TO</div><div style="font-size:14px">Tomás</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">NE</div><div style="font-size:14px">Ney</div></div>
+        </div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:16px; overflow:hidden">
+        <div style="background:#FF4D4D; padding:14px 16px; clip-path:polygon(0 0,100% 0,100% 100%,18px 100%,0 calc(100% - 18px))">
+          <div style="display:flex; align-items:center; justify-content:space-between"><div style="font-family:Anton,sans-serif; font-size:22px; color:#090A0C; line-height:1">TIME VERMELHO</div><div style="font-family:Anton,sans-serif; font-size:22px; color:#090A0C1F">03</div></div>
+        </div>
+        <div style="padding:8px 0">
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#FFD84A; color:#090A0C; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">DH</div><div style="font-size:14px; font-weight:700">Dhener</div><div style="margin-left:auto; font-size:9px; font-weight:700; letter-spacing:.08em; color:#FFD84A">GK</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">AL</div><div style="font-size:14px">Alexandre</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">PA</div><div style="font-size:14px">Pablo</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">KA</div><div style="font-size:14px">Kauã</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">JO</div><div style="font-size:14px">Jorge</div></div>
+        </div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:16px; overflow:hidden">
+        <div style="background:#FF4FA3; padding:14px 16px; clip-path:polygon(0 0,100% 0,100% 100%,18px 100%,0 calc(100% - 18px))">
+          <div style="display:flex; align-items:center; justify-content:space-between"><div style="font-family:Anton,sans-serif; font-size:22px; color:#090A0C; line-height:1">TIME ROSA</div><div style="font-family:Anton,sans-serif; font-size:22px; color:#090A0C1F">04</div></div>
+        </div>
+        <div style="padding:8px 0">
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#FFD84A; color:#090A0C; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">DA</div><div style="font-size:14px; font-weight:700">Danilo</div><div style="margin-left:auto; font-size:9px; font-weight:700; letter-spacing:.08em; color:#FFD84A">GK</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">PE</div><div style="font-size:14px">Pedrão</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">LU</div><div style="font-size:14px">Lucas</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">TH</div><div style="font-size:14px">Thalysson</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 16px"><div style="width:28px; height:28px; background:#262A31; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">AG</div><div style="font-size:14px">Agnaldo</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px">
+      <div style="background:#111317; border:1px solid #262A31; border-radius:14px; padding:20px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:16px">MINI FORMAÇÃO</div>
+        <div style="position:relative; height:150px; background:#0F1114; border:1px solid #262A31; border-radius:8px; overflow:hidden">
+          <div style="position:absolute; left:0; right:0; top:50%; height:1px; background:#ECEFF31A"></div>
+          <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:52px; height:52px; border:1px solid #ECEFF31A; border-radius:50%"></div>
+          <div style="position:absolute; left:50%; top:14%; transform:translate(-50%,-50%); width:14px; height:14px; background:#35E878; border-radius:999px"></div>
+          <div style="position:absolute; left:26%; top:32%; transform:translate(-50%,-50%); width:14px; height:14px; background:#35E878; border-radius:999px"></div>
+          <div style="position:absolute; left:74%; top:32%; transform:translate(-50%,-50%); width:14px; height:14px; background:#35E878; border-radius:999px"></div>
+          <div style="position:absolute; left:50%; top:88%; transform:translate(-50%,-50%); width:14px; height:14px; background:#FF4FA3; border-radius:999px"></div>
+          <div style="position:absolute; left:30%; top:68%; transform:translate(-50%,-50%); width:14px; height:14px; background:#FF4FA3; border-radius:999px"></div>
+          <div style="position:absolute; left:70%; top:68%; transform:translate(-50%,-50%); width:14px; height:14px; background:#FF4FA3; border-radius:999px"></div>
+        </div>
+        <div style="font-size:12.5px; color:#7A828E; margin-top:12px; line-height:1.5">Só pontos e linhas. Nunca desenho de campo com gramado.</div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">FILA DE TIMES</div>
+        <div style="display:flex; flex-direction:column; gap:9px">
+          <div style="display:flex; align-items:center; gap:10px; padding:11px 13px; background:#1A1D22; border-left:3px solid #FF4D4D; border-radius:0 8px 8px 0"><div style="font-size:13.5px; font-weight:700">Vermelho × Rosa</div><div style="margin-left:auto; display:flex; align-items:center; gap:6px; padding:3px 8px; background:#FF4D4D; color:#090A0C; border-radius:999px; font-size:9.5px; font-weight:700; letter-spacing:.08em"><div style="width:5px; height:5px; background:#090A0C; border-radius:999px"></div>AGORA</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:11px 13px; border:1px solid #262A31; border-radius:8px"><div style="font-size:13.5px; color:#A7AEB9">Verde × vencedor</div><div style="margin-left:auto; font-size:11px; color:#7A828E">a seguir</div></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:11px 13px; border:1px solid #262A31; border-radius:8px; opacity:.6"><div style="font-size:13.5px; color:#A7AEB9">Amarelo descansa</div><div style="margin-left:auto; font-size:11px; color:#7A828E">1 jogo</div></div>
+        </div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">EQUILÍBRIO (DISCRETO)</div>
+        <div style="display:flex; flex-direction:column; gap:11px">
+          <div style="display:flex; align-items:center; gap:10px"><div style="width:58px; font-size:12px; color:#A7AEB9">Verde</div><div style="flex:1; height:6px; background:#1A1D22; border-radius:999px; overflow:hidden"><div style="width:78%; height:100%; background:#35E878"></div></div><div style="font-size:11.5px; color:#7A828E; font-variant-numeric:tabular-nums">78</div></div>
+          <div style="display:flex; align-items:center; gap:10px"><div style="width:58px; font-size:12px; color:#A7AEB9">Amarelo</div><div style="flex:1; height:6px; background:#1A1D22; border-radius:999px; overflow:hidden"><div style="width:74%; height:100%; background:#FFD84A"></div></div><div style="font-size:11.5px; color:#7A828E; font-variant-numeric:tabular-nums">74</div></div>
+          <div style="display:flex; align-items:center; gap:10px"><div style="width:58px; font-size:12px; color:#A7AEB9">Vermelho</div><div style="flex:1; height:6px; background:#1A1D22; border-radius:999px; overflow:hidden"><div style="width:81%; height:100%; background:#FF4D4D"></div></div><div style="font-size:11.5px; color:#7A828E; font-variant-numeric:tabular-nums">81</div></div>
+          <div style="display:flex; align-items:center; gap:10px"><div style="width:58px; font-size:12px; color:#A7AEB9">Rosa</div><div style="flex:1; height:6px; background:#1A1D22; border-radius:999px; overflow:hidden"><div style="width:76%; height:100%; background:#FF4FA3"></div></div><div style="font-size:11.5px; color:#7A828E; font-variant-numeric:tabular-nums">76</div></div>
+        </div>
+        <div style="font-size:12.5px; color:#7A828E; line-height:1.5">Sem número mágico gigante: o equilíbrio é informação de apoio, não veredito.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">03.3 — PLACAR</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:12px">Scoreboard</div>
+    <div style="font-size:16px; line-height:1.55; color:#A7AEB9; max-width:660px; margin-bottom:40px; text-wrap:pretty">Bloco reto, canto chanfrado, número em Anton tabular. A cor do time entra só na stripe superior e no nome. Toque em + GOL para ver a reação do placar.</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:24px; margin-bottom:24px">
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">FULL · TELA AO VIVO</div>
+        <div style="position:relative; background:#111317; border:1px solid #262A31; border-radius:18px; overflow:hidden">
+          <div style="position:absolute; inset:0; background-image:repeating-linear-gradient(0deg,#ECEFF308 0 1px,transparent 1px 3px); pointer-events:none"></div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid #262A31">
+            <div style="display:flex; align-items:center; gap:8px; padding:5px 10px; background:#FF4D4D; color:#090A0C; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.12em"><div style="width:6px; height:6px; background:#090A0C; border-radius:999px"></div>AO VIVO</div>
+            <div style="font-family:Anton,sans-serif; font-size:22px; font-variant-numeric:tabular-nums; letter-spacing:.02em">07:42</div>
+            <div style="font-size:11px; font-weight:700; letter-spacing:.1em; color:#7A828E">JOGO 3</div>
+          </div>
+          <div style="position:relative; display:flex; align-items:stretch">
+            <div style="flex:1; padding:22px 18px 20px; display:flex; flex-direction:column; align-items:center; gap:10px">
+              <div style="width:100%; height:4px; background:#35E878"></div>
+              <div style="font-family:Anton,sans-serif; font-size:17px; letter-spacing:.04em; color:#35E878">VERDE</div>
+              <div style="font-family:Anton,sans-serif; font-size:96px; line-height:.82; font-variant-numeric:tabular-nums; animation:{{ pulseA }}">{{ scoreA }}</div>
+            </div>
+            <div style="width:1px; background:#262A31"></div>
+            <div style="flex:1; padding:22px 18px 20px; display:flex; flex-direction:column; align-items:center; gap:10px">
+              <div style="width:100%; height:4px; background:#FF4FA3"></div>
+              <div style="font-family:Anton,sans-serif; font-size:17px; letter-spacing:.04em; color:#FF4FA3">ROSA</div>
+              <div style="font-family:Anton,sans-serif; font-size:96px; line-height:.82; font-variant-numeric:tabular-nums; animation:{{ pulseB }}">{{ scoreB }}</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; padding:14px 16px 16px; border-top:1px solid #262A31">
+            <button onClick="{{ goalA }}" style="flex:1; height:56px; background:#35E878; color:#090A0C; border:none; border-radius:12px; font-family:Anton,sans-serif; font-size:20px; letter-spacing:.02em; cursor:pointer; transition:transform 100ms ease" style-active="transform:scale(.97)">+ GOL VERDE</button>
+            <button onClick="{{ goalB }}" style="flex:1; height:56px; background:#FF4FA3; color:#090A0C; border:none; border-radius:12px; font-family:Anton,sans-serif; font-size:20px; letter-spacing:.02em; cursor:pointer; transition:transform 100ms ease" style-active="transform:scale(.97)">+ GOL ROSA</button>
+          </div>
+        </div>
+        <div style="font-size:12.5px; color:#7A828E; line-height:1.5">Scanline a 3% de opacidade, só aqui. Alvos de 56px: dá pra acertar correndo.</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px">
+        <div>
+          <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:14px">COMPACT · LISTAS E HISTÓRICO</div>
+          <div style="display:flex; align-items:center; gap:14px; background:#111317; border:1px solid #262A31; border-radius:12px; padding:14px 16px">
+            <div style="display:flex; align-items:center; gap:9px; flex:1"><div style="width:10px; height:26px; background:#FFD84A"></div><div style="font-size:14px; font-weight:700">Amarelo</div></div>
+            <div style="display:flex; align-items:center; gap:10px; font-family:Anton,sans-serif; font-size:30px; font-variant-numeric:tabular-nums"><span>3</span><span style="color:#3B4149; font-size:20px">×</span><span style="color:#7A828E">1</span></div>
+            <div style="display:flex; align-items:center; gap:9px; flex:1; justify-content:flex-end"><div style="font-size:14px; font-weight:700; color:#A7AEB9">Vermelho</div><div style="width:10px; height:26px; background:#FF4D4D"></div></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:14px">TIMELINE DE LANCES</div>
+          <div style="background:#111317; border:1px solid #262A31; border-radius:12px; padding:6px 0">
+            <div style="display:flex; align-items:center; gap:12px; padding:11px 16px; animation:jgRise 320ms ease both"><div style="font-family:Anton,sans-serif; font-size:15px; color:#7A828E; width:30px; font-variant-numeric:tabular-nums">07'</div><div style="width:3px; height:26px; background:#35E878"></div><div style="width:26px; height:26px; background:#FF4D4D; border-radius:999px; display:flex; align-items:center; justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#090A0C" stroke-width="2.4" stroke-linecap="round"><path d="M2 19V7h20v12M6 19V11h12v8"></path></svg></div><div style="font-size:14px"><span style="font-weight:700">Deivão</span> <span style="color:#7A828E">· gol</span></div></div>
+            <div style="display:flex; align-items:center; gap:12px; padding:11px 16px; border-top:1px solid #1A1D22"><div style="font-family:Anton,sans-serif; font-size:15px; color:#7A828E; width:30px; font-variant-numeric:tabular-nums">07'</div><div style="width:3px; height:26px; background:#35E878"></div><div style="width:26px; height:26px; border:1px solid #FFD84A; border-radius:999px; display:flex; align-items:center; justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFD84A" stroke-width="2" stroke-linecap="round"><path d="M3.5 18.5C8 18.5 10 7.5 20.5 5.5" stroke-dasharray="3 3"></path></svg></div><div style="font-size:14px; color:#A7AEB9"><span style="color:#ECEFF3; font-weight:700">Salles</span> · assistência</div></div>
+            <div style="display:flex; align-items:center; gap:12px; padding:11px 16px; border-top:1px solid #1A1D22"><div style="font-family:Anton,sans-serif; font-size:15px; color:#7A828E; width:30px; font-variant-numeric:tabular-nums">04'</div><div style="width:3px; height:26px; background:#FF4FA3"></div><div style="width:26px; height:26px; background:#FF4D4D; border-radius:999px; display:flex; align-items:center; justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#090A0C" stroke-width="2.4" stroke-linecap="round"><path d="M2 19V7h20v12M6 19V11h12v8"></path></svg></div><div style="font-size:14px"><span style="font-weight:700">Pedrão</span> <span style="color:#7A828E">· gol</span></div><div style="margin-left:auto; display:flex; align-items:center; gap:5px; font-size:11px; font-weight:700; color:#7A828E">DESFAZER</div></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:14px">FEEDBACK DE GOL · 500 ms</div>
+          <div style="position:relative; height:120px; background:#111317; border:1px solid #FF4D4D; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center">
+            <div style="position:absolute; inset:0; background:linear-gradient(90deg,transparent,#FF4D4D26,transparent); width:40%; animation:jgSweep 1.6s ease-in-out infinite"></div>
+            <div style="font-family:Anton,sans-serif; font-size:52px; color:#FF4D4D; letter-spacing:.02em">GOOOL</div>
+            <div style="position:absolute; bottom:10px; left:14px; font-size:10.5px; font-weight:700; letter-spacing:.1em; color:#7A828E">DEIVÃO · 07' · VERDE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px">
+      <div style="background:#111317; border:1px solid #262A31; border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">SCORE STEPPER (CORREÇÃO)</div>
+        <div style="display:flex; align-items:center; gap:16px">
+          <div style="width:44px; height:44px; border:1px solid #3B4149; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; color:#A7AEB9">−</div>
+          <div style="font-family:Anton,sans-serif; font-size:44px; font-variant-numeric:tabular-nums; min-width:40px; text-align:center">3</div>
+          <div style="width:44px; height:44px; border:1px solid #ECEFF3; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px">+</div>
+          <div style="margin-left:auto; font-size:12px; color:#7A828E; line-height:1.4">Só no menu<br>de correção</div>
+        </div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">TIMER · ESTADOS</div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap">
+          <div style="padding:10px 14px; background:#1A1D22; border-radius:10px; font-family:Anton,sans-serif; font-size:26px; font-variant-numeric:tabular-nums">07:42</div>
+          <div style="padding:10px 14px; border:1px solid #FFD84A; border-radius:10px; font-family:Anton,sans-serif; font-size:26px; color:#FFD84A; font-variant-numeric:tabular-nums">01:12</div>
+          <div style="padding:10px 14px; border:1px dashed #3B4149; border-radius:10px; font-family:Anton,sans-serif; font-size:26px; color:#7A828E; font-variant-numeric:tabular-nums">PAUSA</div>
+        </div>
+        <div style="font-size:12.5px; color:#7A828E; line-height:1.5">Último minuto vira amarelo. Nunca vermelho: vermelho é gol e ao vivo.</div>
+      </div>
+      <div style="background:#F7F8FA; border:1px solid #262A31; border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#6B7280">PUBLIC / SHARE · LIGHT MODE</div>
+        <div style="background:#FFFFFF; border:1px solid #DFE3E8; border-radius:12px; padding:16px; display:flex; align-items:center; gap:14px">
+          <div style="flex:1"><div style="font-family:Anton,sans-serif; font-size:16px; color:#0F7A3D">VERDE</div><div style="font-size:11px; color:#6B7280">Arena Farofa</div></div>
+          <div style="font-family:Anton,sans-serif; font-size:38px; color:#090A0C; font-variant-numeric:tabular-nums">3 × 1</div>
+          <div style="flex:1; text-align:right"><div style="font-family:Anton,sans-serif; font-size:16px; color:#B93131">VERMELHO</div><div style="font-size:11px; color:#6B7280">12 set</div></div>
+        </div>
+        <div style="font-size:12.5px; color:#6B7280; line-height:1.5">No claro as cores escurecem um passo para manter 4.5:1 sobre branco.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">03.4 — RANKING E SHARE</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:12px">Top 3 que dá vontade de mandar no grupo</div>
+    <div style="font-size:16px; line-height:1.55; color:#A7AEB9; max-width:660px; margin-bottom:40px; text-wrap:pretty">Números gigantes de posição em outline, avatar recortado, medalha abstrata como bloco chanfrado. Sem pódio 3D, sem brilho.</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:24px">
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">PODIUM · ARTILHARIA DO MÊS</div>
+        <div style="background:#111317; border:1px solid #262A31; border-radius:18px; overflow:hidden">
+          <div style="position:relative; display:flex; align-items:center; gap:14px; padding:20px; background:#1A1D22; overflow:hidden">
+            <div aria-hidden="true" style="position:absolute; right:6px; top:-26px; font-family:Anton,sans-serif; font-size:130px; line-height:1; color:transparent; -webkit-text-stroke:1.5px rgba(255,216,74,.3)">1</div>
+            <div style="position:relative; width:58px; height:58px; background:#FFD84A; border-radius:16px; display:flex; align-items:center; justify-content:center; font-family:Anton,sans-serif; font-size:22px; color:#090A0C">PE</div>
+            <div style="position:relative; flex:1">
+              <div style="font-family:Anton,sans-serif; font-size:26px; line-height:1; text-transform:uppercase">Pedrão</div>
+              <div style="font-size:12px; color:#7A828E; margin-top:5px">6 rodadas · 2,3 por jogo</div>
+            </div>
+            <div style="position:relative; font-family:Anton,sans-serif; font-size:44px; color:#FFD84A; font-variant-numeric:tabular-nums">14</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px; padding:16px 20px; border-top:1px solid #262A31">
+            <div style="font-family:Anton,sans-serif; font-size:22px; color:#7A828E; width:26px">2</div>
+            <div style="width:42px; height:42px; background:#262A31; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700">DE</div>
+            <div style="flex:1; font-size:15px; font-weight:700">Deivão</div>
+            <div style="display:flex; align-items:center; gap:7px"><div style="padding:2px 6px; background:#35E8781F; color:#35E878; border-radius:4px; font-size:10px; font-weight:700">+2</div><div style="font-family:Anton,sans-serif; font-size:28px; font-variant-numeric:tabular-nums">11</div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px; padding:16px 20px; border-top:1px solid #262A31">
+            <div style="font-family:Anton,sans-serif; font-size:22px; color:#7A828E; width:26px">3</div>
+            <div style="width:42px; height:42px; background:#262A31; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700">IG</div>
+            <div style="flex:1; font-size:15px; font-weight:700">Igão</div>
+            <div style="display:flex; align-items:center; gap:7px"><div style="padding:2px 6px; background:#FF4D4D1F; color:#FF4D4D; border-radius:4px; font-size:10px; font-weight:700">−1</div><div style="font-family:Anton,sans-serif; font-size:28px; font-variant-numeric:tabular-nums">9</div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px; padding:14px 20px; border-top:1px solid #262A31; opacity:.7">
+            <div style="font-family:Anton,sans-serif; font-size:18px; color:#7A828E; width:26px">4</div>
+            <div style="width:34px; height:34px; background:#1A1D22; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700">KA</div>
+            <div style="flex:1; font-size:14px; color:#A7AEB9">Kaique</div>
+            <div style="font-family:Anton,sans-serif; font-size:22px; color:#A7AEB9; font-variant-numeric:tabular-nums">8</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; padding:14px 16px; background:#111317; border:1px dashed #262A31; border-radius:12px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A828E" stroke-width="1.75" stroke-linecap="round"><path d="M4 20V13M10 20V8M16 20V15M22 20H2"></path></svg>
+          <div style="font-size:13px; color:#7A828E; line-height:1.45">Ranking vazio: “Ninguém marcou ainda. O primeiro gol do mês tá sobrando.”</div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">SHARE CARD · TIMES DE HOJE · 1080×1350</div>
+        <div style="position:relative; background:#090A0C; border:1px solid #262A31; border-radius:14px; padding:24px; overflow:hidden">
+          <div style="position:absolute; inset:0; background-image:linear-gradient(#ECEFF30A 1px,transparent 1px),linear-gradient(90deg,#ECEFF30A 1px,transparent 1px); background-size:34px 34px"></div>
+          <div style="position:relative; display:flex; flex-direction:column; gap:18px">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between">
+              <div>
+                <div style="font-family:Anton,sans-serif; font-size:34px; line-height:.95; text-transform:uppercase">Times de<br>hoje</div>
+                <div style="font-size:12px; font-weight:700; letter-spacing:.1em; color:#35E878; margin-top:10px">QUINTA · 20:30 · ARENA FAROFA</div>
+              </div>
+              <svg width="34" height="34" viewBox="0 0 52 52" fill="none"><path d="M0 10 L10 0 H52 V42 L42 52 H0 Z" fill="#35E878"></path><circle cx="16" cy="38" r="6" fill="#090A0C"></circle><path d="M16 38 C31 38 37 25 37 12" stroke="#090A0C" stroke-width="5" stroke-linecap="round"></path><path d="M31 12 H43" stroke="#090A0C" stroke-width="5" stroke-linecap="round"></path></svg>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+              <div style="background:#111317; border-top:3px solid #35E878; padding:12px 13px"><div style="font-family:Anton,sans-serif; font-size:14px; color:#35E878; margin-bottom:8px">VERDE</div><div style="font-size:12px; line-height:1.75; color:#A7AEB9">Guilherme GK<br>Salles · Deivão<br>Kaique · Juan</div></div>
+              <div style="background:#111317; border-top:3px solid #FFD84A; padding:12px 13px"><div style="font-family:Anton,sans-serif; font-size:14px; color:#FFD84A; margin-bottom:8px">AMARELO</div><div style="font-size:12px; line-height:1.75; color:#A7AEB9">Heitor GK<br>Marcos · Igão<br>Tomás · Ney</div></div>
+              <div style="background:#111317; border-top:3px solid #FF4D4D; padding:12px 13px"><div style="font-family:Anton,sans-serif; font-size:14px; color:#FF4D4D; margin-bottom:8px">VERMELHO</div><div style="font-size:12px; line-height:1.75; color:#A7AEB9">Dhener GK<br>Alexandre · Pablo<br>Kauã · Jorge</div></div>
+              <div style="background:#111317; border-top:3px solid #FF4FA3; padding:12px 13px"><div style="font-family:Anton,sans-serif; font-size:14px; color:#FF4FA3; margin-bottom:8px">ROSA</div><div style="font-size:12px; line-height:1.75; color:#A7AEB9">Danilo GK<br>Pedrão · Lucas<br>Thalysson · Agnaldo</div></div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding-top:6px; border-top:1px solid #262A31">
+              <div style="font-size:11px; color:#7A828E">2 na espera: Carlão, Juliel</div>
+              <div style="font-family:Anton,sans-serif; font-size:13px; color:#3B4149; letter-spacing:.08em">JOGAÊ</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px">
+          <div style="flex:1; height:44px; background:#35E878; color:#090A0C; border-radius:10px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase">Copiar pro WhatsApp</div>
+          <div style="width:44px; height:44px; border:1px solid #262A31; border-radius:10px; display:flex; align-items:center; justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A7AEB9" stroke-width="1.75" stroke-linecap="round"><circle cx="18" cy="6" r="2.8"></circle><circle cx="6" cy="12" r="2.8"></circle><circle cx="18" cy="18" r="2.8"></circle><path d="M8.5 10.7l7-3.4M8.5 13.3l7 3.4"></path></svg></div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">SHARE CARD · RESULTADO DA RODADA</div>
+        <div style="position:relative; background:#090A0C; border:1px solid #262A31; border-radius:14px; padding:24px; overflow:hidden">
+          <div aria-hidden="true" style="position:absolute; right:-14px; bottom:-46px; font-family:Anton,sans-serif; font-size:170px; line-height:.8; color:transparent; -webkit-text-stroke:1.4px rgba(53,232,120,.16)">FIM</div>
+          <div style="position:relative; display:flex; flex-direction:column; gap:16px">
+            <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">RODADA DE 12 SET · 4 JOGOS</div>
+            <div style="display:flex; flex-direction:column; gap:8px">
+              <div style="display:flex; align-items:center; gap:12px; background:#111317; padding:11px 13px"><div style="width:8px; height:22px; background:#35E878"></div><div style="flex:1; font-size:13px; font-weight:700">Verde</div><div style="font-family:Anton,sans-serif; font-size:22px; font-variant-numeric:tabular-nums">3 × 1</div><div style="flex:1; text-align:right; font-size:13px; color:#A7AEB9">Vermelho</div><div style="width:8px; height:22px; background:#FF4D4D"></div></div>
+              <div style="display:flex; align-items:center; gap:12px; background:#111317; padding:11px 13px"><div style="width:8px; height:22px; background:#FFD84A"></div><div style="flex:1; font-size:13px; font-weight:700">Amarelo</div><div style="font-family:Anton,sans-serif; font-size:22px; font-variant-numeric:tabular-nums">2 × 2</div><div style="flex:1; text-align:right; font-size:13px; font-weight:700">Rosa</div><div style="width:8px; height:22px; background:#FF4FA3"></div></div>
+              <div style="display:flex; align-items:center; gap:12px; background:#111317; padding:11px 13px"><div style="width:8px; height:22px; background:#35E878"></div><div style="flex:1; font-size:13px; font-weight:700">Verde</div><div style="font-family:Anton,sans-serif; font-size:22px; font-variant-numeric:tabular-nums">4 × 0</div><div style="flex:1; text-align:right; font-size:13px; color:#A7AEB9">Amarelo</div><div style="width:8px; height:22px; background:#FFD84A"></div></div>
+            </div>
+            <div style="display:flex; gap:10px">
+              <div style="flex:1; padding:13px; background:#111317; border-left:3px solid #FFD84A"><div style="font-size:10px; font-weight:700; letter-spacing:.1em; color:#7A828E">ARTILHEIRO DA RODADA</div><div style="font-family:Anton,sans-serif; font-size:22px; margin-top:6px">DEIVÃO · 4</div></div>
+              <div style="flex:1; padding:13px; background:#111317; border-left:3px solid #FF4FA3"><div style="font-size:10px; font-weight:700; letter-spacing:.1em; color:#7A828E">CAMPEÃO DO DIA</div><div style="font-family:Anton,sans-serif; font-size:22px; margin-top:6px">TIME VERDE</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:12.5px; color:#7A828E; line-height:1.5">Três formatos: 1080×1350 feed, 1080×1920 stories, 1200×630 preview de link. Mesma grade, tipografia reescalada.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">02.4 — FEEDBACK, VAZIOS E OVERLAYS</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:40px">Estados</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; margin-bottom:20px">
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">TOASTS</div>
+        <div style="display:flex; align-items:center; gap:12px; background:#1A1D22; border:1px solid #35E87866; border-left:3px solid #35E878; border-radius:10px; padding:14px 16px; box-shadow:0 8px 24px rgba(0,0,0,.5)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#35E878" stroke-width="2.2" stroke-linecap="round"><path d="M5 12.5l4.2 4.2L19 7"></path></svg><div style="font-size:14px; flex:1">Times prontos.</div><div style="font-size:11.5px; font-weight:700; color:#35E878">VER</div></div>
+        <div style="display:flex; align-items:center; gap:12px; background:#1A1D22; border:1px solid #262A31; border-left:3px solid #FFD84A; border-radius:10px; padding:14px 16px"><div style="font-size:14px; flex:1; color:#ECEFF3">Copiado. Cola no grupo.</div><div style="font-size:11.5px; font-weight:700; color:#7A828E">DESFAZER</div></div>
+        <div style="display:flex; align-items:center; gap:12px; background:#1A1D22; border:1px solid #FF4D4D66; border-left:3px solid #FF4D4D; border-radius:10px; padding:14px 16px"><div style="font-size:14px; flex:1">Não deu pra salvar o gol. Tá offline.</div><div style="font-size:11.5px; font-weight:700; color:#FF4D4D">TENTAR</div></div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">ALERTAS INLINE</div>
+        <div style="display:flex; gap:12px; background:#111317; border:1px solid #FFD84A66; border-radius:12px; padding:16px"><svg style="flex:none; margin-top:2px" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFD84A" stroke-width="2" stroke-linecap="round"><path d="M12 8.5v5M12 17v.4"></path><circle cx="12" cy="12" r="9"></circle></svg><div><div style="font-size:14px; font-weight:700; margin-bottom:5px">Dois nomes parecidos</div><div style="font-size:13px; color:#A7AEB9; line-height:1.5">“Igão” e “Igor” podem ser a mesma pessoa. Quer juntar?</div><div style="display:flex; gap:8px; margin-top:12px"><div style="height:34px; padding:0 14px; background:#FFD84A; color:#090A0C; border-radius:999px; display:flex; align-items:center; font-size:12px; font-weight:700">São a mesma</div><div style="height:34px; padding:0 14px; border:1px solid #3B4149; border-radius:999px; display:flex; align-items:center; font-size:12px; font-weight:700; color:#A7AEB9">São diferentes</div></div></div></div>
+        <div style="display:flex; gap:12px; align-items:center; background:#111317; border:1px solid #262A31; border-radius:12px; padding:14px 16px"><div style="width:8px; height:8px; background:#FFD84A; border-radius:999px; animation:jgBounce 1.4s ease-in-out infinite"></div><div style="font-size:13.5px; color:#A7AEB9">Sincronizando 2 lances…</div></div>
+        <div style="display:flex; gap:12px; align-items:center; background:#111317; border:1px dashed #3B4149; border-radius:12px; padding:14px 16px"><div style="font-size:13.5px; color:#7A828E">Sem internet. Os lances ficam salvos aqui e sobem depois.</div></div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">CARREGANDO · SEM SPINNER GENÉRICO</div>
+        <div style="background:#111317; border:1px solid #262A31; border-radius:12px; padding:22px 18px; display:flex; flex-direction:column; gap:18px">
+          <svg viewBox="0 0 240 60" style="width:100%; height:52px">
+            <path d="M8 50 C60 50 90 14 232 10" stroke="#262A31" stroke-width="2" fill="none" stroke-dasharray="4 6"></path>
+            <path d="M8 50 C60 50 90 14 232 10" stroke="#35E878" stroke-width="2" fill="none" stroke-dasharray="180" style="animation:jgDash 1.5s linear infinite"></path>
+            <circle r="5" fill="#35E878" style="offset-path:path('M8 50 C60 50 90 14 232 10'); animation:jgTrail 1.5s linear infinite"></circle>
+          </svg>
+          <div style="font-size:13px; color:#7A828E; text-align:center">Interpretando a lista…</div>
+        </div>
+        <div style="background:#111317; border:1px solid #262A31; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:12px">
+          <div style="height:14px; width:60%; border-radius:4px; background:linear-gradient(90deg,#1A1D22 25%,#262A31 50%,#1A1D22 75%); background-size:200% 100%; animation:jgShimmer 1.4s linear infinite"></div>
+          <div style="display:flex; gap:10px; align-items:center"><div style="width:34px; height:34px; border-radius:999px; background:linear-gradient(90deg,#1A1D22 25%,#262A31 50%,#1A1D22 75%); background-size:200% 100%; animation:jgShimmer 1.4s linear infinite"></div><div style="flex:1; height:12px; border-radius:4px; background:linear-gradient(90deg,#1A1D22 25%,#262A31 50%,#1A1D22 75%); background-size:200% 100%; animation:jgShimmer 1.4s linear infinite"></div></div>
+          <div style="display:flex; gap:10px; align-items:center"><div style="width:34px; height:34px; border-radius:999px; background:linear-gradient(90deg,#1A1D22 25%,#262A31 50%,#1A1D22 75%); background-size:200% 100%; animation:jgShimmer 1.4s linear infinite"></div><div style="flex:1; height:12px; border-radius:4px; background:linear-gradient(90deg,#1A1D22 25%,#262A31 50%,#1A1D22 75%); background-size:200% 100%; animation:jgShimmer 1.4s linear infinite"></div></div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">VAZIOS</div>
+        <div style="background:#111317; border:1px solid #262A31; border-radius:14px; padding:26px 20px; display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="20" stroke="#262A31" stroke-width="2" stroke-dasharray="4 6"></circle><path d="M30 10v40M10 30h40" stroke="#1A1D22" stroke-width="2"></path><circle cx="30" cy="30" r="5" fill="#35E878"></circle></svg>
+          <div style="font-family:Anton,sans-serif; font-size:22px; text-transform:uppercase">Nenhuma rodada ainda</div>
+          <div style="font-size:13.5px; color:#A7AEB9; line-height:1.5; max-width:240px">Cole a lista do grupo e o Jogaê monta o resto.</div>
+          <div style="height:44px; padding:0 20px; background:#35E878; color:#090A0C; border-radius:10px; display:flex; align-items:center; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase">Criar rodada</div>
+        </div>
+        <div style="background:#111317; border:1px solid #262A31; border-radius:12px; padding:16px; display:flex; align-items:center; gap:12px">
+          <div style="width:34px; height:34px; border:1px dashed #FFD84A; border-radius:999px; display:flex; align-items:center; justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFD84A" stroke-width="1.9" stroke-linecap="round"><path d="M7 21v-9a1.9 1.9 0 0 1 3.8 0V7.5a1.6 1.6 0 0 1 3.2 0v5.2l2.6 1.5A3 3 0 0 1 18 16.8V21z"></path></svg></div>
+          <div style="font-size:13.5px; line-height:1.45">Falta 1 goleiro.<br><span style="color:#7A828E">Alguém da linha pega o gol?</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px">
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">BOTTOM SHEET · GOL DE QUEM?</div>
+        <div style="background:#1A1D22; border:1px solid #3B4149; border-radius:24px 24px 4px 4px; padding:14px 0 18px; box-shadow:0 -12px 40px rgba(0,0,0,.6)">
+          <div style="width:44px; height:4px; background:#3B4149; border-radius:999px; margin:0 auto 18px"></div>
+          <div style="padding:0 20px 16px; display:flex; align-items:center; justify-content:space-between">
+            <div style="font-family:Anton,sans-serif; font-size:28px; text-transform:uppercase">Gol de quem?</div>
+            <div style="width:10px; height:26px; background:#35E878"></div>
+          </div>
+          <div style="padding:0 20px; display:flex; flex-wrap:wrap; gap:8px">
+            <div style="display:flex; align-items:center; gap:9px; height:48px; padding:0 16px 0 6px; background:#262A31; border-radius:999px"><div style="width:36px; height:36px; background:#35E878; color:#090A0C; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700">SA</div><div style="font-size:15px; font-weight:500">Salles</div></div>
+            <div style="display:flex; align-items:center; gap:9px; height:48px; padding:0 16px 0 6px; background:#262A31; border-radius:999px"><div style="width:36px; height:36px; background:#35E878; color:#090A0C; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700">DE</div><div style="font-size:15px; font-weight:500">Deivão</div></div>
+            <div style="display:flex; align-items:center; gap:9px; height:48px; padding:0 16px 0 6px; background:#262A31; border-radius:999px"><div style="width:36px; height:36px; background:#35E878; color:#090A0C; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700">KA</div><div style="font-size:15px; font-weight:500">Kaique</div></div>
+            <div style="display:flex; align-items:center; gap:9px; height:48px; padding:0 16px; border:1px dashed #3B4149; border-radius:999px; font-size:14px; color:#A7AEB9">Gol contra</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">DIALOG DESKTOP · CONFIRMAÇÃO</div>
+        <div style="background:#1A1D22; border:1px solid #3B4149; border-radius:16px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,.6)">
+          <div style="font-family:Anton,sans-serif; font-size:26px; text-transform:uppercase; margin-bottom:10px">Sortear de novo?</div>
+          <div style="font-size:14px; color:#A7AEB9; line-height:1.55; margin-bottom:20px">Os times atuais já foram compartilhados no grupo. O novo sorteio substitui tudo.</div>
+          <div style="display:flex; gap:10px; justify-content:flex-end">
+            <div style="height:44px; padding:0 18px; border:1px solid #3B4149; border-radius:10px; display:flex; align-items:center; font-size:13px; font-weight:700; letter-spacing:.06em; color:#A7AEB9">Cancelar</div>
+            <div style="height:44px; padding:0 18px; background:#35E878; color:#090A0C; border-radius:10px; display:flex; align-items:center; font-size:13px; font-weight:700; letter-spacing:.06em">Sortear de novo</div>
+          </div>
+        </div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-top:8px">COMMAND PALETTE (DESKTOP)</div>
+        <div style="background:#111317; border:1px solid #3B4149; border-radius:12px; overflow:hidden">
+          <div style="padding:14px 16px; border-bottom:1px solid #262A31; font-size:14px; color:#7A828E">Buscar jogador, rodada ou ação…</div>
+          <div style="padding:8px 0">
+            <div style="display:flex; align-items:center; gap:10px; padding:9px 16px; background:#1A1D22; font-size:13.5px">Montar times<div style="margin-left:auto; font-size:10.5px; color:#7A828E; border:1px solid #3B4149; border-radius:4px; padding:2px 6px">⌘M</div></div>
+            <div style="display:flex; align-items:center; gap:10px; padding:9px 16px; font-size:13.5px; color:#A7AEB9">Registrar gol<div style="margin-left:auto; font-size:10.5px; color:#7A828E; border:1px solid #262A31; border-radius:4px; padding:2px 6px">G</div></div>
+            <div style="display:flex; align-items:center; gap:10px; padding:9px 16px; font-size:13.5px; color:#A7AEB9">Desfazer último lance<div style="margin-left:auto; font-size:10.5px; color:#7A828E; border:1px solid #262A31; border-radius:4px; padding:2px 6px">⌘Z</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">PRESENÇA · TOQUE PRA TESTAR</div>
+        <div style="background:#111317; border:1px solid #262A31; border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:16px">
+          <div style="display:flex; align-items:center; gap:12px">
+            <div style="width:44px; height:44px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; background:{{ presenceBg }}; color:{{ presenceFg }}; transition:background 200ms ease">TO</div>
+            <div><div style="font-size:15px; font-weight:700">Tomás</div><div style="font-size:12px; color:#7A828E">{{ presenceLabel }}</div></div>
+          </div>
+          <button onClick="{{ togglePresence }}" style="height:48px; background:#1A1D22; color:#ECEFF3; border:1px solid #3B4149; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer" style-hover="border-color:#35E878">Alternar presença</button>
+          <div style="font-size:12.5px; color:#7A828E; line-height:1.5">Avatar vira verde, check é desenhado em 260 ms, chip dá um bounce de 1.06. Nada além disso.</div>
+        </div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-top:8px">PROGRESSO DA LISTA</div>
+        <div style="background:#111317; border:1px solid #262A31; border-radius:14px; padding:18px 20px; display:flex; flex-direction:column; gap:12px">
+          <div style="display:flex; align-items:baseline; gap:10px"><div style="font-family:Anton,sans-serif; font-size:34px; font-variant-numeric:tabular-nums">20</div><div style="font-size:13px; color:#7A828E">de 20 confirmados</div><div style="margin-left:auto; font-size:12px; font-weight:700; color:#35E878">FECHOU</div></div>
+          <div style="height:8px; background:#1A1D22; border-radius:999px; overflow:hidden"><div style="width:100%; height:100%; background:#35E878"></div></div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#7A828E"><div style="width:6px; height:6px; background:#FFD84A; border-radius:999px"></div>2 na espera · Carlão, Juliel</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px; border-bottom:1px solid #262A31">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">04 — MOTION</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:12px">Rápido, curto, com peso</div>
+    <div style="font-size:16px; line-height:1.55; color:#A7AEB9; max-width:660px; margin-bottom:40px; text-wrap:pretty">Nenhuma animação bloqueia entrada de dado. Tudo abaixo de 1s, exceto o sorteio (1,4s, pulável). Overshoot só onde há celebração.</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:34px">
+      <div style="background:#111317; border:1px solid #262A31; border-radius:12px; padding:18px"><div style="font-family:Anton,sans-serif; font-size:30px; color:#35E878">120<span style="font-size:15px; color:#7A828E">ms</span></div><div style="font-size:12px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:8px">MOTION.FAST</div><div style="font-size:12.5px; color:#A7AEB9; margin-top:8px; line-height:1.5">hover, press, toggle</div></div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:12px; padding:18px"><div style="font-family:Anton,sans-serif; font-size:30px; color:#FFD84A">220<span style="font-size:15px; color:#7A828E">ms</span></div><div style="font-size:12px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:8px">MOTION.BASE</div><div style="font-size:12.5px; color:#A7AEB9; margin-top:8px; line-height:1.5">entrada de item, tab, chip</div></div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:12px; padding:18px"><div style="font-family:Anton,sans-serif; font-size:30px; color:#FF4FA3">380<span style="font-size:15px; color:#7A828E">ms</span></div><div style="font-size:12px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:8px">MOTION.SLOW</div><div style="font-size:12.5px; color:#A7AEB9; margin-top:8px; line-height:1.5">sheet, dialog, transição de tela</div></div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:12px; padding:18px"><div style="font-family:Anton,sans-serif; font-size:20px; color:#ECEFF3">.2 1.3 .35 1</div><div style="font-size:12px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:8px">SPRING.SNAPPY</div><div style="font-size:12.5px; color:#A7AEB9; margin-top:8px; line-height:1.5">gol, sorteio, medalha</div></div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:12px; padding:18px"><div style="font-family:Anton,sans-serif; font-size:20px; color:#ECEFF3">.4 0 .2 1</div><div style="font-size:12px; font-weight:700; letter-spacing:.1em; color:#7A828E; margin-top:8px">EASE.STANDARD</div><div style="font-size:12.5px; color:#A7AEB9; margin-top:8px; line-height:1.5">tudo que não celebra</div></div>
+    </div>
+
+    <div style="border:1px solid #262A31; border-radius:4px; overflow:hidden; margin-bottom:34px">
+      <div style="display:flex; gap:0; background:#1A1D22; font-size:10.5px; font-weight:700; letter-spacing:.12em; color:#7A828E">
+        <div style="flex:1.4; padding:14px 16px">GATILHO</div>
+        <div style="flex:2; padding:14px 16px">O QUE ACONTECE</div>
+        <div style="flex:.8; padding:14px 16px">DURAÇÃO</div>
+        <div style="flex:1; padding:14px 16px">CURVA</div>
+        <div style="flex:1.4; padding:14px 16px">REDUCED MOTION</div>
+      </div>
+      <div style="display:flex; background:#111317; border-top:1px solid #262A31; font-size:13px"><div style="flex:1.4; padding:14px 16px; font-weight:700">Abertura do app</div><div style="flex:2; padding:14px 16px; color:#A7AEB9">Trajetória desenha o símbolo, wordmark entra por baixo</div><div style="flex:.8; padding:14px 16px; color:#A7AEB9">800ms</div><div style="flex:1; padding:14px 16px; color:#A7AEB9">ease.standard</div><div style="flex:1.4; padding:14px 16px; color:#7A828E">fade 150ms</div></div>
+      <div style="display:flex; background:#0F1114; border-top:1px solid #262A31; font-size:13px"><div style="flex:1.4; padding:14px 16px; font-weight:700">Montar times</div><div style="flex:2; padding:14px 16px; color:#A7AEB9">Chips soltam → linhas de campo aparecem → trajetória revela grupos → 20 cards aterrissam em stagger de 40ms → headers acendem</div><div style="flex:.8; padding:14px 16px; color:#A7AEB9">1400ms</div><div style="flex:1; padding:14px 16px; color:#A7AEB9">spring.snappy</div><div style="flex:1.4; padding:14px 16px; color:#7A828E">corte direto + toast</div></div>
+      <div style="display:flex; background:#111317; border-top:1px solid #262A31; font-size:13px"><div style="flex:1.4; padding:14px 16px; font-weight:700">Gol registrado</div><div style="flex:2; padding:14px 16px; color:#A7AEB9">Número antigo sai por cima, novo entra com overshoot; onda atravessa o placar; GOOOL 500ms; lance entra na timeline</div><div style="flex:.8; padding:14px 16px; color:#A7AEB9">420ms</div><div style="flex:1; padding:14px 16px; color:#A7AEB9">spring.snappy</div><div style="flex:1.4; padding:14px 16px; color:#7A828E">troca de número + flash 1 frame</div></div>
+      <div style="display:flex; background:#0F1114; border-top:1px solid #262A31; font-size:13px"><div style="flex:1.4; padding:14px 16px; font-weight:700">Assistência</div><div style="flex:2; padding:14px 16px; color:#A7AEB9">Linha pontilhada liga assistente ao autor, chip amarelo entra</div><div style="flex:.8; padding:14px 16px; color:#A7AEB9">260ms</div><div style="flex:1; padding:14px 16px; color:#A7AEB9">ease.standard</div><div style="flex:1.4; padding:14px 16px; color:#7A828E">chip sem linha</div></div>
+      <div style="display:flex; background:#111317; border-top:1px solid #262A31; font-size:13px"><div style="flex:1.4; padding:14px 16px; font-weight:700">Ranking abre</div><div style="flex:2; padding:14px 16px; color:#A7AEB9">Top 3 em stagger de 60ms, medalha com spring, mudança de posição desliza na vertical</div><div style="flex:.8; padding:14px 16px; color:#A7AEB9">340ms</div><div style="flex:1; padding:14px 16px; color:#A7AEB9">spring.snappy</div><div style="flex:1.4; padding:14px 16px; color:#7A828E">lista estática</div></div>
+      <div style="display:flex; background:#0F1114; border-top:1px solid #262A31; font-size:13px"><div style="flex:1.4; padding:14px 16px; font-weight:700">Confirmar presença</div><div style="flex:2; padding:14px 16px; color:#A7AEB9">Avatar vira verde, check desenhado, bounce 1.06</div><div style="flex:.8; padding:14px 16px; color:#A7AEB9">260ms</div><div style="flex:1; padding:14px 16px; color:#A7AEB9">spring.snappy</div><div style="flex:1.4; padding:14px 16px; color:#7A828E">cor + check sem bounce</div></div>
+      <div style="display:flex; background:#111317; border-top:1px solid #262A31; font-size:13px"><div style="flex:1.4; padding:14px 16px; font-weight:700">Promover da espera</div><div style="flex:2; padding:14px 16px; color:#A7AEB9">Row sobe da lista de espera para confirmados, tracejado vira sólido</div><div style="flex:.8; padding:14px 16px; color:#A7AEB9">300ms</div><div style="flex:1; padding:14px 16px; color:#A7AEB9">ease.standard</div><div style="flex:1.4; padding:14px 16px; color:#7A828E">reordenação instantânea</div></div>
+      <div style="display:flex; background:#0F1114; border-top:1px solid #262A31; font-size:13px"><div style="flex:1.4; padding:14px 16px; font-weight:700">Bottom sheet</div><div style="flex:2; padding:14px 16px; color:#A7AEB9">Sobe com backdrop a 60%, arrasta pra fechar</div><div style="flex:.8; padding:14px 16px; color:#A7AEB9">380ms</div><div style="flex:1; padding:14px 16px; color:#A7AEB9">ease.standard</div><div style="flex:1.4; padding:14px 16px; color:#7A828E">fade 150ms</div></div>
+      <div style="display:flex; background:#111317; border-top:1px solid #262A31; font-size:13px"><div style="flex:1.4; padding:14px 16px; font-weight:700">Interpretando lista</div><div style="flex:2; padding:14px 16px; color:#A7AEB9">Bola percorre a trajetória em loop enquanto o parser roda</div><div style="flex:.8; padding:14px 16px; color:#A7AEB9">1500ms loop</div><div style="flex:1; padding:14px 16px; color:#A7AEB9">linear</div><div style="flex:1.4; padding:14px 16px; color:#7A828E">barra de progresso</div></div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px">
+      <div style="background:#111317; border:1px solid #262A31; border-radius:14px; padding:20px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:16px">SORTEIO · 5 FRAMES</div>
+        <div style="display:flex; gap:8px; align-items:stretch">
+          <div style="flex:1; height:84px; background:#0F1114; border:1px solid #262A31; border-radius:6px; position:relative; overflow:hidden"><div style="position:absolute; left:6px; top:10px; width:16px; height:8px; background:#3B4149; border-radius:999px"></div><div style="position:absolute; left:28px; top:34px; width:16px; height:8px; background:#3B4149; border-radius:999px"></div><div style="position:absolute; left:12px; top:58px; width:16px; height:8px; background:#3B4149; border-radius:999px"></div><div style="position:absolute; bottom:3px; left:5px; font-size:8.5px; color:#7A828E">0ms</div></div>
+          <div style="flex:1; height:84px; background:#0F1114; border:1px solid #262A31; border-radius:6px; position:relative; overflow:hidden"><div style="position:absolute; left:50%; top:0; bottom:0; width:1px; background:#ECEFF31A"></div><div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:36px; height:36px; border:1px solid #ECEFF31A; border-radius:50%"></div><div style="position:absolute; bottom:3px; left:5px; font-size:8.5px; color:#7A828E">200ms</div></div>
+          <div style="flex:1; height:84px; background:#0F1114; border:1px solid #262A31; border-radius:6px; position:relative; overflow:hidden"><svg viewBox="0 0 60 84" style="position:absolute; inset:0; width:100%; height:100%"><path d="M4 76 C24 76 34 20 58 8" stroke="#FF4FA3" stroke-width="1.6" fill="none" stroke-dasharray="3 4"></path></svg><div style="position:absolute; bottom:3px; left:5px; font-size:8.5px; color:#7A828E">500ms</div></div>
+          <div style="flex:1; height:84px; background:#0F1114; border:1px solid #262A31; border-radius:6px; position:relative; overflow:hidden; padding:6px; display:flex; flex-direction:column; gap:3px"><div style="height:5px; background:#35E878"></div><div style="height:5px; background:#FFD84A; width:70%"></div><div style="height:5px; background:#FF4D4D; width:50%"></div><div style="position:absolute; bottom:3px; left:5px; font-size:8.5px; color:#7A828E">900ms</div></div>
+          <div style="flex:1; height:84px; background:#0F1114; border:1px solid #35E878; border-radius:6px; position:relative; overflow:hidden; padding:6px; display:flex; flex-direction:column; gap:3px"><div style="height:5px; background:#35E878"></div><div style="height:5px; background:#FFD84A"></div><div style="height:5px; background:#FF4D4D"></div><div style="height:5px; background:#FF4FA3"></div><div style="position:absolute; bottom:3px; left:5px; font-size:8.5px; color:#35E878">1400ms</div></div>
+        </div>
+        <div style="font-size:12.5px; color:#7A828E; margin-top:14px; line-height:1.5">Botão “Pular” aparece no frame 2 e sempre corta pro resultado final.</div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">DENSIDADE POR CONTEXTO</div>
+        <div style="display:flex; flex-direction:column; gap:11px; font-size:13px">
+          <div style="display:flex; gap:12px; align-items:baseline"><div style="width:96px; flex:none; font-weight:700">Ao vivo</div><div style="color:#A7AEB9; line-height:1.45">Baixa. Alvo 56, placar 96px, no máximo 5 blocos na tela.</div></div>
+          <div style="display:flex; gap:12px; align-items:baseline"><div style="width:96px; flex:none; font-weight:700">Rodada</div><div style="color:#A7AEB9; line-height:1.45">Média. Row de 56–64, seções separadas por 32.</div></div>
+          <div style="display:flex; gap:12px; align-items:baseline"><div style="width:96px; flex:none; font-weight:700">Desktop</div><div style="color:#A7AEB9; line-height:1.45">Média/alta. Row de 48, 4 colunas, padding 24.</div></div>
+          <div style="display:flex; gap:12px; align-items:baseline"><div style="width:96px; flex:none; font-weight:700">Ranking</div><div style="color:#A7AEB9; line-height:1.45">Alta pra scan: números alinhados à direita, tabular, zebra por superfície.</div></div>
+        </div>
+      </div>
+      <div style="background:#111317; border:1px solid #262A31; border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E">ACESSIBILIDADE</div>
+        <div style="display:flex; flex-direction:column; gap:10px; font-size:13px; color:#A7AEB9; line-height:1.5">
+          <div>Foco: anel amarelo de 2px com offset de 2px sobre canvas — visível em qualquer superfície.</div>
+          <div>Estado nunca só por cor: confirmado tem check, ao vivo tem ponto + palavra, espera tem tracejado.</div>
+          <div>Alvo mínimo 44×44; ações de partida 56.</div>
+          <div>Placar legível a 3 m: 96px no mobile, 180px no scoreboard de desktop.</div>
+          <div>prefers-reduced-motion corta stagger, overshoot e loops — mantém só troca de estado.</div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:4px">
+          <div style="height:40px; padding:0 16px; background:#35E878; color:#090A0C; border-radius:10px; display:flex; align-items:center; font-size:12.5px; font-weight:700; box-shadow:0 0 0 2px #090A0C, 0 0 0 4px #FFD84A">FOCO VISÍVEL</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:80px 56px">
+    <div style="font-size:10px; font-weight:700; letter-spacing:.18em; color:#7A828E; margin-bottom:14px">05 — TOKENS</div>
+    <div style="font-family:Anton,sans-serif; font-size:40px; line-height:1; text-transform:uppercase; margin-bottom:40px">Nomenclatura para handoff</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px">
+      <div style="background:#0F1114; border:1px solid #262A31; border-radius:4px; padding:22px; font-size:13px; line-height:2; color:#A7AEB9">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:14px; font-family:'DM Sans',sans-serif">COR</div>
+        color.bg.canvas <span style="color:#ECEFF3">#090A0C</span><br>
+        color.bg.surface <span style="color:#ECEFF3">#111317</span><br>
+        color.bg.elevated <span style="color:#ECEFF3">#1A1D22</span><br>
+        color.border.default <span style="color:#ECEFF3">#262A31</span><br>
+        color.border.strong <span style="color:#ECEFF3">#3B4149</span><br>
+        color.text.primary <span style="color:#ECEFF3">#ECEFF3</span><br>
+        color.text.secondary <span style="color:#ECEFF3">#A7AEB9</span><br>
+        color.text.muted <span style="color:#ECEFF3">#7A828E</span><br>
+        color.action.primary <span style="color:#35E878">#35E878</span><br>
+        color.accent.stat <span style="color:#FFD84A">#FFD84A</span><br>
+        color.live <span style="color:#FF4D4D">#FF4D4D</span><br>
+        color.accent.social <span style="color:#FF4FA3">#FF4FA3</span><br>
+        color.team.green / yellow / red / pink
+      </div>
+      <div style="background:#0F1114; border:1px solid #262A31; border-radius:4px; padding:22px; font-size:13px; line-height:2; color:#A7AEB9">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:14px; font-family:'DM Sans',sans-serif">FORMA E ESPAÇO</div>
+        space.1…12 <span style="color:#ECEFF3">4 → 48</span><br>
+        radius.none / sm / md / lg / xl / pill<br>
+        cut.corner <span style="color:#ECEFF3">16px chanfro</span><br>
+        border.hair <span style="color:#ECEFF3">1px</span><br>
+        border.stripe <span style="color:#ECEFF3">3px</span><br>
+        border.team <span style="color:#ECEFF3">4px</span><br>
+        shadow.1…3<br>
+        glow.team <span style="color:#ECEFF3">18% máx</span><br>
+        opacity.disabled <span style="color:#ECEFF3">.38</span><br>
+        opacity.waiting <span style="color:#ECEFF3">.55</span><br>
+        overlay.scrim <span style="color:#ECEFF3">rgba(9,10,12,.6)</span><br>
+        container.mobile <span style="color:#ECEFF3">390 · gutter 16</span><br>
+        container.desktop <span style="color:#ECEFF3">1440 · 12 col · gutter 24</span>
+      </div>
+      <div style="background:#0F1114; border:1px solid #262A31; border-radius:4px; padding:22px; font-size:13px; line-height:2; color:#A7AEB9">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#7A828E; margin-bottom:14px; font-family:'DM Sans',sans-serif">TIPO E MOTION</div>
+        font.display <span style="color:#ECEFF3">Anton</span><br>
+        font.ui <span style="color:#ECEFF3">DM Sans</span><br>
+        type.display.xl / l<br>
+        type.score.xl / m<br>
+        type.h1 / h2 / h3<br>
+        type.body.l / body / s<br>
+        type.label / caption<br>
+        motion.fast <span style="color:#ECEFF3">120ms</span><br>
+        motion.base <span style="color:#ECEFF3">220ms</span><br>
+        motion.slow <span style="color:#ECEFF3">380ms</span><br>
+        motion.spring.snappy <span style="color:#ECEFF3">cubic-bezier(.2,1.3,.35,1)</span><br>
+        motion.ease.standard <span style="color:#ECEFF3">cubic-bezier(.4,0,.2,1)</span><br>
+        motion.stagger <span style="color:#ECEFF3">40ms</span>
+      </div>
+      <div style="background:#111317; border:1px solid #35E878; border-radius:4px; padding:22px; display:flex; flex-direction:column; gap:14px">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.14em; color:#35E878">PRÓXIMO</div>
+        <div style="font-family:Anton,sans-serif; font-size:26px; line-height:1.05; text-transform:uppercase">Protótipo mobile e desktop</div>
+        <div style="font-size:13.5px; color:#A7AEB9; line-height:1.55">Fluxo clicável: colar lista → parser → sorteio animado → 4 times → ao vivo com gol e assistência → ranking. Depois o Team Builder e o scoreboard de desktop em 1440.</div>
+        <div style="margin-top:auto; font-size:12px; color:#7A828E">Jogaê é codename: trocar wordmark não muda nenhum token.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;reducedMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;pulseStrength&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1.3,&quot;min&quot;:1,&quot;max&quot;:1.8,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+class Component extends DCLogic {
+  state = { scoreA: 2, scoreB: 1, pulse: '', flash: 0, presence: false, replay: 0 };
+  goal(team) {
+    const key = team === 'a' ? 'scoreA' : 'scoreB';
+    this.setState(s => ({ [key]: s[key] + 1, pulse: team, flash: s.flash + 1 }));
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ pulse: '' }), 700);
+  }
+  renderVals() {
+    const reduced = this.props.reducedMotion ?? false;
+    const over = this.props.pulseStrength ?? 1.3;
+    const spring = 'jgScorePop 420ms cubic-bezier(.2,' + over + ',.35,1) both';
+    const pop = t => (reduced || this.state.pulse !== t) ? 'none' : spring;
+    return {
+      scoreA: this.state.scoreA,
+      scoreB: this.state.scoreB,
+      goalA: () => this.goal('a'),
+      goalB: () => this.goal('b'),
+      pulseA: pop('a'),
+      pulseB: pop('b'),
+      presence: this.state.presence,
+      togglePresence: () => this.setState(s => ({ presence: !s.presence })),
+      presenceBg: this.state.presence ? '#35E878' : '#1A1D22',
+      presenceFg: this.state.presence ? '#090A0C' : '#A7AEB9',
+      presenceLabel: this.state.presence ? 'Confirmado' : 'Confirmar presença'
+    };
+  }
+}
+
+</script>
+</body>
+</html>

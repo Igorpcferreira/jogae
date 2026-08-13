@@ -1,0 +1,293 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Jogaê — Design tokens
+   Fonte: docs/prototipo/Design System Jogae.dc.html (seção 05 — TOKENS)
+   Dark mode é a experiência principal; não há tema claro no MVP.
+   ───────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Cor — neutros são o palco (90% da tela) */
+  --color-canvas: #090a0c;
+  --color-surface: #111317;
+  --color-surface-2: #0f1114;
+  --color-elevated: #1a1d22;
+  --color-line: #262a31;
+  --color-line-strong: #3b4149;
+
+  --color-ink: #eceff3;
+  --color-ink-2: #a7aeb9;
+  --color-ink-3: #7a828e;
+
+  /* As quatro cores — uma por função, nunca competindo na mesma região */
+  --color-green: #35e878;
+  --color-green-dim: #1e7a45;
+  --color-green-deep: #0e2c1a;
+  --color-yellow: #ffd84a;
+  --color-yellow-dim: #b99a22;
+  --color-yellow-deep: #332b0d;
+  --color-red: #ff4d4d;
+  --color-red-dim: #b93131;
+  --color-red-deep: #330f0f;
+  --color-pink: #ff4fa3;
+  --color-pink-dim: #b93177;
+  --color-pink-deep: #330f22;
+
+  /* Tipografia */
+  --font-display: var(--font-anton), "Anton", sans-serif;
+  --font-sans: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
+
+  --text-display-xl: 4.5rem; /* 72 */
+  --text-display-xl--line-height: 0.92;
+  --text-display-xl--letter-spacing: 0.004em;
+  --text-display-l: 3.25rem; /* 52 */
+  --text-display-l--line-height: 0.95;
+  --text-display-l--letter-spacing: 0.004em;
+  --text-score-xl: 6.5rem; /* 104 */
+  --text-score-xl--line-height: 0.82;
+  --text-score-xl--letter-spacing: -0.01em;
+  --text-score-m: 2.75rem; /* 44 */
+  --text-score-m--line-height: 0.9;
+  --text-h1: 2.125rem; /* 34 */
+  --text-h1--line-height: 1.05;
+  --text-h1--letter-spacing: 0.005em;
+  --text-h2: 1.375rem; /* 22 */
+  --text-h2--line-height: 1.25;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h3: 0.8125rem; /* 13 caps */
+  --text-h3--line-height: 1.3;
+  --text-h3--letter-spacing: 0.14em;
+  --text-body-l: 1.125rem; /* 18 */
+  --text-body-l--line-height: 1.55;
+  --text-body: 0.9375rem; /* 15 */
+  --text-body--line-height: 1.55;
+  --text-body-s: 0.8125rem; /* 13 */
+  --text-body-s--line-height: 1.5;
+  --text-label: 0.75rem; /* 12 caps */
+  --text-label--line-height: 1.333;
+  --text-label--letter-spacing: 0.1em;
+  --text-caption: 0.6875rem; /* 11 caps */
+  --text-caption--line-height: 1.363;
+  --text-caption--letter-spacing: 0.06em;
+
+  /* Geometria — pill contra bloco */
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Elevação — a borda faz a maior parte do trabalho */
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-3: 0 -12px 40px rgba(0, 0, 0, 0.6);
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-snappy: cubic-bezier(0.2, 1.3, 0.35, 1);
+
+  --animate-score-pop: score-pop 420ms cubic-bezier(0.2, 1.3, 0.35, 1) both;
+  --animate-rise: rise 220ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  --animate-flash: flash 500ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  --animate-check: check 260ms cubic-bezier(0.2, 1.3, 0.35, 1) both;
+  --animate-bounce-in: bounce-in 260ms cubic-bezier(0.2, 1.3, 0.35, 1) both;
+  --animate-live-pulse: live-pulse 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  --animate-trail: trail 1500ms linear infinite;
+  --animate-shimmer: shimmer 1400ms linear infinite;
+}
+
+@theme {
+  /* Durações nomeadas (usadas via style/inline quando preciso) */
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+  --duration-slow: 380ms;
+}
+
+@keyframes score-pop {
+  0% {
+    transform: translateY(28%) scale(0.86);
+    opacity: 0;
+  }
+  55% {
+    transform: translateY(0) scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes rise {
+  0% {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+@keyframes check {
+  0% {
+    stroke-dashoffset: 26;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.7);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
+}
+@keyframes trail {
+  0% {
+    offset-distance: 0%;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ───────────────────────────── base ───────────────────────────── */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background: var(--color-canvas);
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Foco: anel amarelo 2px com offset 2px — visível em qualquer superfície */
+  :focus-visible {
+    outline: 2px solid var(--color-yellow);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--color-pink);
+    color: var(--color-canvas);
+  }
+
+  /* Toda estatística é tabular */
+  .tabular,
+  th,
+  td {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  /* Anton é sempre caixa alta e nunca abaixo de 20px */
+  .font-display {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+  }
+
+  /* Chanfro de 16px — assinatura do placar e do header de time */
+  .cut-corner {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+  }
+  .cut-corner-tl {
+    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
+  }
+
+  /* Texturas do design system */
+  .texture-grid {
+    background-image: linear-gradient(#eceff30d 1px, transparent 1px),
+      linear-gradient(90deg, #eceff30d 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+  .texture-grid-lg {
+    background-image: linear-gradient(#eceff308 1px, transparent 1px),
+      linear-gradient(90deg, #eceff308 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .scrim {
+    background: rgba(9, 10, 12, 0.6);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  /* Safe area do iPhone — bottom nav e ações fixas */
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+  .h-safe-bottom {
+    height: env(safe-area-inset-bottom);
+  }
+}
+
+/* prefers-reduced-motion corta stagger, overshoot e loops.
+   Mantém só troca de estado. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
