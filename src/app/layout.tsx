@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Anton, DM_Sans } from "next/font/google";
+import { Footer } from "@/components/shell/footer";
 import "./globals.css";
 
 const anton = Anton({
@@ -48,7 +49,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${anton.variable} ${dmSans.variable} h-full`}>
-      <body className="min-h-full bg-canvas text-ink antialiased">{children}</body>
+      <body className="min-h-full bg-canvas text-ink antialiased">
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }
