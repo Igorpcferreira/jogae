@@ -14,7 +14,7 @@ import {
   IconPlayers,
   IconSettings,
 } from "@/components/ui/icons";
-import { formatLongDate, weekdayName } from "@/lib/dates";
+import { formatLongDate, nomeDoDiaDaSemana } from "@/lib/dates";
 
 export const metadata = { title: "Mais" };
 
@@ -75,7 +75,7 @@ export default async function MorePage({
               value={
                 group.recurringWeekdays.length > 0
                   ? `${group.recurringWeekdays
-                      .map((day) => weekdayName(new Date(2024, 0, 7 + day)))
+                      .map((day) => nomeDoDiaDaSemana(day))
                       .join(", ")} · ${group.defaultStartTime ?? ""}`
                   : "Sem recorrência"
               }

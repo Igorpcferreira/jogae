@@ -41,8 +41,15 @@ Regras de trabalho:
   autoriza + revalida: o I/O vive em src/features/<área>/service.ts.
 - Toda mutação começa com requireGroupAccess/requireRoundAccess/requirePlayerAccess/
   requireMatchAccess. Sem exceção.
-- Antes de dar por concluído: npm test && npm run test:integracao && npm run typecheck
-  && npx eslint . && npm run build. Reporte o resultado real, incluindo falhas.
+- Data e hora NUNCA pelo relógio do processo. Nada de new Date(a,m,d,h,min), getHours(),
+  getDate(), getDay(), getMonth(). Use src/domain/time/fuso.ts. A Vercel roda em UTC e a
+  sua máquina em horário do Brasil: teste que usa esses getters passa aqui e mente sobre
+  produção. Foi exatamente assim que o bug do 17:30 chegou em produção.
+- Antes de dar por concluído: npm test && TZ=UTC npm test && npm run test:integracao
+  && npm run typecheck && npx eslint . && npm run build. Reporte o resultado real,
+  incluindo falhas.
+- O app está EM PRODUÇÃO (https://jogae-free.vercel.app). Mudança em migration, em
+  regra de presença ou em placar mexe em dado de gente de verdade.
 - Ao terminar, atualize STATUS.md (seções 2 e 3) e a seção "Próximos passos" deste HANDOFF.
 ````
 
@@ -50,17 +57,43 @@ Regras de trabalho:
 
 | Bloco da próxima sessão | Esforço | Por quê |
 | --- | --- | --- |
-| **J — Deploy (VPS Hostinger + Supabase)** | **Opus medium + você** | Arquitetura decidida e documentada em `docs/deploy.md`; falta criar o projeto Supabase, o OAuth do Google e o domínio. |
+| ~~**J — Deploy**~~ | — | **Concluído em 18/08.** Está no ar na Vercel + Supabase. Sobrou só SMTP e domínio (configuração, não código). |
+| **I — Conta de jogador** | **decisão sua, depois Opus medium** | `docs/decisao-conta-de-jogador.md` fecha o levantamento; recomendação é a **opção B**. Uma sessão de trabalho depois da decisão. |
+| **Fase 2 — social e gamificação** | **Opus medium** | Base de estatística pronta e testada; o que falta é **decisão de produto** (quais badges), não código. |
+| **Fase 3 — financeiro** | **Opus high + decisão sua** | O PRD (§28) lista funcionalidades mas não as regras. Precisa de regra antes de virar schema. |
 | **H — QA em aparelho real** | **você, com o app na mão** | Não é trabalho de modelo: precisa de iPhone e Android de verdade. |
-| **I — Conta de jogador** | **decisão sua, depois Opus medium** | `docs/decisao-conta-de-jogador.md` tem as três saídas; a recomendação é a opção B. |
-| **Fase 2 — badges, recordes, retrospectiva** | **Opus medium** | Base de estatística pronta; falta definir a lista de badges. |
-| **Fase 3 — financeiro** | **Opus high + decisão sua** | O PRD só lista tópicos; precisa de regra antes de virar schema. |
 
-**Se for pegar só um:** **J**. O produto está funcional de ponta a ponta e o que falta pra
-ele existir de verdade é sair do localhost — inclusive porque o login com Google e o SMTP
-de produção nunca rodaram contra um projeto Supabase na nuvem.
+**Se for pegar só um:** **I (conta de jogador, opção B)**. É o que tira o organizador do
+meio de toda mudança de presença — o gargalo real do produto hoje — e é pré-requisito
+natural pra Fase 2 fazer sentido (badge de sequência de presença vale muito mais quando a
+presença chega sozinha).
+
+**Ordem recomendada:** I → Fase 2 → Fase 3. Financeiro por último não é acaso: o §28 do
+plano é explícito que ele só entra "depois que a aplicação já estiver sendo usada
+naturalmente", porque aumenta responsabilidade, suporte e caso de exceção.
 
 ---
+
+## Sessão de 18/08 — deploy, desempenho e o bug do fuso
+
+**O app foi pro ar** (Vercel + Supabase Cloud) e a sessão virou caça a lentidão. O que
+ficou de aprendizado, além do que já está no STATUS:
+
+- **A lentidão não era da hospedagem.** A função subiu em `iad1` e o banco está em
+  `sa-east-1`: ~150ms por query, e as telas faziam 6 a 8 em série. `regions: ["gru1"]`
+  no `vercel.json` resolveu quase tudo. **Diagnostique medindo**, não por palpite: o
+  header `X-Vercel-Id` mostra `entrada::execução`, e comparar uma rota com query
+  (`/r/xxx`) contra uma sem (`/entrar`) isola o custo do banco sem precisar de login.
+- **`loading.tsx` não é enfeite.** Sem ele o clique na navegação fica sem resposta
+  nenhuma até o servidor terminar, e o `prefetch` do `<Link>` não tem o que pré-carregar
+  numa rota dinâmica. Metade da sensação de "travado" era isso.
+- **O bug do 17:30 passou porque os testes eram cúmplices.** A suíte asseria com
+  `getHours()`/`getDate()`, que leem o fuso do processo — verde na máquina do dev
+  (horário do Brasil), mentira sobre a Vercel (UTC). Hoje a regra é rodar
+  `TZ=UTC npm test` junto do `npm test`, e as duas ficam verdes.
+- **Armadilha de operação:** o `[YOUR-PASSWORD]` que o Supabase mostra na tela de
+  conexão é texto de exemplo. Colado literal, derruba o app inteiro com 500 (`[` e `]`
+  são reservados em URI). Senha com caractere especial precisa ir percent-encoded.
 
 ## Sessão de 12/08 — autenticação migrada pro Supabase
 
@@ -121,30 +154,133 @@ Continua faltando, e **não dá pra fazer sem o aparelho**:
 - Safe area do iPhone conferida no aparelho, não só no CSS.
 
 ### I. Conta de jogador — decisão pendente
-`docs/decisao-conta-de-jogador.md`. Três saídas: (A) manter a lista do WhatsApp,
-(B) confirmação por link pessoal sem conta — **recomendada**, (C) conta de jogador de
-verdade. Nada foi implementado de propósito: cada opção mexe em schema e rota de um jeito
-diferente. **Nível técnico continua invisível pro jogador em qualquer cenário.**
+Detalhado na seção **"Os três blocos que o dono quer atacar"**, logo abaixo.
 
-### J. Deploy — pronto pra executar
-Arquitetura decidida: **app na VPS Hostinger (Docker) + Supabase Cloud** para
-identidade, banco e storage. `docs/deploy.md` tem as variáveis, a configuração do
-Supabase (Google, Redirect URLs, SMTP, RLS), o passo a passo da VPS e o smoke test.
-O `Dockerfile` já foi validado localmente: `.dockerignore` não envia `.env`; o alvo
-`migrator` aplica as 5 migrations e o alvo padrão sobe o standalone (rota `/offline` 200).
+### J. Deploy — **concluído em 18/08**
+No ar em **https://jogae-free.vercel.app**: Vercel (região `gru1`) + Supabase Cloud
+(`sa-east-1`), Google OAuth validado em produção. Sobrou só configuração de painel:
 
-Falta o que depende de conta sua: criar o projeto Supabase em São Paulo, configurar o
-OAuth do Google, apontar o domínio e ligar um SMTP. Nada disso é código.
+- **SMTP no Supabase** — sem ele o login por link de e-mail e o convite de membro não
+  entregam nada. É o único caminho de entrada de quem não usa Google, então **isto
+  bloqueia o bloco I** (convidar jogador por e-mail).
+- **Domínio próprio** — não muda desempenho, muda identidade.
+- **`CRON_SECRET`** na Vercel, pra fechar `/api/manter-vivo`.
+
+O caminho da VPS **não foi descartado**: `Dockerfile` standalone e `docs/deploy.md`
+continuam válidos e testados. Ele volta a ser necessário se o Jogaê cobrar, porque o
+plano Hobby da Vercel proíbe uso comercial.
+
+---
+
+## Os três blocos que o dono quer atacar
+
+Ordem recomendada: **I → Fase 2 → Fase 3**. Cada um abaixo tem o que já existe, o que
+falta decidir e onde o código encosta — leia antes de abrir qualquer arquivo.
+
+### I. Conta de jogador — *decisão de produto, depois uma sessão de código*
+
+**Estado:** nada implementado, **de propósito**. O levantamento completo está em
+`docs/decisao-conta-de-jogador.md`, com três saídas e a recomendação.
+
+**A recomendação é a opção B — confirmação por link pessoal, sem conta.** Cada jogador
+ganha um link não previsível (`/p/<token>`) que abre uma tela com dois botões: "Tô
+dentro" / "Não vou". Sem senha, sem cadastro, sem app.
+
+Por que B e não C (conta de verdade): B entrega o valor que C promete — presença chegando
+sem o organizador no meio — por uma fração do custo, e não fecha a porta pra C depois. O
+token do jogador vira o convite natural pra conta, no dia em que ela existir. C obriga a
+decidir o que o jogador vê do grupo, quem edita o quê, o que acontece quando ele sai, e
+reabre autorização em toda tela. Além disso o plano coloca isso na **Fase 6**, não na v1,
+e o §65 avisa pra não virar "um sistema para administrar futebol".
+
+**O que a opção B custa, concretamente:**
+- Schema: um token por jogador (`Player.selfToken`, único, não previsível). Migration nova.
+- Rota: `/p/[token]` pública, mesmo espírito de `/r/[token]` — sem login, sem dado privado.
+- Action: confirmar e desconfirmar presença, com `require*Access` próprio (o token **é** a
+  credencial; ele autoriza só aquele jogador, só aquela rodada).
+- Domínio: a regra que hoje não existe — **"cancelou → primeiro da espera sobe"**. Tem que
+  nascer em `src/domain/` com teste, como todo o resto.
+- Provavelmente: um jeito de o organizador distribuir os links (mensagem pro WhatsApp com
+  o link de cada um — `domain/share/whatsapp.ts` já é o lugar).
+
+**Invariante que vale nas três saídas:** o **nível técnico (1–5) nunca aparece pro
+jogador**. É privado do balanceador (plano §13). A tela do jogador mostra presença, time
+e estatística — nunca a nota.
+
+**O que decidir antes de codar:** (1) confirma a opção B? (2) o link é por jogador
+(vale pra sempre) ou por jogador+rodada (expira)? (3) jogador pode se colocar na espera
+sozinho quando a lista estiver cheia?
+
+---
 
 ### Fase 2 — social e gamificação
-Badges, recordes, retrospectivas e share cards avançados. O MVP da rodada já saiu e vive em
-`domain/statistics/aggregate.ts` (`mvpDaRodada`); falta levá-lo pro ranking e pro histórico.
+
+**Estado:** a base de estatística está pronta e testada; o que falta é **decisão de
+produto**, não código.
+
+O que já existe pra construir em cima, tudo em `src/domain/statistics/aggregate.ts`
+(11 + 4 testes): gols, assistências, participações, V/E/D, aproveitamento, saldo,
+ranking com empate compartilhando posição, e `mvpDaRodada` (participação em gol, desempate
+por gols e vitórias, empate total não elege ninguém).
+
+**O que o plano pede (§27):** cards de jogador · "craque da rodada" · votação de MVP ·
+sequência de presenças · badges · recordes pessoais · "melhor mês" · retrospectiva mensal
+· retrospectiva anual · comparação entre amigos · share cards para WhatsApp/Instagram ·
+animações especiais para hat-trick · conquistas divertidas.
+
+**A regra que o plano impõe, e que é a parte difícil:** *"Gamificação deve ser leve e
+positiva. Evitar mecânicas que gerem conflito desnecessário."* Isso descarta, por exemplo,
+badge de "pior do mês", ranking de faltas ou qualquer coisa que exponha quem joga mal —
+e reforça a invariante do nível técnico privado.
+
+**O que decidir antes de codar:** a **lista de badges**. É a decisão que trava tudo, e é
+de produto: quais conquistas existem, com que critério, e como não viram constrangimento.
+Sugestão de recorte inicial pequeno e seguro, todo derivável do que já é calculado:
+artilheiro do mês, garçom do mês (assistências), presença de ferro (sequência de rodadas),
+hat-trick, primeira vez que jogou, MVP da rodada.
+
+**Dívida barata que já pertence a esta fase:** `mvpDaRodada` existe mas só aparece na
+página pública `/r/[token]`. Levar pro ranking e pro histórico é meia hora.
+
+**Dependência real:** "sequência de presenças" fica muito mais forte depois do bloco I —
+enquanto a presença vem da lista colada pelo organizador, o dado é dele, não do jogador.
+
+---
 
 ### Fase 3 — financeiro
-Valor da rodada, pago/pendente, histórico, painel. O plano só lista os tópicos: quem cobra,
-o que acontece com quem falta, mensalidade × diária. Precisa de regra antes de virar schema.
 
-### Dívidas conhecidas (baratas, boas de pegar de carona)
+**Estado:** o PRD (§28) lista funcionalidades mas **não define nenhuma regra**. É o bloco
+mais perigoso e o que o próprio plano manda deixar por último.
+
+**O que o plano pede (§28):** valor da diária/mensalidade · status pago/pendente/isento ·
+marcação manual em um toque · histórico por jogador · total arrecadado · custo do campo ·
+saldo da rodada/mês · lembrete de pendência · exportação simples.
+
+**Por que fica depois, nas palavras do plano:** financeiro aumenta responsabilidade,
+segurança, regras de negócio, suporte e casos de exceção — *"o produto deve provar valor
+primeiro na organização do futebol"*.
+
+**O que decidir antes de virar schema** (nada disso está no PRD, e cada resposta muda o
+modelo de dados):
+- **Mensalidade × diária × os dois?** Um grupo pode ter mensalista e avulso na mesma
+  rodada? Mensalista que falta paga?
+- **Quem falta, deve?** Confirmou e não foi — cobra? Cancelou com antecedência — cobra?
+  Essa é a regra que mais gera briga em grupo de fut e o app vai ter que ter opinião.
+- **Quem cobra?** Só OWNER, ou ADMIN também? (`domain/access/permissions.ts` vai precisar
+  de capacidade nova.)
+- **O custo do campo** é do grupo ou da rodada? Rateia entre confirmados ou entre presentes?
+- **Isento** é atributo do jogador ou da rodada?
+- **O dinheiro entra no app?** O §29 (Fase 4) trata Pix/comprovante/webhook como módulo
+  próprio e posterior. Na Fase 3 o registro é **manual** — o app anota, não recebe.
+
+**Aviso de arquitetura:** a armadilha 14 (nunca cachear HTML de `/g/**` no service worker)
+e a regra de autorização por grupo ficam mais críticas aqui — dado financeiro vazado entre
+contas no mesmo aparelho é outro patamar de problema. O plano já registra "cuidado extra
+quando financeiro entrar".
+
+---
+
+## Dívidas conhecidas (baratas, boas de pegar de carona)
 - A imagem dos times sai na fonte padrão; basta colocar `public/fonts/Anton-Regular.ttf`
   que a rota passa a usar a Anton.
 - Ainda há nomes em inglês em `queries.ts` de rodada e ranking (`getCurrentRound`,
@@ -260,6 +396,29 @@ padrão em qualquer animação de espera. Stagger: 40ms nos cards de time, 60ms 
     no Escape, devolve o foco e trava o scroll do fundo. Não refaça na mão; o campo que
     deve receber o foco leva `data-foco-inicial`.
 
+24. **Nunca leia data pelo relógio do processo.** `new Date(ano, mês, dia, h, min)`,
+    `getHours()`, `getDate()`, `getDay()`, `getMonth()` usam o fuso de quem está
+    rodando — UTC na Vercel, horário do Brasil na sua máquina. Hora de parede entra e
+    sai por `src/domain/time/fuso.ts` (`instanteDoFuso`, `partesNoFuso`,
+    `diaDaSemanaNoFuso`, `inicioDoDiaNoFuso`, `inicioDoMesNoFuso`). Foi essa mistura que
+    fez a tela mostrar 17:30 pra um grupo configurado às 20:30. **Teste que assere com
+    esses getters não vale**: rode `TZ=UTC npm test` também.
+25. **Fuso é um só (`America/Sao_Paulo`) e isso é limitação conhecida.** Grupo fora de
+    Brasília (o Fut Manus é UTC−4) vê o horário de Brasília em "hoje/amanhã" e na
+    fronteira da artilharia. As funções de fuso já aceitam o fuso por parâmetro: dar
+    fuso próprio ao grupo é coluna em `FootballGroup` e trocar os `FUSO_PADRAO` por
+    `grupo.fuso`.
+26. **Rodada gravada antes de 18/08 pode estar com hora torta.**
+    `scripts/corrigir-fuso-das-rodadas.ts` relata por padrão e só grava com `--aplicar`.
+    A detecção é exata (hora de parede em UTC igual ao `defaultStartTime` do grupo), então
+    rodada criada em máquina de dev não é tocada.
+27. **`staleTimes` deixa dado velho por até 30s.** O cache de navegação do cliente está
+    ligado em `next.config.ts`. Mutação própria não sofre (toda action chama
+    `revalidatePath("/g", "layout")`), mas mudança feita por **outro** organizador demora
+    isso pra aparecer. Se o placar ao vivo começar a atrasar, é esse número que baixa.
+28. **`regions: ["gru1"]` no `vercel.json` não é opcional.** Sem ele a Vercel sobe a
+    função em `iad1` e cada query paga ~150ms de travessia até o banco em `sa-east-1`.
+
 ---
 
 ## Mapa rápido de arquivos
@@ -284,6 +443,13 @@ padrão em qualquer animação de espera. Stagger: 40ms nos cards de time, 60ms 
 | Defaults de modalidade, slug, capacidade | `src/domain/groups/setup.ts` |
 | Regras do elenco (nome, nível, conflito) | `src/domain/roster/roster.ts` |
 | Próxima data da rodada | `src/domain/schedule/recurrence.ts` |
+| Fuso horário (hora de parede ↔ instante) | `src/domain/time/fuso.ts` |
+| Formatação de data e hora na UI | `src/lib/dates.ts` |
+| Consertar rodada com hora torta | `scripts/corrigir-fuso-das-rodadas.ts` |
+| Região, cron e config da Vercel | `vercel.json` |
+| Cache de navegação e flags do Next | `next.config.ts` |
+| Batida anti-pausa do Supabase | `src/app/api/manter-vivo/route.ts` |
+| Casca de espera das telas do grupo | `src/app/g/[slug]/loading.tsx` |
 | Interpretação da lista do WhatsApp | `src/domain/list-parser/parser.ts` |
 | Regra do sorteio e do equilíbrio | `src/domain/team-balancer/balancer.ts` |
 | Ranking e estatística | `src/domain/statistics/aggregate.ts` |

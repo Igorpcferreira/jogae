@@ -1,4 +1,11 @@
-const TZ = "America/Sao_Paulo";
+import {
+  FUSO_PADRAO,
+  diaDaSemanaNoFuso,
+  inicioDoDiaNoFuso,
+  inicioDoMesNoFuso,
+} from "@/domain/time/fuso";
+
+const TZ = FUSO_PADRAO;
 
 const WEEKDAYS = [
   "Domingo",
@@ -10,8 +17,19 @@ const WEEKDAYS = [
   "Sábado",
 ] as const;
 
+/**
+ * Nome do dia a partir do índice (0=domingo), que é como o grupo guarda a
+ * recorrência. Existe pra ninguém precisar inventar uma data só pra descobrir
+ * o nome do dia — o truque antigo (`new Date(2024, 0, 7 + dia)`) só acertava
+ * porque construção e leitura usavam o mesmo fuso do processo.
+ */
+export function nomeDoDiaDaSemana(indice: number): string {
+  return WEEKDAYS[((indice % 7) + 7) % 7];
+}
+
+/** Nome do dia em que o instante cai, no fuso do app. */
 export function weekdayName(date: Date): string {
-  return WEEKDAYS[date.getDay()];
+  return WEEKDAYS[diaDaSemanaNoFuso(date, TZ)];
 }
 
 export function formatTime(date: Date | null | undefined): string | null {
@@ -45,7 +63,7 @@ export function formatRoundSchedule(
   startsAt: Date | null,
   durationMin?: number | null,
 ): string {
-  const parts = [weekdayName(date)];
+  const parts = [weekdayName(startsAt ?? date)];
   const start = formatTime(startsAt ?? date);
   if (start) {
     if (durationMin) {
@@ -69,11 +87,16 @@ export function greeting(now = new Date()): string {
   return "Boa noite";
 }
 
-/** "em 2 dias", "hoje", "amanhã" — usado no card da próxima rodada. */
+/**
+ * "em 2 dias", "hoje", "amanhã" — usado no card da próxima rodada.
+ *
+ * A diferença é contada entre as meia-noites **do fuso do app**. Contar pelo
+ * relógio do processo fazia o fut de quinta à noite virar "amanhã" num
+ * servidor em UTC, onde aquele instante já é sexta.
+ */
 export function relativeDay(date: Date, now = new Date()): string {
-  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const diff = Math.round(
-    (startOfDay(date).getTime() - startOfDay(now).getTime()) / 86_400_000,
+    (inicioDoDiaNoFuso(date, TZ).getTime() - inicioDoDiaNoFuso(now, TZ).getTime()) / 86_400_000,
   );
   if (diff === 0) return "hoje";
   if (diff === 1) return "amanhã";
@@ -82,6 +105,7 @@ export function relativeDay(date: Date, now = new Date()): string {
   return `há ${Math.abs(diff)} dias`;
 }
 
+/** Primeiro instante do mês corrente, no fuso do app — recorte da artilharia. */
 export function startOfMonth(date = new Date()): Date {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
+  return inicioDoMesNoFuso(date, TZ);
 }

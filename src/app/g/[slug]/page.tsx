@@ -29,7 +29,7 @@ import {
   formatRoundSchedule,
   greeting,
   relativeDay,
-  weekdayName,
+  nomeDoDiaDaSemana,
 } from "@/lib/dates";
 import { CreateRoundButton } from "./_components/create-round-button";
 
@@ -62,7 +62,7 @@ export default async function GroupHomePage({
           <h1 className="font-display text-h1 leading-none text-ink">{group.name}</h1>
           <p className="mt-1.5 text-caption uppercase tracking-[0.1em] text-ink-3">
             {group.recurringWeekdays.length > 0
-              ? `${group.recurringWeekdays.map((d) => weekdayName(new Date(2024, 0, 7 + d))).join(" · ")} · ${group.defaultStartTime ?? ""}`
+              ? `${group.recurringWeekdays.map((d) => nomeDoDiaDaSemana(d)).join(" · ")} · ${group.defaultStartTime ?? ""}`
               : "Sem recorrência definida"}
           </p>
         </div>

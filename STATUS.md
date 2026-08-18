@@ -1,10 +1,14 @@
 # STATUS — Jogaê
 
-**Atualizado:** 12/08/2026
+**Atualizado:** 18/08/2026
 **Fase do roadmap:** Fase 0 (Fundação) concluída · Fase 1 (MVP de organização) concluída ·
-Fase 1.5 concluída (falta só o que depende de aparelho e de deploy)
-**Verificação nesta data:** `npm test` 115/115 · `npm run test:integracao` 57/57 ·
-`npx tsc --noEmit` limpo · `npx eslint .` limpo · `npm run build` OK.
+Fase 1.5 concluída · **Bloco J (deploy) concluído — o app está em produção**
+**Verificação nesta data:** `npm test` 134/134 (verde também com `TZ=UTC`) ·
+`npm run test:integracao` 57/57 · `npx tsc --noEmit` limpo · `npx eslint .` limpo ·
+`npm run build` OK.
+
+**Em produção:** https://jogae-free.vercel.app · Vercel (região `gru1`) + Supabase
+(`sa-east-1`). Login com Google funcionando de ponta a ponta.
 
 Smoke de ponta a ponta contra um **Supabase de verdade** (stack local do CLI):
 login por link → sessão gravada → `/g/**` abre; sem sessão, o proxy redireciona pro
@@ -27,7 +31,8 @@ pessoa no grupo; assistente recebe 404 em `/membros` e 200 no ao vivo.
 | Modo ao vivo | **Entra na v1** | É o que gera retenção e histórico |
 | **Auth** | **Supabase Auth: Google + link por e-mail** | O magic link próprio funcionava, mas o produto vai ser lançado aberto: "abre o e-mail e volta" derruba cadastro, e ninguém espera digitar e-mail num app de fut. Google é um toque. Substituiu a implementação própria em 12/08 |
 | **Banco em produção** | **Postgres do Supabase** | Já vinha junto da auth; o Prisma continua dono do schema e das migrations |
-| **Hospedagem do app** | **VPS Hostinger (Docker)** | O plano Hobby da Vercel proíbe uso comercial, e a VPS já existe. `Dockerfile` standalone pronto |
+| **Hospedagem do app** | **Vercel (plano Hobby) por ora; VPS Hostinger continua sendo o plano se houver cobrança** | O deploy de 18/08 foi na Vercel porque é o caminho mais curto pro app existir, e o desempenho ficou bom (ver §2). **A restrição continua de pé: o plano Hobby proíbe uso comercial** — no dia em que o Jogaê cobrar, é Vercel Pro ou a VPS. O `Dockerfile` standalone e o `docs/deploy.md` seguem válidos e testados pra essa virada |
+| **Fuso horário** | **Um só, `America/Sao_Paulo`, declarado em `domain/time/fuso.ts`** | Hora de parede entra e sai sempre pelo mesmo fuso. O fuso do processo (UTC na Vercel) nunca é usado — foi essa mistura que gerou o bug do 17:30. Fuso por grupo está mapeado como próximo passo; as funções já recebem o fuso por parâmetro |
 | **Papéis** | **OWNER / ADMIN / ASSISTANT**, regra pura em `domain/access` | Assistente apita o jogo, nunca mexe em config nem em sorteio (plano §6 e §55) |
 | **Envio de e-mail** | **Do Supabase, com SMTP próprio configurado no painel** | Um lugar só pra template, remetente e entrega. Em dev os e-mails caem no Mailpit local. Substituiu o Resend chamado direto do app |
 | **Testes da camada de dados** | **Serviço extraído + Postgres real em schema `teste`** | Mock de Prisma testaria o mock; schema separado dispensa segundo container |
@@ -167,6 +172,58 @@ não mexe no elenco dele.
   devolve 401 e a fila espera; erro definitivo (partida encerrada) descarta o lance.
 - Indicador em `components/shell/offline-sync.tsx` só aparece quando há o que dizer.
 
+### Produção e desempenho — sessão de 18/08
+- **Deploy feito na Vercel**, com o banco e a auth no Supabase Cloud (`sa-east-1`).
+  Google OAuth validado em produção; login funcionando.
+- **Região da função fixada em `gru1`** (`vercel.json`). O deploy inicial subiu em
+  `iad1` (Washington) com o banco em São Paulo: cada query atravessava o continente.
+  Medido antes e depois, em produção, com 10 amostras intercaladas:
+
+  | Rota | Antes (`iad1`) | Depois (`gru1`) |
+  | --- | --- | --- |
+  | `/entrar` (0 queries) | ~300ms | **146ms** |
+  | `/r/xxx` (1 query) | ~450ms morno · 2,4s frio | **145ms** morno · ~1s frio |
+
+  Uma ida ao banco custava ~150ms e passou a ser indistinguível de zero.
+- **Cascata de queries desfeita.** A casca pedia a rodada inteira (presenças, times,
+  partidas, lances) pra derivar o booleano "tem jogo ao vivo" — virou `temRodadaAoVivo`,
+  uma coluna. `getCurrentRound` fazia até três buscas em série com o `include` gordo pra
+  descartar duas — virou três buscas paralelas de `id` mais um detalhe. Grupo e
+  identidade agora resolvem em paralelo na autorização.
+- **`loading.tsx` no grupo.** Sem esse boundary o clique na navegação ficava sem
+  resposta nenhuma até o servidor terminar a página inteira, e rota dinâmica sem ele não
+  tem casca pro `prefetch` do `<Link>` pré-carregar. É o que fez a navegação *parecer*
+  instantânea, além de ser.
+- **Cache de navegação ligado** (`staleTimes: { dynamic: 30, static: 180 }`): voltar
+  pra uma aba visitada nos últimos 30s não custa ida ao servidor.
+- **Cron diário anti-pausa** (`/api/manter-vivo`, 12:00 UTC). O plano Free do Supabase
+  pausa projeto com uma semana sem atividade **no banco**, e religar é manual — o site
+  ficaria fora do ar até alguém abrir o painel. A rota faz `select 1` de verdade.
+
+### Fuso horário — bug corrigido na sessão de 18/08
+A tela mostrava **17:30** para um grupo configurado às **20:30**. Causa:
+`proximaDataRecorrente` montava a data com `new Date(ano, mês, dia, hora, minuto)`, que
+usa o relógio do processo. Na Vercel isso é UTC, então "20:30" virava 20:30 **UTC**, e a
+exibição, que formata em Brasília, mostrava 17:30.
+
+O que mudou:
+- `src/domain/time/fuso.ts` (novo, puro): `instanteDoFuso`, `partesNoFuso`,
+  `diaDaSemanaNoFuso`, `inicioDoDiaNoFuso`, `inicioDoMesNoFuso`. Hora de parede entra e
+  sai sempre pelo fuso declarado.
+- `recurrence.ts` ancora o horário no fuso do app e aceita fuso por parâmetro.
+- `dates.ts`: `weekdayName`, `relativeDay` e `startOfMonth` liam o relógio do processo —
+  todos corrigidos. `startOfMonth` deslocado significava artilharia do mês com fronteira
+  errada. Novo `nomeDoDiaDaSemana(indice)` substitui o truque `new Date(2024, 0, 7 + dia)`,
+  que só acertava porque construção e leitura usavam o mesmo fuso errado.
+- **Os testes eram cúmplices:** asseriam com `getHours`/`getDate`, que leem o fuso do
+  processo. Passavam na máquina do dev (horário do Brasil) e mentiam sobre a Vercel.
+  Foram reescritos para asserir em ISO/UTC ou pelo relógio de Brasília explícito, e a
+  suíte agora roda verde **nos dois fusos** — `npm test` e `TZ=UTC npm test`.
+- `scripts/corrigir-fuso-das-rodadas.ts` conserta as rodadas já gravadas torto. Relata
+  por padrão; só grava com `--aplicar`. A impressão digital do bug é exata (hora de
+  parede em UTC igual ao `defaultStartTime` do grupo), então rodada criada em máquina
+  de dev não é tocada.
+
 ---
 
 ## 3. O que NÃO está pronto
@@ -176,15 +233,12 @@ não mexe no elenco dele.
    corrigiu o que dava pra ver lendo (safe area do indicador de sincronização, alvo de
    44px no botão compacto, respiro do rodapé com notch), mas iPhone e Android continuam
    sem QA real. O service worker nunca rodou fora do `next start` local.
-2. **Nada rodou contra um projeto Supabase na nuvem** — só contra o stack local do CLI,
-   onde login por link e aceite de convite funcionaram de ponta a ponta. Falta exercitar
-   o **Google** (que o stack local não tem) e o **SMTP de produção**. O que costuma
-   falhar aí é configuração, não código: redirect URI no Google Cloud e Redirect URLs
-   no Supabase.
-3. **Deploy não foi feito.** A arquitetura está decidida (VPS Hostinger + Supabase Cloud)
-  e o artefato foi validado localmente: o `migrator` encontrou as 5 migrations, a imagem
-  standalone iniciou e `/offline` respondeu 200. Falta o que depende de conta: criar o
-  projeto Supabase, configurar o OAuth do Google, apontar o domínio e ligar SMTP.
+2. **SMTP de produção nunca foi exercitado.** O Google OAuth já está validado em
+   produção, mas o **login por link de e-mail e o convite de membro dependem de SMTP
+   configurado no painel do Supabase** — sem isso, os dois caminhos não entregam nada.
+   É configuração, não código.
+3. **Domínio próprio.** O app responde em `jogae-free.vercel.app`. Domínio não muda nada
+   de desempenho; é questão de identidade e de mandar o link no grupo sem vergonha.
 4. **Conta de jogador** segue em aberto por decisão de produto, não por falta de código:
    `docs/decisao-conta-de-jogador.md` tem as três saídas e a recomendação.
 5. Sem rate limit fora do login; erro de action ainda aparece só como mensagem inline.
@@ -192,6 +246,17 @@ não mexe no elenco dele.
    da rodada foi o único item antecipado) e todo o financeiro (Fase 3 — valor da rodada,
    pago/pendente, painel). O financeiro não tem regra definida no PRD além da lista de
    tópicos; precisa de decisão de produto antes de virar schema.
+
+9. **Fuso é um só pro app inteiro** (`America/Sao_Paulo`). O Fut Manus joga em UTC−4 e
+   vê horário de Brasília — uma hora a mais. O bug do 17:30 está corrigido (o que o
+   organizador digita é o que aparece), mas "hoje/amanhã" e a fronteira da artilharia
+   ainda usam Brasília pra todo mundo. A correção é dar fuso próprio ao grupo; as
+   funções de `domain/time/fuso.ts` já aceitam o fuso por parâmetro.
+10. **Cold start de ~1s** no primeiro acesso após ociosidade — inerente ao serverless.
+   Pesa mais no Jogaê que na média porque o app é usado uma ou duas vezes por semana.
+   Mitigações não exploradas: Fluid Compute no painel da Vercel; a VPS elimina.
+11. **`CRON_SECRET` não configurada.** Sem ela `/api/manter-vivo` fica aberta. O que a
+   rota expõe é um `select 1`, mas vale configurar.
 
 **Dívidas menores:**
 7. A imagem dos times sai na fonte padrão: a Anton exigiria o `.ttf` embutido e o
@@ -203,6 +268,18 @@ não mexe no elenco dele.
 
 ## 4. Notas de ambiente
 
+- **Fuso: nunca use o relógio do processo.** `new Date(ano, mês, dia, hora, min)`,
+  `getHours()`, `getDate()`, `getDay()` e `getMonth()` leem o fuso de quem está
+  rodando — UTC na Vercel, horário do Brasil na sua máquina. Para hora de parede use
+  `src/domain/time/fuso.ts`. Teste que assere com esses getters passa aqui e mente
+  sobre produção; rode `TZ=UTC npm test` antes de dar qualquer data por correta.
+- **Produção:** Vercel, região `gru1` fixada em `vercel.json`. **Não tire** — o banco
+  está em `sa-east-1` e sem isso a função sobe em `iad1`, somando ~150ms por query.
+- **`DATABASE_URL` de produção é o pooler na porta 6543.** A 5432 é sessão/direta e
+  só serve pra migration (`DIRECT_URL`). O `?pgbouncer=true` que o Supabase inclui é
+  flag do query engine em Rust e o `@prisma/adapter-pg` a ignora — quem resolve é a porta.
+- Env var na Vercel só entra em vigor no **próximo deploy**: editar e não redeployar
+  não muda nada.
 - Registry npm global aponta pro repositório privado da Marinha. O `.npmrc` do projeto
   corrige isso — **não apague**.
 - Postgres roda em **5433** (não 5432).
