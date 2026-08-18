@@ -41,8 +41,12 @@ export default async function GroupHomePage({
   const { slug } = await params;
   const { group } = await requireGrupoPorSlug(slug);
 
-  const round = await getCurrentRound(group.id);
-  const topScorers = await getTopScorersOfMonth(group.id);
+  // Rodada e artilharia são independentes: em série a home pagava a ida ao
+  // banco das duas somada.
+  const [round, topScorers] = await Promise.all([
+    getCurrentRound(group.id),
+    getTopScorersOfMonth(group.id),
+  ]);
   const capacity = groupCapacity(group);
 
   const attendance = round ? splitAttendances(round.attendances) : null;

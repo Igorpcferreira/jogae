@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { requireGrupoPorSlug } from "@/features/groups/access";
 import { getUsuarioAtual } from "@/features/auth/queries";
-import { getCurrentRound } from "@/features/rounds/queries";
+import { temRodadaAoVivo } from "@/features/rounds/queries";
 import { BottomNav, Sidebar } from "@/components/shell/navigation";
 import { OfflineSync } from "@/components/shell/offline-sync";
 
@@ -17,11 +17,12 @@ export default async function GroupLayout({
   // página chama `requireGrupoPorSlug` de novo e toda mutação passa pelo DAL.
   const { group, role } = await requireGrupoPorSlug(slug);
 
-  const [usuario, round] = await Promise.all([
+  // A casca só precisa do ponto vermelho: pedir a rodada inteira aqui era
+  // carregar presenças, times, partidas e lances pra derivar um booleano.
+  const [usuario, hasLive] = await Promise.all([
     getUsuarioAtual(),
-    getCurrentRound(group.id),
+    temRodadaAoVivo(group.id),
   ]);
-  const hasLive = round?.status === "LIVE";
 
   return (
     <div className="flex min-h-dvh">
