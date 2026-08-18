@@ -40,29 +40,56 @@ export const getRoundByToken = cache(async (publicToken: string) => {
 });
 
 /**
- * A rodada que a home mostra: a que está ao vivo, senão a próxima aberta,
+ * Qual rodada a interface mostra: a que está ao vivo, senão a próxima aberta,
  * senão a última encerrada.
+ *
+ * Só o id, e as três buscas em paralelo. Antes cada tentativa vinha com o
+ * `include` inteiro e uma esperava a outra — trazer duas rodadas completas
+ * (presenças, times, partidas, lances) do outro lado da rede pra descartar
+ * ambas era o gargalo de toda navegação.
+ */
+export const getCurrentRoundId = cache(async (groupId: string) => {
+  const [live, upcoming, last] = await Promise.all([
+    prisma.round.findFirst({
+      where: { groupId, status: "LIVE" },
+      orderBy: { date: "desc" },
+      select: { id: true },
+    }),
+    prisma.round.findFirst({
+      where: { groupId, status: { in: ["OPEN", "CONFIRMED"] } },
+      orderBy: { date: "asc" },
+      select: { id: true },
+    }),
+    prisma.round.findFirst({
+      where: { groupId },
+      orderBy: { date: "desc" },
+      select: { id: true },
+    }),
+  ]);
+
+  return (live ?? upcoming ?? last)?.id ?? null;
+});
+
+/**
+ * A rodada corrente com tudo dentro. Passa por `getRoundDetail` de propósito:
+ * a página que já pediu o detalhe daquele id reaproveita o mesmo `cache()` em
+ * vez de repetir a consulta.
  */
 export const getCurrentRound = cache(async (groupId: string) => {
-  const live = await prisma.round.findFirst({
+  const id = await getCurrentRoundId(groupId);
+  return id ? getRoundDetail(id) : null;
+});
+
+/**
+ * Tem jogo rolando? É tudo que a casca precisa saber pra acender o ponto
+ * vermelho na navegação — e cabe numa consulta de uma coluna.
+ */
+export const temRodadaAoVivo = cache(async (groupId: string) => {
+  const aoVivo = await prisma.round.findFirst({
     where: { groupId, status: "LIVE" },
-    include: roundInclude,
-    orderBy: { date: "desc" },
+    select: { id: true },
   });
-  if (live) return live;
-
-  const upcoming = await prisma.round.findFirst({
-    where: { groupId, status: { in: ["OPEN", "CONFIRMED"] } },
-    include: roundInclude,
-    orderBy: { date: "asc" },
-  });
-  if (upcoming) return upcoming;
-
-  return prisma.round.findFirst({
-    where: { groupId },
-    include: roundInclude,
-    orderBy: { date: "desc" },
-  });
+  return aoVivo !== null;
 });
 
 export const getRoundHistory = cache(async (groupId: string, take = 10) => {
