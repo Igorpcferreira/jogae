@@ -55,6 +55,45 @@ function descreverBanco(): string {
   }
 }
 
+/**
+ * Recusa rodar com a senha de exemplo no lugar da senha de verdade.
+ *
+ * Aconteceu duas vezes: a tela de conexão do Supabase mostra `[YOUR-PASSWORD]`
+ * e o passo a passo mostrava `SENHA` — os dois foram colados literalmente. O
+ * erro que aparece é "authentication failed", que não diz nada sobre a causa,
+ * e no modo `--aplicar` dá a impressão de que rodou e não achou nada.
+ */
+function recusarSenhaDeExemplo(): void {
+  const exemplos = [
+    "senha",
+    "sua_senha",
+    "suasenha",
+    "password",
+    "your-password",
+    "your_password",
+  ];
+
+  let senha = "";
+  try {
+    senha = decodeURIComponent(new URL(process.env.DATABASE_URL!).password);
+  } catch {
+    return;
+  }
+
+  const pareceExemplo = exemplos.includes(senha.toLowerCase()) || /[[\]<>]/.test(senha);
+  if (!pareceExemplo) return;
+
+  console.error(`A senha da DATABASE_URL é texto de exemplo ("${senha}"), não a senha real.`);
+  console.error("");
+  console.error("Pegue a string que já funciona, em vez de digitar na mão:");
+  console.error("  Vercel → projeto → Settings → Environment Variables → DATABASE_URL → revelar");
+  console.error("");
+  console.error("É a mesma que o app usa em produção, então você sabe que ela está certa.");
+  process.exit(1);
+}
+
+recusarSenhaDeExemplo();
+
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
 });
