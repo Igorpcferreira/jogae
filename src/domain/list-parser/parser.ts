@@ -1,4 +1,5 @@
 import { cleanText, normalizeName, similarity, titleCaseName } from "@/domain/text/normalize";
+import { MAX_NOME_JOGADOR } from "@/domain/roster/roster";
 import type {
   GroupContext,
   KnownPlayer,
@@ -223,6 +224,17 @@ export function parseList(rawText: string, context: GroupContext = { players: []
     const name = titleCaseName(rest);
     const normalized = normalizeName(rest);
     if (!normalized || NOISE_RE.test(normalized)) return;
+
+    // Avisos de lista ("lista fecha com...", links e instruções) às vezes
+    // vêm no meio dos nomes. Acima do limite do elenco não é um jogador válido.
+    if (name.length > MAX_NOME_JOGADOR) {
+      warnings.push({
+        code: "LINE_TOO_LONG",
+        message: `Ignorei uma linha com mais de ${MAX_NOME_JOGADOR} caracteres: ela não parece nome de jogador.`,
+        entryIndexes: [],
+      });
+      return;
+    }
 
     if (slot !== null) slotsInSection += 1;
 

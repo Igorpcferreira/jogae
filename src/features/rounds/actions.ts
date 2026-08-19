@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/db/client";
 import type { ParseResult } from "@/domain/list-parser/types";
+import { MAX_NOME_JOGADOR } from "@/domain/roster/roster";
 import {
   requireGroupAccess,
   requireRoundAccess,
@@ -29,7 +30,7 @@ export async function interpretarListaAction(
 }
 
 const resolvedEntrySchema = z.object({
-  name: z.string().min(1).max(80),
+  name: z.string().min(1).max(MAX_NOME_JOGADOR),
   section: z.enum(["confirmed", "goalkeepers", "waiting"]),
   /** null = criar jogador novo com esse nome. */
   playerId: z.string().nullable(),
@@ -43,12 +44,24 @@ const applySchema = z.object({
 });
 
 export type ResolvedEntry = z.infer<typeof resolvedEntrySchema>;
+export type ResultadoAplicarLista =
+  | { ok: true; confirmed: number; waiting: number }
+  | { ok: false; motivo: string };
 
 export async function aplicarListaAction(input: {
   roundId: string;
   entries: ResolvedEntry[];
-}): Promise<{ ok: true; confirmed: number; waiting: number }> {
-  const { roundId, entries } = applySchema.parse(input);
+}): Promise<ResultadoAplicarLista> {
+  const analise = applySchema.safeParse(input);
+  if (!analise.success) {
+    const problema = analise.error.issues[0];
+    const indice = problema.path[0] === "entries" && typeof problema.path[1] === "number"
+      ? ` da posição ${problema.path[1] + 1}`
+      : "";
+    return { ok: false, motivo: `Não deu para salvar: revise a lista${indice}.` };
+  }
+
+  const { roundId, entries } = analise.data;
   await requireRoundAccess(roundId, "rodada:presenca");
 
   const resultado = await servico.aplicarLista(prisma, roundId, entries);

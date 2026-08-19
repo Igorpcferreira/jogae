@@ -21,6 +21,8 @@ export const ROTULO_POSICAO: Record<Posicao, string> = {
 /** Escala 1–5, privada: só o balanceador lê (plano §13). */
 export const SKILL_MIN = 1;
 export const SKILL_MAX = 5;
+/** Limite que mantém nomes legíveis nos cards e na lista importada. */
+export const MAX_NOME_JOGADOR = 60;
 
 export const ROTULO_SKILL: Record<number, string> = {
   1: "Tá começando",
@@ -65,7 +67,7 @@ export function prepararJogador(entrada: EntradaDeJogador): {
   if (nome.length < 2) {
     erros.push({ campo: "displayName", mensagem: "Nome com pelo menos 2 letras." });
   }
-  if (nome.length > 60) {
+  if (nome.length > MAX_NOME_JOGADOR) {
     erros.push({ campo: "displayName", mensagem: "Nome muito longo." });
   }
 

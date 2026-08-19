@@ -6,13 +6,14 @@ import { prisma } from "@/db/client";
 import { normalizeName } from "@/domain/text/normalize";
 import {
   conflitoDeNome,
+  MAX_NOME_JOGADOR,
   prepararJogador,
   type Posicao,
 } from "@/domain/roster/roster";
 import { requireGroupAccess, requirePlayerAccess } from "@/features/auth/queries";
 
 const jogadorSchema = z.object({
-  displayName: z.string().max(80),
+  displayName: z.string().max(MAX_NOME_JOGADOR),
   nickname: z.string().max(40).nullable(),
   skillLevel: z.coerce.number(),
   preferredRole: z.enum([

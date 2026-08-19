@@ -42,7 +42,8 @@ export type WarningCode =
   | "EMPTY_SLOT"
   | "NO_GOALKEEPERS"
   | "OVER_CAPACITY"
-  | "NO_SECTION_DETECTED";
+  | "NO_SECTION_DETECTED"
+  | "LINE_TOO_LONG";
 
 export interface ParseWarning {
   code: WarningCode;

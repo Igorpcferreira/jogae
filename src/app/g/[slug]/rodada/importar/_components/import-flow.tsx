@@ -111,7 +111,11 @@ export function ImportListFlow({
             rawName: decision.rawName,
           }));
 
-        await aplicarListaAction({ roundId, entries });
+        const resultado = await aplicarListaAction({ roundId, entries });
+        if (!resultado.ok) {
+          setError(resultado.motivo);
+          return;
+        }
         router.push(backHref);
         router.refresh();
       } catch {
@@ -178,6 +182,7 @@ export function ImportListFlow({
   const duplicateWarnings = parsed.warnings.filter(
     (warning) => warning.code === "DUPLICATE_IN_LIST",
   );
+  const ignoredWarnings = parsed.warnings.filter((warning) => warning.code === "LINE_TOO_LONG");
 
   return (
     <div className="flex flex-col gap-6">
@@ -250,6 +255,18 @@ export function ImportListFlow({
           <ul className="flex flex-col gap-1">
             {duplicateWarnings.map((warning, i) => (
               <li key={i} className="text-body-s text-red">
+                {warning.message}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {ignoredWarnings.length > 0 && (
+        <Card className="border-yellow/40 bg-yellow/8 py-3">
+          <ul className="flex flex-col gap-1">
+            {ignoredWarnings.map((warning, index) => (
+              <li key={index} className="text-body-s text-yellow">
                 {warning.message}
               </li>
             ))}

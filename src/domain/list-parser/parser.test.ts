@@ -111,6 +111,14 @@ Pix na chave do sempre`);
     expect(result.metadata.venueUrl).toContain("maps.app.goo.gl");
   });
 
+  it("ignora aviso longo que aparece no meio da lista", () => {
+    const aviso = "A lista fecha com 20 jogadores e quem confirmar depois disso entra automaticamente na espera";
+    const result = parseList(`01-Salles\n02-Guilherme\n${aviso}\n03-Danilo`);
+
+    expect(names(result.confirmed)).toEqual(["Salles", "Guilherme", "Danilo"]);
+    expect(result.warnings.some((warning) => warning.code === "LINE_TOO_LONG")).toBe(true);
+  });
+
   it("limpa prefixo de export do WhatsApp", () => {
     const result = parseList(`[12/09/2025 20:31] Salles: 01-Salles
 [12/09/2025 20:32] Guilherme: 02-Guilherme`);
