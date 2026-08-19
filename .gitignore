@@ -42,3 +42,8 @@ next-env.d.ts
 
 /src/db/generated
 !.env.example
+
+# Segredo do OAuth do Google, baixado do Google Cloud Console.
+# O app não lê este arquivo (as chaves vão por env var, no painel do Supabase);
+# ele só fica na máquina de quem configurou. Commitar publicaria a credencial.
+client_secret_*.json
