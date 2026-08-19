@@ -238,11 +238,6 @@ O que mudou:
    válidos — o problema é o **template padrão do Supabase**: "Your sign-in link", três
    linhas e um link solto. Falta português e identidade visual. Os templates vivem no
    painel do Supabase (Authentication → Emails), não no repositório.
-3. ~~**SMTP de produção nunca foi exercitado.**~~ Concluído — mantido aqui só pelo
-   histórico da numeração: O Google OAuth já está validado em
-   produção, mas o **login por link de e-mail e o convite de membro dependem de SMTP
-   configurado no painel do Supabase** — sem isso, os dois caminhos não entregam nada.
-   É configuração, não código.
 3. **Domínio próprio.** O app responde em `jogae-free.vercel.app`. Domínio não muda nada
    de desempenho; é questão de identidade e de mandar o link no grupo sem vergonha.
 4. **Conta de jogador** segue em aberto por decisão de produto, não por falta de código:
