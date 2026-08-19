@@ -160,9 +160,18 @@ Detalhado na seção **"Os três blocos que o dono quer atacar"**, logo abaixo.
 No ar em **https://jogae-free.vercel.app**: Vercel (região `gru1`) + Supabase Cloud
 (`sa-east-1`), Google OAuth validado em produção. Sobrou só configuração de painel:
 
-- **SMTP no Supabase** — sem ele o login por link de e-mail e o convite de membro não
-  entregam nada. É o único caminho de entrada de quem não usa Google, então **isto
-  bloqueia o bloco I** (convidar jogador por e-mail).
+- ~~**SMTP no Supabase**~~ — **feito em 18/08.** Hostinger (`smtp.hostinger.com:465`,
+  usuário `igor@somoskyber.com.br`). Testado: o link de login chega e loga.
+  SPF, DKIM (`hostingermail-a/b/c`) e DMARC (`p=none`) do domínio estão todos válidos.
+- **Os e-mails caem em spam e estão em inglês.** O template é o padrão do Supabase:
+  "Your sign-in link", três linhas e um link solto — assinatura clássica de spam, e
+  errado num produto todo em pt-BR. **Isto é risco real pro bloco I**: 22 convites no
+  spam é a adoção morrendo na porta. Os templates ficam em Supabase → Authentication →
+  Emails → Templates (HTML colado no painel, não vive no repositório). Precisam de
+  português, texto de verdade e a identidade do Jogaê — e como é e-mail, vale HTML de
+  tabela com estilo inline, não os tokens do `globals.css`.
+- **Reputação de domínio** melhora com uso; `jogae.com.br` próprio resolveria de vez o
+  descasamento entre a marca "Jogaê" e o domínio `somoskyber.com.br`.
 - **Domínio próprio** — não muda desempenho, muda identidade.
 - **`CRON_SECRET`** na Vercel, pra fechar `/api/manter-vivo`.
 

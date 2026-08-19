@@ -233,7 +233,13 @@ O que mudou:
    corrigiu o que dava pra ver lendo (safe area do indicador de sincronização, alvo de
    44px no botão compacto, respiro do rodapé com notch), mas iPhone e Android continuam
    sem QA real. O service worker nunca rodou fora do `next start` local.
-2. **SMTP de produção nunca foi exercitado.** O Google OAuth já está validado em
+2. **Os e-mails de autenticação caem em spam e estão em inglês.** O SMTP funciona
+   (Hostinger, testado de ponta a ponta em 18/08) e SPF/DKIM/DMARC do domínio estão
+   válidos — o problema é o **template padrão do Supabase**: "Your sign-in link", três
+   linhas e um link solto. Falta português e identidade visual. Os templates vivem no
+   painel do Supabase (Authentication → Emails), não no repositório.
+3. ~~**SMTP de produção nunca foi exercitado.**~~ Concluído — mantido aqui só pelo
+   histórico da numeração: O Google OAuth já está validado em
    produção, mas o **login por link de e-mail e o convite de membro dependem de SMTP
    configurado no painel do Supabase** — sem isso, os dois caminhos não entregam nada.
    É configuração, não código.
