@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildResultMessage, buildRoundCallMessage, buildTeamsMessage } from "./whatsapp";
+import {
+  buildLinkPessoalMessage,
+  buildResultMessage,
+  buildRoundCallMessage,
+  buildTeamsMessage,
+} from "./whatsapp";
 
 const teams = [
   {
@@ -101,5 +106,30 @@ describe("buildRoundCallMessage", () => {
     });
     expect(message).toContain("23 confirmados. Fechou.");
     expect(message).not.toContain("-");
+  });
+});
+
+describe("buildLinkPessoalMessage", () => {
+  const base = {
+    nome: "Igão",
+    groupName: "Fut da Quinta",
+    url: "https://jogae.app/p/8f14e45f-ceea-4d15-9b0f-9a2c1e4b7d3a",
+  };
+
+  it("chama a pessoa pelo nome e entrega o link inteiro", () => {
+    const mensagem = buildLinkPessoalMessage(base);
+    expect(mensagem).toContain("Fala, Igão!");
+    expect(mensagem).toContain(base.url);
+  });
+
+  it("avisa que o link é pessoal — é o que evita ele virar link de grupo", () => {
+    expect(buildLinkPessoalMessage(base)).toMatch(/não repassa/i);
+  });
+
+  it("só cita a rodada quando sabe quando é", () => {
+    expect(buildLinkPessoalMessage(base)).not.toContain("Próxima rodada");
+    expect(
+      buildLinkPessoalMessage({ ...base, dateText: "Quinta, 20:30", venue: "Arena Farofa" }),
+    ).toContain("Próxima rodada: Quinta, 20:30 · Arena Farofa.");
   });
 });

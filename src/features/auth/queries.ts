@@ -157,6 +157,62 @@ export async function requireTeamAccess(teamId: string, permission: Permission) 
   return { ...acesso, groupId: team.round.groupId, roundId: team.roundId };
 }
 
+/**
+ * Acesso pelo link pessoal do jogador (`/p/<token>`, bloco I — opção B).
+ *
+ * Aqui o token **é** a credencial: não tem sessão, não tem papel e não tem
+ * grupo alheio pra confundir — ele abre um jogador e mais nada. Fica no mesmo
+ * arquivo que os outros `require*` de propósito: autorização é um assunto só.
+ *
+ * Jogador inativo perde o link junto com a vaga no elenco, e o `select` é
+ * explícito porque `skillLevel` não pode vazar pra rota pública (plano §13).
+ */
+export const getJogadorPorLinkPessoal = cache(async (selfToken: string) => {
+  if (!selfToken) return null;
+
+  const jogador = await prisma.player.findUnique({
+    where: { selfToken },
+    select: {
+      id: true,
+      displayName: true,
+      nickname: true,
+      isGoalkeeper: true,
+      active: true,
+      groupId: true,
+      group: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          publicToken: true,
+          timezone: true,
+          teamCount: true,
+          fieldPlayersPerTeam: true,
+          goalkeepersPerTeam: true,
+          waitlistLimit: true,
+        },
+      },
+    },
+  });
+
+  return jogador?.active ? jogador : null;
+});
+
+export type JogadorDoLinkPessoal = NonNullable<
+  Awaited<ReturnType<typeof getJogadorPorLinkPessoal>>
+>;
+
+/** Versão que falha alto — é a porta das mutações vindas do link pessoal. */
+export async function requireAcessoPorLinkPessoal(
+  selfToken: string,
+): Promise<JogadorDoLinkPessoal> {
+  const jogador = await getJogadorPorLinkPessoal(selfToken);
+  if (!jogador) {
+    throw new ErroDeAcesso("nao-encontrado", "Esse link não vale mais.");
+  }
+  return jogador;
+}
+
 /** Mesma checagem partindo da partida. */
 export async function requireMatchAccess(matchId: string, permission: Permission) {
   const match = await prisma.match.findUnique({

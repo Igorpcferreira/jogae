@@ -100,6 +100,44 @@ export function buildResultMessage(input: ShareResultInput): string {
   return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+export interface ShareLinkPessoalInput {
+  /** Como o grupo chama o cara — apelido ganha do nome de batismo. */
+  nome: string;
+  groupName: string;
+  url: string;
+  dateText?: string | null;
+  venue?: string | null;
+}
+
+/**
+ * O convite do link pessoal (bloco I), pra mandar **no privado** de cada um.
+ *
+ * Não existe versão "pro grupo" de propósito: colar 22 links numa conversa de
+ * grupo é entregar a presença de cada um pra todo mundo. A mensagem já diz
+ * isso, porque quem recebe é quem vai encaminhar sem pensar.
+ */
+export function buildLinkPessoalMessage(input: ShareLinkPessoalInput): string {
+  const quando = [input.dateText, input.venue].filter(Boolean).join(" · ");
+  const lines: string[] = [
+    `Fala, ${input.nome}!`,
+    "",
+    `Agora dá pra confirmar presença no ${input.groupName} sem esperar a lista.`,
+  ];
+
+  if (quando) lines.push(`Próxima rodada: ${quando}.`);
+
+  lines.push(
+    "",
+    'É só abrir e tocar em "Tô dentro" ou "Não vou":',
+    input.url,
+    "",
+    "Esse link é seu e vale sempre — salva aí. Não precisa criar conta nem instalar nada.",
+    "Só não repassa pra ninguém: quem abrir responde no seu lugar.",
+  );
+
+  return lines.join("\n").trim();
+}
+
 export interface ShareRoundCallInput {
   groupName: string;
   dateText: string;

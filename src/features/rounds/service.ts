@@ -1,3 +1,8 @@
+import {
+  aplicarAcaoDePresenca,
+  type AcaoDePresenca,
+  type ResultadoDePresenca,
+} from "@/domain/attendance/presenca";
 import { parseList } from "@/domain/list-parser/parser";
 import type { ParseResult } from "@/domain/list-parser/types";
 import { balanceTeams } from "@/domain/team-balancer/balancer";
@@ -166,8 +171,105 @@ export async function definirPresenca(
 ) {
   await db.attendance.update({
     where: { roundId_playerId: { roundId, playerId } },
-    data: { status },
+    data: { status, origin: "ORGANIZER" },
   });
+}
+
+export interface MudancaDePresencaAplicada {
+  resultado: ResultadoDePresenca;
+  /** Quem subiu da espera, com nome — a tela e a mensagem precisam dizer quem. */
+  promovido: { id: string; displayName: string } | null;
+}
+
+/**
+ * Confirmar ou cancelar presença passando pela regra de `domain/attendance`.
+ *
+ * É por aqui que entra o link pessoal do jogador (bloco I), e é por aqui que a
+ * lista de espera anda sozinha: quem cancela abre vaga e o primeiro da fila
+ * sobe na mesma transação — se fossem duas escritas soltas, um erro no meio
+ * deixaria a rodada com uma vaga fantasma.
+ */
+export async function mudarPresenca(
+  db: Db,
+  entrada: {
+    roundId: string;
+    playerId: string;
+    acao: AcaoDePresenca;
+    origem: "ORGANIZER" | "PLAYER";
+  },
+): Promise<MudancaDePresencaAplicada> {
+  const [round, jogador] = await Promise.all([
+    db.round.findUniqueOrThrow({
+      where: { id: entrada.roundId },
+      include: {
+        group: true,
+        // `skillLevel` de propósito fora do select: a nota não passa por esta
+        // função nem por acidente (plano §13).
+        attendances: { include: { player: { select: { isGoalkeeper: true } } } },
+      },
+    }),
+    db.player.findUniqueOrThrow({
+      where: { id: entrada.playerId },
+      select: { id: true, groupId: true, isGoalkeeper: true },
+    }),
+  ]);
+
+  if (jogador.groupId !== round.groupId) {
+    throw new Error("Jogador não pertence a este grupo");
+  }
+
+  const resultado = aplicarAcaoDePresenca({
+    acao: entrada.acao,
+    playerId: entrada.playerId,
+    presencas: round.attendances.map((presenca) => ({
+      playerId: presenca.playerId,
+      status: presenca.status,
+      order: presenca.order,
+      asGoalkeeper: presenca.asGoalkeeper,
+      goleiroNoElenco: presenca.player.isGoalkeeper,
+    })),
+    formato: {
+      capacidade:
+        round.teamCount * (round.fieldPlayersPerTeam + round.group.goalkeepersPerTeam),
+      vagasDeGoleiro: round.teamCount * round.group.goalkeepersPerTeam,
+      limiteDaEspera: round.group.waitlistLimit,
+    },
+    rodada: { status: round.status, sorteada: round.drawnAt !== null },
+    ehGoleiro: jogador.isGoalkeeper,
+  });
+
+  if (!resultado.ok || resultado.mudancas.length === 0) {
+    return { resultado, promovido: null };
+  }
+
+  await db.$transaction(
+    resultado.mudancas.map((mudanca) => {
+      const dados = {
+        status: mudanca.status,
+        order: mudanca.order,
+        asGoalkeeper: mudanca.asGoalkeeper,
+        // A origem marca quem *escolheu* o status. Quem sobe da espera não
+        // escolheu nada: a origem dele fica como estava.
+        ...(mudanca.playerId === entrada.playerId ? { origin: entrada.origem } : {}),
+      };
+      return db.attendance.upsert({
+        where: {
+          roundId_playerId: { roundId: entrada.roundId, playerId: mudanca.playerId },
+        },
+        create: { roundId: entrada.roundId, playerId: mudanca.playerId, ...dados },
+        update: dados,
+      });
+    }),
+  );
+
+  const promovido = resultado.promovido
+    ? await db.player.findUnique({
+        where: { id: resultado.promovido },
+        select: { id: true, displayName: true },
+      })
+    : null;
+
+  return { resultado, promovido };
 }
 
 export async function alternarGoleiro(db: Db, roundId: string, playerId: string) {

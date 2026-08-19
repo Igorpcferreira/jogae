@@ -1,0 +1,97 @@
+<!-- Jogaê — template "Invite user" do Supabase (Authentication → Emails → Templates).
+     Assunto sugerido: Te chamaram para ajudar a organizar o fut
+     Mesmo cuidado do magic-link.html: tabela, estilo inline, href intocado
+     ({{ .ConfirmationURL }}). -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Você foi convidado para organizar um grupo no Jogaê. O convite vale por 7 dias.</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0;padding:0;background-color:#090a0c;">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background-color:#111317;border:1px solid #262a31;border-radius:16px;">
+
+        <tr>
+          <td style="padding:32px 32px 8px 32px;font-family:Helvetica,Arial,sans-serif;">
+            <span style="font-size:26px;line-height:1;font-weight:bold;color:#35e878;letter-spacing:0.5px;">JOGAÊ</span>
+            <span style="font-size:12px;line-height:1;color:#7a828e;letter-spacing:2px;text-transform:uppercase;">&nbsp;&nbsp;o fut organizado</span>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:16px 32px 0 32px;font-family:Helvetica,Arial,sans-serif;font-size:24px;line-height:1.2;color:#eceff3;font-weight:bold;">
+            Te chamaram pra ajudar a tocar o fut
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:16px 32px 0 32px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#a7aeb9;">
+            <p style="margin:0 0 14px 0;">
+              Quem organiza o grupo convidou este e-mail
+              (<span style="color:#eceff3;">{{ .Email }}</span>) pra entrar no Jogaê
+              como organizador. Aceitando, você passa a montar a lista da rodada,
+              sortear os times e registrar os gols junto com o pessoal.
+            </p>
+            <p style="margin:0 0 14px 0;">
+              O Jogaê guarda a lista da semana, equilibra os times pelo histórico
+              do grupo, marca o placar durante o jogo e fecha a artilharia do mês
+              sozinho. Funciona no navegador do celular — nada pra instalar.
+            </p>
+            <p style="margin:0 0 14px 0;">
+              É só tocar no botão abaixo. Não precisa criar senha: o próprio
+              e-mail é a sua entrada.
+            </p>
+          </td>
+        </tr>
+
+        <tr>
+          <td align="center" style="padding:28px 32px 8px 32px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="center" bgcolor="#35e878" style="border-radius:999px;">
+                  <a href="{{ .ConfirmationURL }}"
+                     style="display:inline-block;padding:16px 40px;font-family:Helvetica,Arial,sans-serif;font-size:16px;font-weight:bold;line-height:1;color:#090a0c;text-decoration:none;border-radius:999px;">
+                    Aceitar o convite
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:20px 32px 0 32px;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:1.6;color:#7a828e;">
+            <p style="margin:0 0 12px 0;">
+              O botão não funcionou? Copie e cole este endereço no navegador:
+            </p>
+            <p style="margin:0 0 16px 0;word-break:break-all;">
+              <a href="{{ .ConfirmationURL }}" style="color:#35e878;text-decoration:underline;">{{ .ConfirmationURL }}</a>
+            </p>
+            <p style="margin:0 0 12px 0;">
+              O convite vale por 7 dias. Depois disso, peça um novo pra quem te chamou.
+            </p>
+            <p style="margin:0;">
+              <strong style="color:#a7aeb9;">Não conhece esse grupo?</strong>
+              Pode ignorar este e-mail — sem abrir o link, nada acontece.
+            </p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:28px 32px 32px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr><td style="border-top:1px solid #262a31;font-size:0;line-height:0;">&nbsp;</td></tr>
+            </table>
+            <p style="margin:16px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:1.6;color:#7a828e;">
+              Jogaê — organização de futebol amador.<br />
+              Você recebeu este e-mail porque alguém te convidou em
+              <a href="{{ .SiteURL }}" style="color:#7a828e;text-decoration:underline;">{{ .SiteURL }}</a>.
+              Este é um e-mail transacional: não mandamos newsletter nem promoção.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>

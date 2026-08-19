@@ -1,4 +1,5 @@
 import { requireGrupoPorSlug } from "@/features/groups/access";
+import { urlBase } from "@/lib/base-url";
 import { getJogadoresDoGrupo } from "@/features/groups/queries";
 import { EmptyState } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/button";
@@ -27,7 +28,10 @@ export default async function ElencoPage({
     );
   }
 
-  const jogadores = await getJogadoresDoGrupo(group.id);
+  const [jogadores, base] = await Promise.all([
+    getJogadoresDoGrupo(group.id),
+    urlBase(),
+  ]);
 
   const dados: JogadorDoElenco[] = jogadores.map((jogador) => ({
     id: jogador.id,
@@ -40,7 +44,8 @@ export default async function ElencoPage({
     active: jogador.active,
     notes: jogador.notes,
     aliases: jogador.aliases.map((alias) => alias.alias),
+    linkPessoal: `${base}/p/${jogador.selfToken}`,
   }));
 
-  return <ElencoView groupId={group.id} jogadores={dados} />;
+  return <ElencoView groupId={group.id} groupName={group.name} jogadores={dados} />;
 }

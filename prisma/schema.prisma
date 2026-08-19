@@ -164,6 +164,21 @@ model Player {
   active        Boolean       @default(true)
   notes         String?
 
+  /// Link pessoal do jogador (`/p/<selfToken>`): a credencial que deixa ele
+  /// confirmar presença sem ter conta (bloco I, opção B). Não expira — link por
+  /// rodada obrigaria a redistribuir 22 links toda semana no WhatsApp, e esse
+  /// atrito mata a adoção. Gravar um valor novo é o que revoga o link antigo.
+  ///
+  /// UUID v4 e não `cuid()` (que os outros tokens usam) porque este token
+  /// *muda presença*: cuid carrega contador e fingerprint da máquina, então
+  /// dois gerados em sequência são parentes. Aqui são 122 bits de aleatório.
+  ///
+  /// O default é do **banco**, não do client (`@default(uuid(4))` seria gerado
+  /// no Prisma). Assim o código que já está no ar, que não conhece esta coluna,
+  /// continua criando jogador entre a migration e o deploy — e importar lista
+  /// cria jogador, então essa janela não é teórica.
+  selfToken String @unique @default(dbgenerated("gen_random_uuid()::text"))
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -255,6 +270,14 @@ enum AttendanceStatus {
   ABSENT
 }
 
+/// Quem mexeu nesta presença por último.
+enum AttendanceOrigin {
+  /// Veio da lista colada ou do dedo do organizador.
+  ORGANIZER
+  /// O próprio jogador, pelo link pessoal dele.
+  PLAYER
+}
+
 model Attendance {
   id       String @id @default(cuid())
   roundId  String
@@ -265,6 +288,10 @@ model Attendance {
   order  Int
   /// Confirmado especificamente como goleiro nesta rodada.
   asGoalkeeper Boolean @default(false)
+  /// De onde veio a última mudança. É o que separa "ele confirmou sozinho" de
+  /// "o organizador colou a lista" — sem isso a sequência de presença da Fase 2
+  /// seria mérito de quem organiza, não de quem joga.
+  origin AttendanceOrigin @default(ORGANIZER)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

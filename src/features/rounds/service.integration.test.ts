@@ -9,6 +9,7 @@ import {
   conferirJogadoresDoGrupo,
   criarRodada,
   interpretarLista,
+  mudarPresenca,
   promoverDaEspera,
   sortearTimes,
   duplicarRodada,
@@ -425,6 +426,170 @@ suite("rodada — camada de dados", () => {
       await expect(
         conferirJogadoresDoGrupo(db, grupo.id, [null, undefined]),
       ).resolves.toBeUndefined();
+    });
+  });
+
+  describe("mudarPresenca — o link pessoal do jogador", () => {
+    /** Um jogador a mais que a capacidade, parado na espera. */
+    async function comEspera(db: PrismaClient) {
+      const cenario = await criarCenario(db);
+      const suplente = await db.player.create({
+        data: { groupId: cenario.grupo.id, displayName: "Suplente", skillLevel: 3 },
+      });
+      await db.attendance.create({
+        data: {
+          roundId: cenario.rodada.id,
+          playerId: suplente.id,
+          status: "WAITING",
+          order: 99,
+        },
+      });
+      return { ...cenario, suplente };
+    }
+
+    it("cancelou pelo link: sai da lista e o primeiro da espera sobe", async () => {
+      const { rodada, elenco, suplente } = await comEspera(db);
+      const quemSai = elenco.find((jogador) => !jogador.isGoalkeeper)!;
+
+      const { resultado, promovido } = await mudarPresenca(db, {
+        roundId: rodada.id,
+        playerId: quemSai.id,
+        acao: "cancelar",
+        origem: "PLAYER",
+      });
+
+      expect(resultado.ok).toBe(true);
+      expect(promovido?.id).toBe(suplente.id);
+
+      const [saiu, subiu] = await Promise.all([
+        db.attendance.findUniqueOrThrow({
+          where: { roundId_playerId: { roundId: rodada.id, playerId: quemSai.id } },
+        }),
+        db.attendance.findUniqueOrThrow({
+          where: { roundId_playerId: { roundId: rodada.id, playerId: suplente.id } },
+        }),
+      ]);
+
+      expect(saiu.status).toBe("ABSENT");
+      expect(subiu.status).toBe("CONFIRMED");
+      // Quem clicou é PLAYER; quem subiu não escolheu nada e mantém a origem.
+      expect(saiu.origin).toBe("PLAYER");
+      expect(subiu.origin).toBe("ORGANIZER");
+    });
+
+    it("goleiro que cai é substituído pelo goleiro da espera", async () => {
+      const { grupo, rodada, elenco } = await criarCenario(db);
+      const goleiroDeFora = await db.player.create({
+        data: {
+          groupId: grupo.id,
+          displayName: "Goleiro reserva",
+          isGoalkeeper: true,
+          skillLevel: 3,
+        },
+      });
+      const linhaDeFora = await db.player.create({
+        data: { groupId: grupo.id, displayName: "Linha reserva", skillLevel: 3 },
+      });
+      // O de linha chegou antes: sem a regra do gol, seria ele a subir.
+      await db.attendance.createMany({
+        data: [
+          { roundId: rodada.id, playerId: linhaDeFora.id, status: "WAITING", order: 50 },
+          { roundId: rodada.id, playerId: goleiroDeFora.id, status: "WAITING", order: 51 },
+        ],
+      });
+
+      const goleiroQueSai = elenco.find((jogador) => jogador.isGoalkeeper)!;
+      const { promovido } = await mudarPresenca(db, {
+        roundId: rodada.id,
+        playerId: goleiroQueSai.id,
+        acao: "cancelar",
+        origem: "PLAYER",
+      });
+
+      expect(promovido?.id).toBe(goleiroDeFora.id);
+      const subiu = await db.attendance.findUniqueOrThrow({
+        where: {
+          roundId_playerId: { roundId: rodada.id, playerId: goleiroDeFora.id },
+        },
+      });
+      expect(subiu.asGoalkeeper).toBe(true);
+    });
+
+    it("confirmar com a lista cheia cria presença na espera", async () => {
+      const { grupo, rodada } = await criarCenario(db);
+      const novo = await db.player.create({
+        data: { groupId: grupo.id, displayName: "Atrasado", skillLevel: 3 },
+      });
+
+      const { resultado } = await mudarPresenca(db, {
+        roundId: rodada.id,
+        playerId: novo.id,
+        acao: "confirmar",
+        origem: "PLAYER",
+      });
+
+      expect(resultado).toMatchObject({ ok: true, status: "WAITING" });
+      const presenca = await db.attendance.findUniqueOrThrow({
+        where: { roundId_playerId: { roundId: rodada.id, playerId: novo.id } },
+      });
+      expect(presenca.status).toBe("WAITING");
+      expect(presenca.origin).toBe("PLAYER");
+    });
+
+    it("clicar duas vezes no link não duplica nem muda nada", async () => {
+      const { rodada, elenco } = await criarCenario(db);
+      const jogador = elenco[0];
+
+      await mudarPresenca(db, {
+        roundId: rodada.id,
+        playerId: jogador.id,
+        acao: "confirmar",
+        origem: "PLAYER",
+      });
+      const { resultado } = await mudarPresenca(db, {
+        roundId: rodada.id,
+        playerId: jogador.id,
+        acao: "confirmar",
+        origem: "PLAYER",
+      });
+
+      expect(resultado.ok && resultado.mudancas).toEqual([]);
+      const presencas = await db.attendance.findMany({
+        where: { roundId: rodada.id, playerId: jogador.id },
+      });
+      expect(presencas).toHaveLength(1);
+    });
+
+    it("recusa jogador de outro grupo", async () => {
+      const { rodada } = await criarCenario(db);
+      const outro = await criarCenario(db);
+
+      await expect(
+        mudarPresenca(db, {
+          roundId: rodada.id,
+          playerId: outro.elenco[0].id,
+          acao: "cancelar",
+          origem: "PLAYER",
+        }),
+      ).rejects.toThrow(/não pertence/i);
+    });
+
+    it("rodada ao vivo não aceita mais mudança", async () => {
+      const { rodada, elenco } = await criarCenario(db);
+      await db.round.update({ where: { id: rodada.id }, data: { status: "LIVE" } });
+
+      const { resultado } = await mudarPresenca(db, {
+        roundId: rodada.id,
+        playerId: elenco[0].id,
+        acao: "cancelar",
+        origem: "PLAYER",
+      });
+
+      expect(resultado.ok).toBe(false);
+      const presenca = await db.attendance.findUniqueOrThrow({
+        where: { roundId_playerId: { roundId: rodada.id, playerId: elenco[0].id } },
+      });
+      expect(presenca.status).toBe("CONFIRMED");
     });
   });
 });

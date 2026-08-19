@@ -20,12 +20,16 @@ import { Card, Chip, EmptyState, Panel, SectionLabel } from "@/components/ui/pri
 import { Sheet } from "@/components/ui/dialog";
 import { PlayerRow } from "@/components/football/player-row";
 import {
+  IconCheck,
+  IconCopy,
   IconEdit,
   IconPlus,
   IconSearch,
+  IconShare,
   IconTrash,
   IconX,
 } from "@/components/ui/icons";
+import { buildLinkPessoalMessage } from "@/domain/share/whatsapp";
 import { cn } from "@/lib/cn";
 
 export interface JogadorDoElenco {
@@ -38,6 +42,8 @@ export interface JogadorDoElenco {
   active: boolean;
   notes: string | null;
   aliases: string[];
+  /** `/p/<token>` completo — a URL pública é montada no servidor. */
+  linkPessoal: string;
 }
 
 const POSICOES: Posicao[] = [
@@ -50,9 +56,11 @@ const POSICOES: Posicao[] = [
 
 export function ElencoView({
   groupId,
+  groupName,
   jogadores,
 }: {
   groupId: string;
+  groupName: string;
   jogadores: JogadorDoElenco[];
 }) {
   const [busca, setBusca] = useState("");
@@ -190,6 +198,7 @@ export function ElencoView({
         <FichaDoJogador
           key={editando}
           groupId={groupId}
+          groupName={groupName}
           jogador={emEdicao}
           onFechar={() => setEditando(null)}
         />
@@ -263,10 +272,12 @@ function NivelPontos({ nivel }: { nivel: number }) {
 
 function FichaDoJogador({
   groupId,
+  groupName,
   jogador,
   onFechar,
 }: {
   groupId: string;
+  groupName: string;
   jogador?: JogadorDoElenco;
   onFechar: () => void;
 }) {
@@ -479,7 +490,86 @@ function FichaDoJogador({
             />
           </Field>
 
+          {jogador && (
+            <LinkPessoal
+              jogador={jogador}
+              groupName={groupName}
+              nome={apelido.trim() || nome.trim() || jogador.displayName}
+            />
+          )}
+
           {erro && !erro.campo && <p className="text-body-s text-red">{erro.mensagem}</p>}
     </Sheet>
+  );
+}
+
+/**
+ * O link pessoal do jogador (bloco I). Fica na ficha, e não na lista, porque a
+ * distribuição é **um a um**: colar 22 links no grupo entrega a presença de
+ * cada um pra todo mundo.
+ */
+function LinkPessoal({
+  jogador,
+  groupName,
+  nome,
+}: {
+  jogador: JogadorDoElenco;
+  groupName: string;
+  nome: string;
+}) {
+  const [copiado, setCopiado] = useState<"link" | "mensagem" | null>(null);
+
+  const mensagem = buildLinkPessoalMessage({
+    nome,
+    groupName,
+    url: jogador.linkPessoal,
+  });
+
+  async function copiar(texto: string, qual: "link" | "mensagem") {
+    try {
+      await navigator.clipboard.writeText(texto);
+      setCopiado(qual);
+    } catch {
+      setCopiado(null);
+    }
+  }
+
+  return (
+    <section className="flex flex-col gap-2 rounded-md border border-line bg-surface-2 p-3">
+      <span className="text-caption font-bold uppercase tracking-[0.1em] text-ink-3">
+        Link pessoal
+      </span>
+      <p className="text-body-s text-ink-2">
+        Com esse link {jogador.displayName} confirma presença sozinho, sem conta e
+        sem instalar nada. Manda no privado — quem abre responde no lugar dele.
+      </p>
+
+      <code className="overflow-x-auto rounded-sm bg-canvas px-2.5 py-2 text-body-s text-ink-3">
+        {jogador.linkPessoal}
+      </code>
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          block
+          onClick={() => copiar(jogador.linkPessoal, "link")}
+        >
+          {copiado === "link" ? <IconCheck size={15} /> : <IconCopy size={15} />}
+          {copiado === "link" ? "Copiado" : "Copiar link"}
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          block
+          onClick={() => copiar(mensagem, "mensagem")}
+        >
+          {copiado === "mensagem" ? <IconCheck size={15} /> : <IconShare size={15} />}
+          {copiado === "mensagem" ? "Copiado" : "Copiar recado"}
+        </Button>
+      </div>
+    </section>
   );
 }

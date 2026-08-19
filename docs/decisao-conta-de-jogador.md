@@ -1,4 +1,9 @@
-# Conta de jogador — a decisão em aberto
+# Conta de jogador — decidido em 19/08/2026: **opção B**
+
+> **Fechado.** O dono escolheu a **opção B** (link pessoal, sem conta), com o link **por
+> jogador e sem expirar**, e o jogador **pode se colocar na espera sozinho**. Implementado
+> na sessão de 19/08 — ver STATUS §2 ("Bloco I") e HANDOFF ("Sessão de 19/08"). O texto
+> abaixo fica como registro do levantamento que levou à escolha.
 
 Bloco **I** do HANDOFF e último item do §63 do plano: *"se o jogador poderá criar
 conta já na v1"*. Este documento fecha o levantamento; a escolha é sua.
