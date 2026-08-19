@@ -412,6 +412,13 @@ padrão em qualquer animação de espera. Stagger: 40ms nos cards de time, 60ms 
     `scripts/corrigir-fuso-das-rodadas.ts` relata por padrão e só grava com `--aplicar`.
     A detecção é exata (hora de parede em UTC igual ao `defaultStartTime` do grupo), então
     rodada criada em máquina de dev não é tocada.
+    **Ele fala com o banco do `.env`, que é o Docker local.** Rodar e ver "0 com a marca
+    do bug" não significa que produção está limpa — significa que o Docker está. Para
+    produção, force a URL no ambiente (o `dotenv` não sobrescreve o que já existe, então
+    a variável do shell vence). PowerShell:
+    `$env:DATABASE_URL = '...:6543/postgres'` → rode → `Remove-Item Env:\DATABASE_URL`.
+    A primeira linha da saída diz sempre contra qual banco ele está falando; confira
+    antes de usar `--aplicar`.
 27. **`staleTimes` deixa dado velho por até 30s.** O cache de navegação do cliente está
     ligado em `next.config.ts`. Mutação própria não sofre (toda action chama
     `revalidatePath("/g", "layout")`), mas mudança feita por **outro** organizador demora
