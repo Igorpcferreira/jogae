@@ -2,6 +2,13 @@ import "server-only";
 import { cache } from "react";
 import { prisma } from "@/db/client";
 import type { Prisma } from "@/db/generated/client";
+import {
+  aggregatePlayerStats,
+  mvpDaRodada,
+  type StatEvent,
+  type StatMatch,
+  type StatRoster,
+} from "@/domain/statistics/aggregate";
 import { timesAnteriores } from "./service";
 
 const roundInclude = {
@@ -92,16 +99,80 @@ export const temRodadaAoVivo = cache(async (groupId: string) => {
   return aoVivo !== null;
 });
 
+/**
+ * Histórico das rodadas encerradas, já com o craque de cada uma.
+ *
+ * O MVP era calculado só na página pública (`/r/[token]`) — dívida da Fase 2
+ * anotada no HANDOFF. Ele sai daqui pronto porque decidir craque é regra de
+ * domínio (`mvpDaRodada`), e página não decide nada.
+ */
 export const getRoundHistory = cache(async (groupId: string, take = 10) => {
-  return prisma.round.findMany({
+  const rounds = await prisma.round.findMany({
     where: { groupId, status: "FINISHED" },
     orderBy: { date: "desc" },
     take,
     include: {
-      teams: { orderBy: { order: "asc" } },
-      matches: { orderBy: { order: "asc" } },
+      teams: {
+        orderBy: { order: "asc" },
+        include: { players: { select: { playerId: true } } },
+      },
+      matches: {
+        orderBy: { order: "asc" },
+        include: {
+          events: {
+            select: {
+              matchId: true,
+              type: true,
+              teamId: true,
+              playerId: true,
+              assistPlayerId: true,
+              voidedAt: true,
+            },
+          },
+        },
+      },
       _count: { select: { attendances: true } },
     },
+  });
+
+  const stats = rounds.map((round) => {
+    const roster: StatRoster = {};
+    for (const team of round.teams) {
+      roster[team.id] = team.players.map((tp) => tp.playerId);
+    }
+    const matches: StatMatch[] = round.matches.map((match) => ({
+      id: match.id,
+      teamAId: match.teamAId,
+      teamBId: match.teamBId,
+      scoreA: match.scoreA,
+      scoreB: match.scoreB,
+      status: match.status,
+    }));
+    const events: StatEvent[] = round.matches.flatMap((match) => match.events);
+    return mvpDaRodada(aggregatePlayerStats(matches, events, roster).values());
+  });
+
+  const nomes = await prisma.player.findMany({
+    where: {
+      id: { in: [...new Set(stats.filter(Boolean).map((mvp) => mvp!.playerId))] },
+    },
+    select: { id: true, displayName: true, nickname: true },
+  });
+  const porId = new Map(nomes.map((player) => [player.id, player]));
+
+  return rounds.map((round, index) => {
+    const mvp = stats[index];
+    const jogador = mvp ? porId.get(mvp.playerId) : undefined;
+    return {
+      ...round,
+      craque: jogador
+        ? {
+            playerId: mvp!.playerId,
+            nome: jogador.nickname ?? jogador.displayName,
+            contributions: mvp!.contributions,
+          }
+        : null,
+    };
   });
 });
 

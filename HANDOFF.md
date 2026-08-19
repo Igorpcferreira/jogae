@@ -58,21 +58,65 @@ Regras de trabalho:
 | Bloco da próxima sessão | Esforço | Por quê |
 | --- | --- | --- |
 | ~~**J — Deploy**~~ | — | **Concluído em 18/08.** Está no ar na Vercel + Supabase. Sobrou só SMTP e domínio (configuração, não código). |
-| **I — Conta de jogador** | **decisão sua, depois Opus medium** | `docs/decisao-conta-de-jogador.md` fecha o levantamento; recomendação é a **opção B**. Uma sessão de trabalho depois da decisão. |
-| **Fase 2 — social e gamificação** | **Opus medium** | Base de estatística pronta e testada; o que falta é **decisão de produto** (quais badges), não código. |
+| ~~**I — Conta de jogador**~~ | — | **Concluído em 19/08** (opção B, link pessoal). Sobrou migration em produção e distribuir os links — operação, não código. |
+| **Fase 2 — social e gamificação** | **parcial: conquistas feitas em 19/08** | As 6 conquistas do recorte inicial estão no ar em código. O que sobra do §27 (votação de MVP, recordes, retrospectivas, card de jogador, share card) continua dependendo de decisão de produto. |
 | **Fase 3 — financeiro** | **Opus high + decisão sua** | O PRD (§28) lista funcionalidades mas não as regras. Precisa de regra antes de virar schema. |
 | **H — QA em aparelho real** | **você, com o app na mão** | Não é trabalho de modelo: precisa de iPhone e Android de verdade. |
 
-**Se for pegar só um:** **I (conta de jogador, opção B)**. É o que tira o organizador do
-meio de toda mudança de presença — o gargalo real do produto hoje — e é pré-requisito
-natural pra Fase 2 fazer sentido (badge de sequência de presença vale muito mais quando a
-presença chega sozinha).
+**Se for pegar só um:** **rodar o grupo de verdade por algumas semanas** antes de escrever
+mais código. O bloco I e as conquistas saíram no mesmo dia e nenhum dos dois foi tocado por
+gente real: "presença de ferro" precisa de 4 rodadas pra existir, e o link pessoal precisa
+das 22 mensagens. Depois disso, o resto da Fase 2 (retrospectiva, recordes, card de
+jogador) tem dado pra se apoiar — hoje não tem.
 
-**Ordem recomendada:** I → Fase 2 → Fase 3. Financeiro por último não é acaso: o §28 do
+**Ordem recomendada:** ~~I~~ → ~~conquistas~~ → uso real → resto da Fase 2 → Fase 3. Financeiro por último não é acaso: o §28 do
 plano é explícito que ele só entra "depois que a aplicação já estiver sendo usada
 naturalmente", porque aumenta responsabilidade, suporte e caso de exceção.
 
 ---
+
+## Sessão de 19/08 (parte 2) — Fase 2: conquistas
+
+Seis conquistas, o recorte que este próprio arquivo recomendava. Detalhe no STATUS §2;
+o que vale registrar do caminho:
+
+- **A regra difícil não era calcular, era não constranger.** O plano manda "leve e
+  positiva", e isso vira decisão de código em três lugares: nada de conquista negativa,
+  empate divide em vez de escolher, e conquista que muita gente tem não é dada a ninguém.
+- **O dado real achou o bug que o teste não achou.** Com o seed, a primeira rodada da vida
+  do grupo deu "Estreia" pros 20 jogadores. Os testes passavam porque eu tinha escrito o
+  caso do novato entrando num grupo rodado — não o do grupo nascendo. Virou
+  `MAXIMO_ESTREANTES` e dois testes novos. **Vale o hábito: subir o `next start` com o
+  seed e abrir a tela, mesmo com a suíte verde.**
+- **Servidor de smoke test morre mal.** `npm run start` parado pelo agente deixou o
+  processo segurando a porta 3000, e o `start` seguinte falhou em silêncio — passei um
+  tempo achando que o código estava errado quando o build servido é que era velho.
+  Confira com `netstat -ano | grep ":3000"` antes de acreditar no que a tela mostra.
+- **Rótulo não pode mentir.** "Artilheiro do mês" na aba "Geral" seria errado, então a
+  seção de conquistas é sempre do mês, independente do período do ranking.
+
+## Sessão de 19/08 — bloco I: o jogador confirma sozinho
+
+Opção B implementada de ponta a ponta: `Player.selfToken` → `/p/<token>` → dois botões.
+O que ficou de aprendizado, além do que está no STATUS:
+
+- **A regra que faltava não era "cancelar", era "quem sobe".** `cancelou → primeiro da
+  espera sobe` parece uma linha, mas carrega quatro casos que só aparecem escrevendo
+  teste: sair da espera não abre vaga pra ninguém; lista estourada (organizador colou mais
+  gente que cabe) não promove; goleiro que cai deixa o time sem quem pega bola; e o
+  "primeiro" é por `order`, não pela ordem que o banco devolveu.
+- **Ordem monotônica em vez de recontagem.** `promoverDaEspera` gravava
+  `order = contagem de confirmados`, que colide com quem já está lá. Quem entra agora vai
+  pro fim (`maior + 1`) — sem colisão, sem renumerar a lista inteira a cada clique.
+- **`@default` do Prisma não é default do banco.** `@default(uuid(4))` é gerado no client,
+  então `ADD COLUMN ... NOT NULL` estoura em tabela com dado. A migration foi escrita à
+  mão em três passos (anulável → `UPDATE` com `gen_random_uuid()` → `SET NOT NULL`).
+- **Idempotência é requisito de UX aqui, não refinamento.** O link vive no WhatsApp e vai
+  ser clicado de novo, sem querer, semanas depois. Clique repetido devolve `ok` com zero
+  escritas.
+- **Link pessoal é credencial, e credencial não se manda pro grupo.** Por isso não existe
+  botão "copiar todos os links": a ficha copia um, com um recado que já avisa pra não
+  repassar.
 
 ## Sessão de 18/08 — deploy, desempenho e o bug do fuso
 
@@ -153,8 +197,27 @@ Continua faltando, e **não dá pra fazer sem o aparelho**:
 - Ficha do jogador e sheet de gol em tela pequena, com teclado aberto.
 - Safe area do iPhone conferida no aparelho, não só no CSS.
 
-### I. Conta de jogador — decisão pendente
-Detalhado na seção **"Os três blocos que o dono quer atacar"**, logo abaixo.
+### I. Conta de jogador — **concluído em código (19/08)**
+Opção B: link pessoal, sem conta. Schema, regra de domínio, rota, action e distribuição
+estão prontos e testados (ver STATUS §2, "Bloco I"). O que **sobrou**, e não é código:
+
+- **Rodar a migration em produção.** `20260819120000_link_pessoal_do_jogador` só foi
+  aplicada no banco local e no schema `teste`. Em produção vai pelo `DIRECT_URL`
+  (porta 5432): o pooler da 6543 não tem advisory lock nem prepared statement.
+- **Distribuir os links.** 22 mensagens no privado, uma por jogador (ficha do jogador em
+  `/g/[slug]/elenco` → "Copiar recado"). Não existe atalho "mandar no grupo" de propósito.
+- **Colar os templates de e-mail** (abaixo) antes de convidar ninguém: convite no spam é a
+  adoção morrendo na porta.
+- **Ninguém de verdade clicou ainda.** O fluxo foi verificado com o seed no `next start`,
+  não com o grupo.
+
+O que **não** entrou, por escopo:
+- Prazo pra cancelar (hoje dá pra cancelar até o apito inicial). Vira parâmetro do grupo
+  se o dono do fut pedir.
+- Notificação de "subiu da espera" — quem sobe só descobre abrindo o link. Depende de
+  push, que não existe ainda.
+- Revogar/trocar o link de um jogador: o schema aguenta (é só gravar um `selfToken` novo),
+  mas não tem botão.
 
 ### J. Deploy — **concluído em 18/08**
 No ar em **https://jogae-free.vercel.app**: Vercel (região `gru1`) + Supabase Cloud
@@ -163,13 +226,13 @@ No ar em **https://jogae-free.vercel.app**: Vercel (região `gru1`) + Supabase C
 - ~~**SMTP no Supabase**~~ — **feito em 18/08.** Hostinger (`smtp.hostinger.com:465`,
   usuário `igor@somoskyber.com.br`). Testado: o link de login chega e loga.
   SPF, DKIM (`hostingermail-a/b/c`) e DMARC (`p=none`) do domínio estão todos válidos.
-- **Os e-mails caem em spam e estão em inglês.** O template é o padrão do Supabase:
-  "Your sign-in link", três linhas e um link solto — assinatura clássica de spam, e
-  errado num produto todo em pt-BR. **Isto é risco real pro bloco I**: 22 convites no
-  spam é a adoção morrendo na porta. Os templates ficam em Supabase → Authentication →
-  Emails → Templates (HTML colado no painel, não vive no repositório). Precisam de
-  português, texto de verdade e a identidade do Jogaê — e como é e-mail, vale HTML de
-  tabela com estilo inline, não os tokens do `globals.css`.
+- **Os e-mails: HTML pronto, falta colar.** `docs/emails/magic-link.html` e
+  `docs/emails/convite.html` estão escritos (português, identidade do Jogaê, tabela com
+  estilo inline, preheader, link também em texto, `{{ .ConfirmationURL }}` intocado);
+  `docs/emails/README.md` diz onde colar, o assunto sugerido e como testar. O passo que
+  falta é manual: Supabase → Authentication → Emails → Templates. Detalhe que vale saber:
+  **quem é convidado pro grupo recebe o Magic Link**, não o "Invite user" — o convite do
+  Jogaê não tem token, a verificação do e-mail é do provedor.
 - **Reputação de domínio** melhora com uso; `jogae.com.br` próprio resolveria de vez o
   descasamento entre a marca "Jogaê" e o domínio `somoskyber.com.br`.
 - **Domínio próprio** — não muda desempenho, muda identidade.
@@ -242,17 +305,29 @@ positiva. Evitar mecânicas que gerem conflito desnecessário."* Isso descarta, 
 badge de "pior do mês", ranking de faltas ou qualquer coisa que exponha quem joga mal —
 e reforça a invariante do nível técnico privado.
 
-**O que decidir antes de codar:** a **lista de badges**. É a decisão que trava tudo, e é
-de produto: quais conquistas existem, com que critério, e como não viram constrangimento.
-Sugestão de recorte inicial pequeno e seguro, todo derivável do que já é calculado:
-artilheiro do mês, garçom do mês (assistências), presença de ferro (sequência de rodadas),
-hat-trick, primeira vez que jogou, MVP da rodada.
+**A lista de badges foi decidida e implementada em 19/08** — exatamente o recorte que
+estava sugerido aqui: artilheiro do mês, garçom do mês, presença de ferro, hat-trick,
+estreia e craque da rodada. Está em `src/domain/badges/conquistas.ts`, com os critérios e
+os limites (`MINIMO_SEQUENCIA`, `MAXIMO_EMPATADOS`, `MAXIMO_ESTREANTES`) num lugar só —
+mudar um número é mudar a regra, e os testes cobrem cada um.
 
-**Dívida barata que já pertence a esta fase:** `mvpDaRodada` existe mas só aparece na
-página pública `/r/[token]`. Levar pro ranking e pro histórico é meia hora.
+~~**Dívida barata:** `mvpDaRodada` só aparece na página pública.~~ **Quitada:** o craque
+sai no histórico da tela Mais e como conquista no ranking.
 
-**Dependência real:** "sequência de presenças" fica muito mais forte depois do bloco I —
-enquanto a presença vem da lista colada pelo organizador, o dado é dele, não do jogador.
+**O que continua aberto do §27, e cada um é decisão de produto:**
+- **Votação de MVP.** Hoje o craque é *calculado* por participação em gol. Votação é outro
+  produto: quem vota, quando fecha, o que acontece com empate, e o risco de virar
+  popularidade em vez de futebol.
+- **Recordes pessoais e "melhor mês".** Precisa decidir o que é recorde (mais gols numa
+  rodada? maior sequência de todos os tempos?) e onde isso mora — hoje tudo é recalculado
+  na hora, e recorde histórico provavelmente quer coluna.
+- **Retrospectiva mensal e anual, comparação entre amigos, card de jogador, share card de
+  conquista, animação de hat-trick.**
+
+**Dependência real, e ela agora é concreta:** "presença de ferro" só existe depois de 4
+rodadas seguidas, e a presença só é do jogador depois que ele usar o link pessoal
+(`Attendance.origin = PLAYER`). Enquanto o grupo não rodar algumas semanas com o bloco I no
+ar, essa conquista não tem como aparecer pra ninguém.
 
 ---
 
@@ -434,6 +509,21 @@ padrão em qualquer animação de espera. Stagger: 40ms nos cards de time, 60ms 
     isso pra aparecer. Se o placar ao vivo começar a atrasar, é esse número que baixa.
 28. **`regions: ["gru1"]` no `vercel.json` não é opcional.** Sem ele a Vercel sobe a
     função em `iad1` e cada query paga ~150ms de travessia até o banco em `sa-east-1`.
+29. **`@default(...)` do Prisma não vira default no Postgres.** `cuid()`, `uuid(4)` e
+    companhia são gerados no client. Duas consequências, e a segunda é a que morde:
+    (a) `ADD COLUMN "x" TEXT NOT NULL` numa tabela com dado **estoura** mesmo com
+    `@default` no schema — coluna obrigatória em tabela viva é sempre em três passos:
+    anulável → `UPDATE` de backfill → `SET NOT NULL`;
+    (b) **o código que já está no ar não conhece a coluna nova** e vai mandar `INSERT`
+    sem ela, tomando violação de `NOT NULL` na janela entre `migrate deploy` e o deploy
+    do código. Em `Player` isso não é teórico: importar lista cria jogador. A saída é
+    `@default(dbgenerated("..."))`, que põe o default no banco — ver
+    `20260819133000_default_do_link_no_banco`. **Migration sempre roda antes do deploy,
+    então ela precisa ser compatível com o código velho.**
+30. **`Player.selfToken` é credencial, não identificador.** Quem tem o link responde a
+    presença daquele jogador. Nunca liste vários links numa tela de copiar/compartilhar,
+    nunca mande pro grupo, e nunca coloque `/p/**` num `og:image` ou metadado indexável —
+    a página já sai com `robots: noindex`. Revogar é gravar um `selfToken` novo.
 
 ---
 
@@ -458,6 +548,13 @@ padrão em qualquer animação de espera. Stagger: 40ms nos cards de time, 60ms 
 | Deploy e checklist de produção | `docs/deploy.md` |
 | Defaults de modalidade, slug, capacidade | `src/domain/groups/setup.ts` |
 | Regras do elenco (nome, nível, conflito) | `src/domain/roster/roster.ts` |
+| Conquistas: quais existem e quem ganha | `src/domain/badges/conquistas.ts` |
+| Conquista desenhada (ícone e cor) | `src/components/football/conquista-card.tsx` |
+| Presença: confirmar, cancelar, quem sobe da espera | `src/domain/attendance/presenca.ts` |
+| Tela do jogador (link pessoal) | `src/app/p/[token]/` |
+| Leitura e mutação do link pessoal | `src/features/presenca/` |
+| Gravar presença passando pela regra | `mudarPresenca` em `src/features/rounds/service.ts` |
+| Templates de e-mail do Supabase | `docs/emails/` (colar no painel) |
 | Próxima data da rodada | `src/domain/schedule/recurrence.ts` |
 | Fuso horário (hora de parede ↔ instante) | `src/domain/time/fuso.ts` |
 | Formatação de data e hora na UI | `src/lib/dates.ts` |

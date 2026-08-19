@@ -2,9 +2,10 @@ import Link from "next/link";
 import { requireGrupoPorSlug } from "@/features/groups/access";
 import { cn } from "@/lib/cn";
 import { getCurrentRound } from "@/features/rounds/queries";
-import { getRanking, type RankingPeriod } from "@/features/rankings/queries";
+import { getConquistas, getRanking, type RankingPeriod } from "@/features/rankings/queries";
 import type { RankingMetric } from "@/domain/statistics/aggregate";
 import { Card, EmptyState, SectionLabel } from "@/components/ui/primitives";
+import { ConquistaCard } from "@/components/football/conquista-card";
 
 export const metadata = { title: "Ranking" };
 
@@ -43,7 +44,12 @@ export default async function RankingPage({
     : "goals";
 
   const round = period === "round" ? await getCurrentRound(group.id) : null;
-  const ranking = await getRanking(group.id, period, metric, round?.id);
+  // Em paralelo: uma não depende da outra e cada ida ao banco custa caro
+  // (a função roda em gru1, o banco em sa-east-1).
+  const [ranking, conquistas] = await Promise.all([
+    getRanking(group.id, period, metric, round?.id),
+    getConquistas(group.id),
+  ]);
   const activeMetric = METRICS.find((m) => m.value === metric)!;
 
   const valueOf = (row: (typeof ranking)[number]) =>
@@ -71,6 +77,24 @@ export default async function RankingPage({
           active: m.value === metric,
         }))}
       />
+
+      {conquistas.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <SectionLabel>Conquistas do mês</SectionLabel>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {conquistas.map((conquista, index) => (
+              <ConquistaCard
+                key={`${conquista.tipo}-${conquista.playerId}`}
+                tipo={conquista.tipo}
+                valor={conquista.valor}
+                nome={conquista.nickname ?? conquista.displayName}
+                className="animate-rise"
+                style={{ animationDelay: `${Math.min(index, 5) * 60}ms` }}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {visible.length === 0 ? (
         <EmptyState title="O ranking começa no primeiro apito." />

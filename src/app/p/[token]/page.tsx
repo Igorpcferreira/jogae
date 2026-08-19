@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Card, Chip, SectionLabel } from "@/components/ui/primitives";
 import { TeamCard, TeamStripe } from "@/components/football/team-card";
+import { ConquistaCard } from "@/components/football/conquista-card";
 import { IconClock, IconPin, JogaeMark } from "@/components/ui/icons";
 import { podeMexerNaPresenca } from "@/domain/attendance/presenca";
 import { getPainelDoJogador } from "@/features/presenca/queries";
@@ -53,7 +54,7 @@ export default async function PaginaDoJogador({
   // mensagem que confirme que o token um dia existiu.
   if (!painel) notFound();
 
-  const { jogador, rodada } = painel;
+  const { jogador, rodada, conquistas } = painel;
   const primeiroNome = (jogador.nickname ?? jogador.displayName).split(" ")[0];
 
   return (
@@ -149,6 +150,22 @@ export default async function PaginaDoJogador({
                     isGoalkeeper: companheiro.isGoalkeeper,
                   }))}
                 />
+              </section>
+            )}
+
+            {conquistas.length > 0 && (
+              <section className="flex flex-col gap-3">
+                <SectionLabel>Suas conquistas</SectionLabel>
+                <div className="grid gap-2">
+                  {conquistas.map((conquista) => (
+                    <ConquistaCard
+                      key={conquista.tipo}
+                      tipo={conquista.tipo}
+                      valor={conquista.valor}
+                      nome={jogador.nickname ?? jogador.displayName}
+                    />
+                  ))}
+                </div>
               </section>
             )}
 

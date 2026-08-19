@@ -13,6 +13,7 @@ import {
   IconLogout,
   IconPlayers,
   IconSettings,
+  IconTrophy,
 } from "@/components/ui/icons";
 import { formatLongDate, nomeDoDiaDaSemana } from "@/lib/dates";
 
@@ -173,6 +174,14 @@ export default async function MorePage({
                       <div className="text-caption text-ink-3">
                         {round._count.attendances} jogadores · {round.matches.length} partidas
                       </div>
+                      {round.craque && (
+                        <div className="mt-1 flex items-center gap-1.5 text-caption text-pink">
+                          <IconTrophy size={13} />
+                          <span className="truncate">
+                            Craque: {round.craque.nome}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <IconChevronRight size={16} className="text-ink-3" />
                   </Link>

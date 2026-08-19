@@ -69,6 +69,22 @@ export const IconTrophy = (p: IconProps) => (
   </Icon>
 );
 
+/** Estreia — primeira vez em campo. */
+export const IconStar = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3.5l2.6 5.3 5.9.85-4.25 4.15 1 5.85L12 16.9l-5.25 2.75 1-5.85L3.5 9.65l5.9-.85z" />
+  </Icon>
+);
+
+/** Sequência de presença — corrente que não arrebenta. */
+export const IconStreak = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M9.5 14.5l-1.9 1.9a3.4 3.4 0 0 1-4.8-4.8l1.9-1.9" />
+    <path d="M14.5 9.5l1.9-1.9a3.4 3.4 0 0 1 4.8 4.8l-1.9 1.9" />
+    <path d="M9.2 14.8l5.6-5.6" />
+  </Icon>
+);
+
 export const IconAssist = (p: IconProps) => (
   <Icon {...p}>
     <path d="M3.5 18.5C8 18.5 10 7.5 20.5 5.5" strokeDasharray="3 3" />

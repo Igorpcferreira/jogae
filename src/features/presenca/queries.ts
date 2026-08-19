@@ -4,6 +4,7 @@ import { cache } from "react";
 import { prisma } from "@/db/client";
 import { filaDaEspera, posicaoNaEspera } from "@/domain/attendance/presenca";
 import { getJogadorPorLinkPessoal } from "@/features/auth/queries";
+import { getConquistas } from "@/features/rankings/queries";
 import { getCurrentRoundId } from "@/features/rounds/queries";
 
 /**
@@ -19,8 +20,18 @@ export const getPainelDoJogador = cache(async (selfToken: string) => {
   const jogador = await getJogadorPorLinkPessoal(selfToken);
   if (!jogador) return null;
 
-  const roundId = await getCurrentRoundId(jogador.group.id);
-  if (!roundId) return { jogador, rodada: null };
+  // As conquistas dele são o "estatística" que o plano promete pra esta tela
+  // (§27) — e continuam sem nota: conquista se ganha jogando, não sendo bem
+  // avaliado pelo organizador.
+  const [roundId, conquistasDoGrupo] = await Promise.all([
+    getCurrentRoundId(jogador.group.id),
+    getConquistas(jogador.group.id),
+  ]);
+  const conquistas = conquistasDoGrupo
+    .filter((conquista) => conquista.playerId === jogador.id)
+    .map((conquista) => ({ tipo: conquista.tipo, valor: conquista.valor }));
+
+  if (!roundId) return { jogador, conquistas, rodada: null };
 
   const rodada = await prisma.round.findUnique({
     where: { id: roundId },
@@ -61,7 +72,7 @@ export const getPainelDoJogador = cache(async (selfToken: string) => {
       },
     },
   });
-  if (!rodada) return { jogador, rodada: null };
+  if (!rodada) return { jogador, conquistas, rodada: null };
 
   const presencas = rodada.attendances.map((presenca) => ({
     playerId: presenca.playerId,
@@ -82,6 +93,7 @@ export const getPainelDoJogador = cache(async (selfToken: string) => {
 
   return {
     jogador,
+    conquistas,
     rodada: {
       id: rodada.id,
       date: rodada.date,

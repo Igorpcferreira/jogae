@@ -1,10 +1,12 @@
 # STATUS — Jogaê
 
-**Atualizado:** 18/08/2026
+**Atualizado:** 19/08/2026
 **Fase do roadmap:** Fase 0 (Fundação) concluída · Fase 1 (MVP de organização) concluída ·
-Fase 1.5 concluída · **Bloco J (deploy) concluído — o app está em produção**
-**Verificação nesta data:** `npm test` 134/134 (verde também com `TZ=UTC`) ·
-`npm run test:integracao` 57/57 · `npx tsc --noEmit` limpo · `npx eslint .` limpo ·
+Fase 1.5 concluída · Bloco J (deploy) concluído — o app está em produção ·
+Bloco I (conta de jogador, opção B) concluído em código ·
+**Fase 2 (social e gamificação) — primeiro recorte de conquistas entregue**
+**Verificação nesta data:** `npm test` 183/183 (verde também com `TZ=UTC`) ·
+`npm run test:integracao` 63/63 · `npx tsc --noEmit` limpo · `npx eslint .` limpo ·
 `npm run build` OK.
 
 **Em produção:** https://jogae-free.vercel.app · Vercel (região `gru1`) + Supabase
@@ -36,8 +38,11 @@ pessoa no grupo; assistente recebe 404 em `/membros` e 200 no ao vivo.
 | **Papéis** | **OWNER / ADMIN / ASSISTANT**, regra pura em `domain/access` | Assistente apita o jogo, nunca mexe em config nem em sorteio (plano §6 e §55) |
 | **Envio de e-mail** | **Do Supabase, com SMTP próprio configurado no painel** | Um lugar só pra template, remetente e entrega. Em dev os e-mails caem no Mailpit local. Substituiu o Resend chamado direto do app |
 | **Testes da camada de dados** | **Serviço extraído + Postgres real em schema `teste`** | Mock de Prisma testaria o mock; schema separado dispensa segundo container |
+| **Conta de jogador** | **Opção B — link pessoal, sem conta** (`docs/decisao-conta-de-jogador.md`) | Entrega o valor da opção C (presença chega sem o organizador no meio) por uma fração do custo, e não fecha a porta pra conta de verdade depois. Decidido em 19/08 |
+| **Escopo do link do jogador** | **Um link por jogador, que não expira** | Link por rodada obrigaria a redistribuir 22 links toda semana no WhatsApp, e esse atrito mata a adoção |
+| **Jogador entra na espera sozinho** | **Sim** | Se a lista está cheia, o clique vira lugar na fila em vez de erro — é o que faz a espera andar sem ninguém no meio |
 
-Ainda em aberto: **conta de jogador** (hoje só organizador tem login) e **nome definitivo**.
+Ainda em aberto: **nome definitivo**.
 
 ---
 
@@ -80,12 +85,14 @@ foco amarelo 2px, e `prefers-reduced-motion`.
 | `domain/schedule` | Próxima data recorrente: hoje ainda dá tempo, virada de semana e de mês, sem recorrência. | 9 |
 | `domain/access/membros` | Convite (papel válido, já é membro, convite duplicado), troca de papel e remoção — nunca deixando o grupo sem dono. | 12 |
 | `domain/statistics` (MVP) | MVP da rodada por participação em gol, desempate por gols e vitórias; empate total não elege ninguém. | 4 |
+| `domain/badges` | Conquistas: artilheiro e garçom do mês, presença de ferro, hat-trick, craque da rodada, estreia. Empate divide a conquista; empate de gente demais não coroa ninguém; nada negativo. | 23 |
+| `domain/attendance` | Presença: confirmar, cancelar, **"cancelou → primeiro da espera sobe"**, goleiro que cai puxa goleiro da espera, clique repetido idempotente, lista/espera cheias, rodada fechada a mexida. | 23 |
 | `domain/text`, `domain/random` | Normalização, Levenshtein, similaridade, PRNG mulberry32 com seed. | (cobertos indiretamente) |
 
 **Invariantes garantidas por teste:** o balanceador não perde nem duplica jogador,
 respeita capacidade e locks, e a mesma seed sempre dá o mesmo resultado.
 
-### Camada de dados (53 testes de integração contra Postgres)
+### Camada de dados (63 testes de integração contra Postgres)
 `features/rounds/service.ts` e `features/live/service.ts` recebem o client por parâmetro e
 não sabem de sessão nem de `revalidatePath`. O que está coberto:
 importar lista cria jogador novo · aprende alias confirmado · substitui presenças em vez de
@@ -96,7 +103,10 @@ encerrar rodada fecha a partida em andamento e alimenta a vitória no ranking ·
 convite guarda só o hash e recusa duplicado · aceitar convite não rebaixa quem já é membro ·
 último dono não é rebaixado nem removido · assistente não sorteia nem edita config ·
 duplicar rodada repete a lista sem trazer inativo nem quem faltou · renomear time
-não mexe no elenco dele.
+não mexe no elenco dele · cancelar pelo link pessoal promove o primeiro da espera na
+mesma transação · goleiro que cai é substituído por goleiro · confirmar com a lista cheia
+cria presença na espera · clique repetido não duplica · jogador de outro grupo é recusado ·
+rodada ao vivo não aceita mudança.
 
 ### Autenticação e autorização
 - **Identidade é do Supabase Auth**: Google (caminho principal) e link por e-mail
@@ -143,6 +153,7 @@ não mexe no elenco dele.
 | `/g/[slug]/config` | Edita formato, recorrência e local do grupo |
 | `/g/[slug]/membros` | Só do dono: convidar por e-mail, trocar papel, tirar do grupo, revogar convite |
 | `/g/[slug]/mais` | Resumo do grupo, atalhos pra elenco, membros e config, histórico, conta e sair |
+| `/p/[token]` | **Link pessoal do jogador**: "Tô dentro" / "Não vou", posição na espera, o time dele quando saiu o sorteio. Sem login, sem conta — e sem nível técnico |
 | `/r/[token]` | Página pública: times, placares, espera, MVP da rodada, regra do dia — sem login, sem dado privado |
 | `/r/[token]/imagem` | Card PNG 1200×630 dos times (share card e `og:image` do link no WhatsApp) |
 | `/offline` | Fallback do service worker |
@@ -159,6 +170,74 @@ não mexe no elenco dele.
 - `components/ui/dialog.tsx` (`Sheet`): foco preso, Escape fecha, foco volta pro
   gatilho, scroll do fundo travado. Ficha do jogador, sheet de gol, convite, ficha de
   membro e ficha de time usam todos ele.
+
+### Bloco I — conta de jogador (opção B), sessão de 19/08
+O jogador confirma presença sozinho, **sem conta**. O que entrou:
+
+- **`Player.selfToken`** (UUID v4, único, não expira) — o link pessoal `/p/<token>`.
+  UUID e não `cuid()` como os outros tokens porque este *muda presença*: cuid carrega
+  contador e fingerprint da máquina, então dois gerados em sequência são parentes.
+  A migration preenche as linhas antigas com `gen_random_uuid()` antes de exigir
+  `NOT NULL`. O default é do **banco** (`@default(dbgenerated(...))`) e não do Prisma:
+  a migration roda antes do deploy, e o código que está no ar criaria jogador sem a
+  coluna nova — importar lista cria jogador, então a janela não era teórica.
+- **`Attendance.origin`** (`ORGANIZER` | `PLAYER`) — separa "ele confirmou sozinho" de
+  "o organizador colou a lista". Sem isso a sequência de presença da Fase 2 seria mérito
+  de quem organiza. A origem marca quem **escolheu** o status: quem sobe da espera não
+  escolheu nada e mantém a que tinha.
+- **`src/domain/attendance/presenca.ts`** (23 testes) — a regra que faltava. Cancelou →
+  o primeiro da espera sobe, por `order` crescente. Quem entra na lista vai sempre pro
+  fim (`order = maior + 1`), sem a colisão de ordem que o `promoverDaEspera` do organizador
+  ainda produz (ele grava `order = contagem de confirmados`, que bate com quem já está na
+  lista — dívida conhecida, não tocada nesta sessão). Clique repetido é `ok` sem escrita nenhuma — o link
+  mora no WhatsApp e vai ser clicado de novo.
+- **Goleiro fura a fila.** Se quem saiu era goleiro e o grupo reserva vaga de gol, sobe o
+  primeiro goleiro da espera; sem goleiro esperando, sobe o primeiro mesmo assim e sai o
+  aviso `sem-goleiro-na-espera`. Grupo em revezamento (`vagasDeGoleiro = 0`) é FIFO puro.
+- **`requireAcessoPorLinkPessoal`** em `features/auth/queries.ts`: o token **é** a
+  credencial e autoriza um jogador só. A action nunca aceita `playerId` nem `roundId`
+  vindo do client — senão o link de um viraria a presença de outro. Token inválido,
+  revogado ou de jogador inativo responde **404**.
+- **Distribuição um a um.** Na ficha do jogador (`/g/[slug]/elenco`) tem "Copiar link" e
+  "Copiar recado" (`buildLinkPessoalMessage`). Não existe versão "manda no grupo" de
+  propósito: colar 22 links numa conversa de grupo entrega a presença de cada um pra todo
+  mundo, e a própria mensagem avisa isso.
+- **Invariante mantida e verificada:** o nível técnico não entra na função de domínio
+  (a entrada não tem `skillLevel`), não é selecionado pela consulta da página e não
+  aparece no HTML servido — conferido no `next start` com o seed real.
+
+### Fase 2 — conquistas, sessão de 19/08
+Primeiro recorte de gamificação, o que o HANDOFF recomendava. Seis conquistas em
+`src/domain/badges/conquistas.ts` (23 testes), todas deriváveis do que já era calculado:
+
+| Conquista | Critério | Cor |
+| --- | --- | --- |
+| Artilheiro do mês | Mais gols no mês | vermelho (gol) |
+| Garçom do mês | Mais assistências no mês | amarelo (assistência) |
+| Presença de ferro | 4+ rodadas seguidas sem faltar | verde (confirmação) |
+| Hat-trick | 3+ gols numa rodada | vermelho |
+| Craque da rodada | O `mvpDaRodada` que já existia | rosa (conquista) |
+| Estreia | Primeira rodada de quem jogou | rosa |
+
+As três regras que a exigência do plano ("leve e positiva, sem gerar conflito") impôs:
+
+- **Nada negativo.** Não existe "pior do mês" nem ranking de gol contra, e não vai
+  existir — a decisão está escrita no cabeçalho do módulo.
+- **Empate divide a conquista.** Dois artilheiros é resenha; escolher um por ordem
+  alfabética é briga. (O MVP continua a exceção: empate total não elege ninguém, porque
+  craque é singular por desenho.)
+- **Conquista que muita gente tem não é conquista.** Acima de 3 empatados, ninguém leva.
+  Isso apareceu **testando com dado real**: na primeira rodada da vida do grupo, os 20
+  jogadores são estreantes, e 20 medalhas iguais não são medalha. Vale pro topo do
+  ranking (`MAXIMO_EMPATADOS`) e pra estreia (`MAXIMO_ESTREANTES`).
+
+Onde aparece: **ranking** ("Conquistas do mês"), **link pessoal do jogador**
+(`/p/<token>` → "Suas conquistas") e o **craque de cada rodada no histórico** da tela
+Mais — que era a dívida barata anotada no HANDOFF (o `mvpDaRodada` existia e só saía na
+página pública).
+
+O recorte das conquistas é **sempre o mês**, mesmo quando a aba do ranking está em
+"Geral": o rótulo diz "do mês", e rótulo que mente é pior que aba a menos.
 
 ### Offline (plano §40)
 - `public/sw.js`: cache-first nos assets versionados do Next, network-first na navegação com
@@ -233,20 +312,27 @@ O que mudou:
    corrigiu o que dava pra ver lendo (safe area do indicador de sincronização, alvo de
    44px no botão compacto, respiro do rodapé com notch), mas iPhone e Android continuam
    sem QA real. O service worker nunca rodou fora do `next start` local.
-2. **Os e-mails de autenticação caem em spam e estão em inglês.** O SMTP funciona
-   (Hostinger, testado de ponta a ponta em 18/08) e SPF/DKIM/DMARC do domínio estão
-   válidos — o problema é o **template padrão do Supabase**: "Your sign-in link", três
-   linhas e um link solto. Falta português e identidade visual. Os templates vivem no
-   painel do Supabase (Authentication → Emails), não no repositório.
+2. **Os e-mails de autenticação continuam em inglês em produção — mas o HTML já existe.**
+   O SMTP funciona (Hostinger, testado de ponta a ponta em 18/08) e SPF/DKIM/DMARC do
+   domínio estão válidos; o que faltava era o template. `docs/emails/magic-link.html` e
+   `docs/emails/convite.html` estão prontos (português, identidade do Jogaê, tabela com
+   estilo inline, preheader, link também em texto) e `docs/emails/README.md` diz onde
+   colar e como testar. **Falta a ação manual:** colar no painel do Supabase
+   (Authentication → Emails → Templates) — eles não vivem no repositório.
 3. **Domínio próprio.** O app responde em `jogae-free.vercel.app`. Domínio não muda nada
    de desempenho; é questão de identidade e de mandar o link no grupo sem vergonha.
-4. **Conta de jogador** segue em aberto por decisão de produto, não por falta de código:
-   `docs/decisao-conta-de-jogador.md` tem as três saídas e a recomendação.
+4. **O bloco I está em código, mas ainda não em uso.** As migrations
+   `20260819120000_link_pessoal_do_jogador` e `20260819133000_default_do_link_no_banco`
+   foram aplicadas no banco local e no schema `teste`; **falta rodar em produção** (`prisma migrate deploy` pelo `DIRECT_URL`, porta
+   5432 — o pooler da 6543 não roda migration). E falta o passo humano: mandar o link no
+   privado de cada um dos 22. Nenhum jogador de verdade clicou nesse link ainda.
 5. Sem rate limit fora do login; erro de action ainda aparece só como mensagem inline.
-6. **Fase 2 e 3 do plano não entraram**: badges, recordes e retrospectivas (Fase 2, o MVP
-   da rodada foi o único item antecipado) e todo o financeiro (Fase 3 — valor da rodada,
-   pago/pendente, painel). O financeiro não tem regra definida no PRD além da lista de
-   tópicos; precisa de decisão de produto antes de virar schema.
+6. **Da Fase 2 entraram só as conquistas.** Continuam de fora, todos do §27: votação de
+   MVP (o craque hoje é calculado, não votado), recordes pessoais, "melhor mês",
+   retrospectiva mensal e anual, comparação entre amigos, card de jogador, share card de
+   conquista e animação de hat-trick. **A Fase 3 (financeiro) não entrou nada** — não tem
+   regra definida no PRD além da lista de tópicos; precisa de decisão de produto antes de
+   virar schema.
 
 9. **Fuso é um só pro app inteiro** (`America/Sao_Paulo`). O Fut Manus joga em UTC−4 e
    vê horário de Brasília — uma hora a mais. O bug do 17:30 está corrigido (o que o
@@ -263,7 +349,8 @@ O que mudou:
 7. A imagem dos times sai na fonte padrão: a Anton exigiria o `.ttf` embutido e o
    `next/font` não expõe o arquivo. Se `public/fonts/Anton-Regular.ttf` existir, a rota
    usa — é só colocar lá.
-8. `/g/[slug]/ranking` e o histórico ainda não mostram o MVP; só a página pública mostra.
+8. ~~`/g/[slug]/ranking` e o histórico ainda não mostram o MVP.~~ **Resolvido em 19/08:**
+   o craque aparece no histórico da tela Mais e como conquista no ranking.
 
 ---
 
