@@ -544,6 +544,10 @@ O que mudou:
 - **`DATABASE_URL` de produção é o pooler na porta 6543.** A 5432 é sessão/direta e
   só serve pra migration (`DIRECT_URL`). O `?pgbouncer=true` que o Supabase inclui é
   flag do query engine em Rust e o `@prisma/adapter-pg` a ignora — quem resolve é a porta.
+- **Migration de máquina local usa o Session Pooler, não a conexão direta.** O host
+  `db.<ref>.supabase.co` só tem IPv6 — de rede IPv4 dá `P1001` que parece senha
+  errada. O caminho é `postgres.<ref>@aws-0-sa-east-1.pooler.supabase.com:5432`
+  (armadilha 19b do HANDOFF).
 - Env var na Vercel só entra em vigor no **próximo deploy**: editar e não redeployar
   não muda nada.
 - Registry npm global aponta pro repositório privado da Marinha. O `.npmrc` do projeto

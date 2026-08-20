@@ -616,6 +616,15 @@ padrão em qualquer animação de espera. Stagger: 40ms nos cards de time, 60ms 
     (porta 5432) quando ela existe; `scripts/migrar-banco-de-teste.mjs` **apaga**
     `DIRECT_URL` do ambiente de propósito, senão rodar teste com `.env` de produção
     migraria o banco errado.
+19b. **A conexão direta (`db.<ref>.supabase.co:5432`) só existe em IPv6.** De rede
+    IPv4 (a maioria das residenciais no Brasil) ela dá `P1001: Can't reach database
+    server` — parece senha ou firewall, e não é nenhum dos dois; o DNS nem tem
+    registro A. Migration de máquina local vai pelo **Session Pooler** (modo sessão,
+    que tem advisory lock e prepared statement, diferente do 6543):
+    `postgresql://postgres.ykglklndohmfaozfazxs:SENHA@aws-0-sa-east-1.pooler.supabase.com:5432/postgres`
+    — repare que o usuário vira `postgres.<ref>`. O projeto está no `aws-0` (o
+    `aws-1` responde "tenant not found"). Descoberto em 20/08 na primeira migration
+    de produção.
 20. **O driver adapter do Prisma ignora o `?schema=` da URL.** O CLI lê, o `PrismaPg` não.
     Por causa disso os testes de integração rodavam no `public` e o `limparBanco` apagava o
     banco de desenvolvimento no meio da suíte. O schema vai por opção:
