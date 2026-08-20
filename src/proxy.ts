@@ -19,7 +19,15 @@ import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, supabaseConfigurado } from "@/l
  * papel dentro do grupo.
  */
 
-/** Rotas que exigem sessão. `/r/**` fica de fora: link público é público. */
+/**
+ * Rotas que exigem sessão — e a lista curta é de propósito.
+ *
+ * Ficam de fora as três rotas que existem justamente pra quem não tem conta:
+ * `/r/**` (página pública da rodada), `/p/**` (link pessoal do jogador) e
+ * `/e/**` (link de convidado do grupo). Nessas três quem autoriza é o token,
+ * não o cookie — ver `requireAcessoPorLinkPessoal` e
+ * `requireAcessoPorLinkDeConvidado` em `features/auth/queries.ts`.
+ */
 const PROTEGIDAS = [/^\/g(\/|$)/, /^\/novo(\/|$)/];
 
 export async function proxy(request: NextRequest) {

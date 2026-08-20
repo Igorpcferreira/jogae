@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
    * output serverless e o adaptador dela empacota as rotas depois do build.
    */
   output: process.env.VERCEL ? undefined : "standalone",
+  /**
+   * Os cards PNG (`/r/[token]/imagem` e `/r/[token]/conquistas/imagem`) leem
+   * `public/fonts/Anton-Regular.ttf` do filesystem em runtime. O tracer da
+   * Vercel não garante que arquivo lido por caminho montado entra no bundle da
+   * função — sem isto o card cai em silêncio na fonte padrão.
+   */
+  outputFileTracingIncludes: {
+    "/r/**": ["public/fonts/**"],
+    "/opengraph-image": ["public/fonts/**"],
+  },
   experimental: {
     // O client do Prisma 7 não deve ser empacotado pelo bundler do servidor.
     serverComponentsHmrCache: true,

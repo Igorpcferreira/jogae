@@ -20,6 +20,8 @@ function rodada(
     gols: entrada.gols ?? {},
     assistencias: entrada.assistencias ?? {},
     mvpPlayerId: entrada.mvpPlayerId ?? null,
+    escolhaDaGaleraIds: entrada.escolhaDaGaleraIds ?? [],
+    votosDaEscolha: entrada.votosDaEscolha,
   };
 }
 
@@ -247,6 +249,54 @@ describe("gamificação leve e positiva (plano §27)", () => {
       ...conquistasDaRodada(rodada("r1", { presentes: ["a", "b", "c"] })),
     ];
     expect(conquistas).toEqual([]);
+  });
+});
+
+describe("escolha da galera", () => {
+  it("vira conquista com o número de votos", () => {
+    const conquistas = conquistasDaRodada(
+      rodada("r1", {
+        presentes: ["a", "b"],
+        escolhaDaGaleraIds: ["b"],
+        votosDaEscolha: 7,
+      }),
+    );
+
+    expect(de(conquistas, "escolha-da-galera")).toEqual([
+      { tipo: "escolha-da-galera", playerId: "b", valor: 7, roundId: "r1" },
+    ]);
+  });
+
+  it("empate na urna divide a conquista", () => {
+    const conquistas = conquistasDaRodada(
+      rodada("r1", {
+        presentes: ["a", "b", "c"],
+        escolhaDaGaleraIds: ["b", "c"],
+        votosDaEscolha: 4,
+      }),
+    );
+
+    expect(de(conquistas, "escolha-da-galera").map((c) => c.playerId)).toEqual(["b", "c"]);
+  });
+
+  it("convive com o craque calculado — os dois medem coisas diferentes", () => {
+    const conquistas = conquistasDaRodada(
+      rodada("r1", {
+        presentes: ["a", "b"],
+        gols: { a: 2 },
+        mvpPlayerId: "a",
+        escolhaDaGaleraIds: ["b"],
+        votosDaEscolha: 5,
+      }),
+    );
+
+    expect(de(conquistas, "mvp")).toHaveLength(1);
+    expect(de(conquistas, "escolha-da-galera")).toHaveLength(1);
+  });
+
+  it("rodada sem votação não produz conquista de voto", () => {
+    const conquistas = conquistasDaRodada(rodada("r1", { presentes: ["a", "b"] }));
+    expect(de(conquistas, "escolha-da-galera")).toEqual([]);
   });
 });
 

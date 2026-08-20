@@ -9,8 +9,20 @@ import {
   mvpDaRodada,
 } from "@/domain/statistics/aggregate";
 import { Card, Chip, LiveBadge, SectionLabel } from "@/components/ui/primitives";
+import { getEscolhaDaGalera } from "@/features/mvp/queries";
+import { getConquistasDaRodadaPublica } from "@/features/rankings/queries";
+import { ConquistaCard } from "@/components/football/conquista-card";
+import { BotaoCopiar } from "@/components/ui/copiar";
+import { CONQUISTAS } from "@/domain/badges/conquistas";
+import { buildConquistasMessage } from "@/domain/share/whatsapp";
 import { TeamCard, TeamStripe } from "@/components/football/team-card";
-import { IconClock, IconPin, IconTrophy, JogaeMark } from "@/components/ui/icons";
+import {
+  IconClock,
+  IconPin,
+  IconPlayers,
+  IconTrophy,
+  JogaeMark,
+} from "@/components/ui/icons";
 import { formatLongDate, formatRoundSchedule, formatTime } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
@@ -104,6 +116,15 @@ export default async function PublicRoundPage({
           ).values(),
         )
       : null;
+  // A escolha da galera só sai com a urna fechada (`getEscolhaDaGalera`
+  // devolve null enquanto a votação está aberta): parcial no meio da votação
+  // transforma o prêmio em campanha.
+  const escolhaDaGalera = await getEscolhaDaGalera(round.id);
+
+  // As conquistas da rodada (craque, escolha da galera, hat-trick, estreia) —
+  // as do mês ficam no app: um card que mistura as duas coisas mente na data.
+  const conquistas = await getConquistasDaRodadaPublica(round.id);
+
   const settings = (round.group.settings ?? {}) as { matchRule?: string };
 
   return (
@@ -166,9 +187,30 @@ export default async function PublicRoundPage({
           <Stat value={waiting.length} label="Espera" tone="text-ink-2" />
         </section>
 
+        {escolhaDaGalera && (
+          <section className="flex flex-col gap-3">
+            <SectionLabel>Escolha da galera</SectionLabel>
+            <Card className="flex items-center gap-4 py-4">
+              <span className="text-yellow">
+                <IconPlayers size={28} />
+              </span>
+              <div className="min-w-0">
+                <div className="font-display text-[26px] leading-tight text-ink">
+                  {escolhaDaGalera.vencedores.map((v) => v.nome).join(" e ")}
+                </div>
+                <div className="mt-1.5 text-body-s text-ink-2">
+                  {escolhaDaGalera.votos}{" "}
+                  {escolhaDaGalera.votos === 1 ? "voto" : "votos"} de{" "}
+                  {escolhaDaGalera.totalDeVotos} — quem jogou escolheu
+                </div>
+              </div>
+            </Card>
+          </section>
+        )}
+
         {mvp && (
           <section className="flex flex-col gap-3">
-            <SectionLabel>MVP da rodada</SectionLabel>
+            <SectionLabel>Craque da rodada</SectionLabel>
             <Card className="flex items-center gap-4 py-4">
               <span className="text-yellow">
                 <IconTrophy size={28} />
@@ -183,6 +225,40 @@ export default async function PublicRoundPage({
                 </div>
               </div>
             </Card>
+          </section>
+        )}
+
+        {conquistas.length > 0 && (
+          <section className="flex flex-col gap-3">
+            <SectionLabel
+              action={
+                <BotaoCopiar
+                  texto={buildConquistasMessage({
+                    groupName: round.group.name,
+                    recorte: "da rodada",
+                    conquistas: conquistas.map((conquista) => ({
+                      emoji: CONQUISTAS[conquista.tipo].emoji,
+                      rotulo: CONQUISTAS[conquista.tipo].rotulo,
+                      nome: conquista.nickname ?? conquista.displayName,
+                      detalhe: CONQUISTAS[conquista.tipo].descricao(conquista.valor),
+                    })),
+                  })}
+                  rotulo="Copiar"
+                />
+              }
+            >
+              Conquistas da rodada
+            </SectionLabel>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {conquistas.map((conquista) => (
+                <ConquistaCard
+                  key={`${conquista.tipo}-${conquista.playerId}`}
+                  tipo={conquista.tipo}
+                  valor={conquista.valor}
+                  nome={conquista.nickname ?? conquista.displayName}
+                />
+              ))}
+            </div>
           </section>
         )}
 

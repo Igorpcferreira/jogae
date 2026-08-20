@@ -141,11 +141,19 @@ export async function encerrarPartida(db: Db, matchId: string) {
 }
 
 export async function encerrarRodada(db: Db, roundId: string) {
+  // O mesmo instante nas duas escritas: `finishedAt` é o apito final, e é dele
+  // que a votação de craque conta as 48h (`domain/mvp/votacao.ts`). Dois
+  // `new Date()` diferentes dariam dois "fins" pra mesma rodada.
+  const apito = new Date();
+
   await db.$transaction([
     db.match.updateMany({
       where: { roundId, status: "LIVE" },
-      data: { status: "FINISHED", endedAt: new Date() },
+      data: { status: "FINISHED", endedAt: apito },
     }),
-    db.round.update({ where: { id: roundId }, data: { status: "FINISHED" } }),
+    db.round.update({
+      where: { id: roundId },
+      data: { status: "FINISHED", finishedAt: apito },
+    }),
   ]);
 }

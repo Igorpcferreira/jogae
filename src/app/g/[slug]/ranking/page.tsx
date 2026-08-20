@@ -6,6 +6,9 @@ import { getConquistas, getRanking, type RankingPeriod } from "@/features/rankin
 import type { RankingMetric } from "@/domain/statistics/aggregate";
 import { Card, EmptyState, SectionLabel } from "@/components/ui/primitives";
 import { ConquistaCard } from "@/components/football/conquista-card";
+import { BotaoCopiar } from "@/components/ui/copiar";
+import { CONQUISTAS } from "@/domain/badges/conquistas";
+import { buildConquistasMessage } from "@/domain/share/whatsapp";
 
 export const metadata = { title: "Ranking" };
 
@@ -80,7 +83,25 @@ export default async function RankingPage({
 
       {conquistas.length > 0 && (
         <section className="flex flex-col gap-3">
-          <SectionLabel>Conquistas do mês</SectionLabel>
+          <SectionLabel
+            action={
+              <BotaoCopiar
+                texto={buildConquistasMessage({
+                  groupName: group.name,
+                  recorte: "do mês",
+                  conquistas: conquistas.map((conquista) => ({
+                    emoji: CONQUISTAS[conquista.tipo].emoji,
+                    rotulo: CONQUISTAS[conquista.tipo].rotulo,
+                    nome: conquista.nickname ?? conquista.displayName,
+                    detalhe: CONQUISTAS[conquista.tipo].descricao(conquista.valor),
+                  })),
+                })}
+                rotulo="Copiar"
+              />
+            }
+          >
+            Conquistas do mês
+          </SectionLabel>
           <div className="grid gap-2 sm:grid-cols-2">
             {conquistas.map((conquista, index) => (
               <ConquistaCard
@@ -124,9 +145,12 @@ export default async function RankingPage({
                   >
                     {row.position}
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-body font-medium text-ink">
+                  <Link
+                    href={`/g/${slug}/jogador/${row.playerId}`}
+                    className="min-w-0 flex-1 truncate text-body font-medium text-ink transition-colors hover:text-yellow"
+                  >
                     {row.nickname ?? row.displayName}
-                  </span>
+                  </Link>
                   <span className="hidden text-caption tabular text-ink-3 sm:inline">
                     {row.matchesPlayed} {row.matchesPlayed === 1 ? "jogo" : "jogos"}
                   </span>

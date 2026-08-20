@@ -213,6 +213,44 @@ export async function requireAcessoPorLinkPessoal(
   return jogador;
 }
 
+/**
+ * Acesso pelo **link de convidado do grupo** (`/e/<token>`).
+ *
+ * O irmão mais fraco de `getJogadorPorLinkPessoal`: este token não abre jogador
+ * nenhum, abre o grupo. Quem tem ele vê a lista de nomes do elenco e pode dizer
+ * "sou o Marcos" — a partir daí quem autoriza volta a ser o link pessoal, e a
+ * regra de presença continua exatamente onde estava.
+ *
+ * A separação importa: o link do grupo circula no WhatsApp e vai ser
+ * encaminhado; o pessoal, não. Por isso o de grupo é revogável numa tela
+ * (basta gravar outro `publicToken`) e não carrega presença de ninguém.
+ *
+ * Aqui só a leitura da página. Quem transforma o token em jogador é
+ * `features/entrada/service.ts` — é lá que a conferência "esse `playerId` é
+ * mesmo deste grupo?" está coberta por teste de integração.
+ *
+ * O `select` é explícito pelo motivo de sempre: `skillLevel` não pode chegar
+ * perto de rota pública (plano §13), e aqui não se seleciona jogador nenhum.
+ */
+export const getGrupoPorLinkDeConvidado = cache(async (publicToken: string) => {
+  if (!publicToken) return null;
+
+  return prisma.footballGroup.findUnique({
+    where: { publicToken },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      publicToken: true,
+      defaultVenue: true,
+    },
+  });
+});
+
+export type GrupoDoLinkDeConvidado = NonNullable<
+  Awaited<ReturnType<typeof getGrupoPorLinkDeConvidado>>
+>;
+
 /** Mesma checagem partindo da partida. */
 export async function requireMatchAccess(matchId: string, permission: Permission) {
   const match = await prisma.match.findUnique({

@@ -10,6 +10,7 @@ import { Card, Chip, SectionLabel } from "@/components/ui/primitives";
 import { PlayerRow } from "@/components/football/player-row";
 import {
   IconChevronRight,
+  IconHistory,
   IconLogout,
   IconPlayers,
   IconSettings,
@@ -132,6 +133,25 @@ export default async function MorePage({
               <IconChevronRight size={16} className="text-ink-3" />
             </Link>
           )}
+        </Card>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <SectionLabel>O que rolou</SectionLabel>
+        <Card className="p-0">
+          <Link
+            href={`/g/${slug}/retrospectiva`}
+            className="flex min-h-14 items-center gap-3 px-4 py-3 transition-colors hover:bg-elevated/50"
+          >
+            <IconHistory size={18} className="text-ink-3" />
+            <div className="min-w-0 flex-1">
+              <div className="text-body text-ink">Retrospectiva</div>
+              <div className="text-caption text-ink-3">
+                Os números e os destaques do mês e do ano
+              </div>
+            </div>
+            <IconChevronRight size={16} className="text-ink-3" />
+          </Link>
         </Card>
       </section>
 

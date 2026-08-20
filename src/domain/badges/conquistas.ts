@@ -21,6 +21,7 @@ export type TipoDeConquista =
   | "presenca-de-ferro"
   | "hat-trick"
   | "mvp"
+  | "escolha-da-galera"
   | "estreia";
 
 export interface Conquista {
@@ -88,6 +89,12 @@ export const CONQUISTAS: Record<
     tom: "pink",
     emoji: "🏆",
   },
+  "escolha-da-galera": {
+    rotulo: "Escolha da galera",
+    descricao: (valor) => (valor === 1 ? "1 voto" : `${valor} votos`),
+    tom: "yellow",
+    emoji: "🗳️",
+  },
   estreia: {
     rotulo: "Estreia",
     descricao: () => "Primeira rodada no grupo",
@@ -104,6 +111,17 @@ export interface RodadaDoHistorico {
   assistencias: Record<string, number>;
   /** MVP da rodada, já decidido por `mvpDaRodada`. */
   mvpPlayerId?: string | null;
+  /**
+   * Quem a galera elegeu no voto (`domain/mvp/votacao`), quando houve quórum.
+   *
+   * Convive com `mvpPlayerId` em vez de substituí-lo: o craque calculado sai de
+   * participação em gol e por construção nunca premia goleiro nem zagueiro. Os
+   * dois prêmios existem porque medem coisas diferentes, e cair no mesmo nome é
+   * resenha garantida.
+   */
+  escolhaDaGaleraIds?: string[];
+  /** Votos que o eleito recebeu — é o número que dá sentido à conquista. */
+  votosDaEscolha?: number;
 }
 
 /* ── Peças ─────────────────────────────────────────────────── */
@@ -198,7 +216,8 @@ export function conquistasDoPeriodo(rodadas: RodadaDoHistorico[]): Conquista[] {
 }
 
 /**
- * Conquistas de uma rodada só: craque da rodada, hat-trick e estreia.
+ * Conquistas de uma rodada só: craque da rodada, escolha da galera, hat-trick
+ * e estreia.
  *
  * `estreantes` são os jogadores para quem esta é a primeira rodada da vida no
  * grupo — quem sabe isso é quem consultou o banco, não esta função.
@@ -216,6 +235,17 @@ export function conquistasDaRodada(
       tipo: "mvp",
       playerId: rodada.mvpPlayerId,
       valor: gols + assistencias,
+      roundId: rodada.roundId,
+    });
+  }
+
+  // Empate na votação divide a conquista, como no resto do módulo. Quem
+  // decidiu que houve empate (e que ele não é grande demais) foi a apuração.
+  for (const playerId of rodada.escolhaDaGaleraIds ?? []) {
+    conquistas.push({
+      tipo: "escolha-da-galera",
+      playerId,
+      valor: rodada.votosDaEscolha ?? 0,
       roundId: rodada.roundId,
     });
   }

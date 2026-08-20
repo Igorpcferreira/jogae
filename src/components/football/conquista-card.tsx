@@ -4,6 +4,7 @@ import {
   IconBall,
   IconGoal,
   IconAssist,
+  IconPlayers,
   IconStar,
   IconStreak,
   IconTrophy,
@@ -26,6 +27,9 @@ const ICONES: Record<TipoDeConquista, Icone> = {
   "presenca-de-ferro": IconStreak,
   "hat-trick": IconBall,
   mvp: IconTrophy,
+  // A galera escolhendo: o ícone de gente, não outro troféu — o craque
+  // calculado e o votado precisam ser distinguíveis de relance.
+  "escolha-da-galera": IconPlayers,
   estreia: IconStar,
 };
 

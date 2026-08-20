@@ -95,6 +95,11 @@
   --animate-live-pulse: live-pulse 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   --animate-trail: trail 1500ms linear infinite;
   --animate-shimmer: shimmer 1400ms linear infinite;
+  /* Hat-trick (plano §27): a única animação do app que passa de meio segundo.
+     Ela interrompe a tela do placar, então só sai no gol que fecha os três — o
+     quarto volta a ser `flash`. Raridade é o que faz valer a interrupção. */
+  --animate-hat-trick: hat-trick 1400ms cubic-bezier(0.2, 1.3, 0.35, 1) both;
+  --animate-confete: confete 1400ms cubic-bezier(0.3, 0.7, 0.4, 1) both;
 }
 
 @theme {
@@ -188,6 +193,40 @@
     background-position: 200% 0;
   }
 }
+@keyframes hat-trick {
+  0% {
+    transform: scale(0.5) rotate(-8deg);
+    opacity: 0;
+  }
+  18% {
+    transform: scale(1.15) rotate(2deg);
+    opacity: 1;
+  }
+  32% {
+    transform: scale(1) rotate(0deg);
+  }
+  75% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.05) rotate(0deg);
+    opacity: 0;
+  }
+}
+@keyframes confete {
+  0% {
+    transform: translateY(-10%) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(120vh) rotate(540deg);
+    opacity: 0;
+  }
+}
 
 /* ───────────────────────────── base ───────────────────────────── */
 
@@ -276,6 +315,19 @@
   }
   .h-safe-bottom {
     height: env(safe-area-inset-bottom);
+  }
+}
+
+/* O bottom nav das telas do grupo é fixo e cobria o rodapé de crédito: ele só
+   aparecia depois de todo o scroll, cortado atrás da barra. O respiro existe
+   apenas quando o nav está na tela — no lg ele vira sidebar e o rodapé volta
+   ao normal. Navegador sem :has() fica como era, nada quebra. */
+body:has([data-nav-fixa]) [data-rodape] {
+  padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+}
+@media (min-width: 64rem) {
+  body:has([data-nav-fixa]) [data-rodape] {
+    padding-bottom: 0;
   }
 }
 

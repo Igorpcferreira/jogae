@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -190,6 +191,34 @@ export async function atualizarGrupoAction(
 
   revalidatePath("/g", "layout");
   return { status: "salvo" };
+}
+
+/**
+ * Troca o link de convidado do grupo — o botão de "vazou".
+ *
+ * O link vive numa conversa de WhatsApp, e conversa de WhatsApp é encaminhada.
+ * Quem tem o link vê os nomes do elenco e pode responder presença no lugar de
+ * qualquer um, então precisa existir um jeito de cortar isso sem migration nem
+ * suporte: gravar outro token invalida o antigo na hora.
+ *
+ * O que a troca **não** desfaz: quem já entrou pelo link antigo escolheu um
+ * nome e ficou com o link pessoal daquele jogador, que é outro token e não
+ * muda aqui. Isso é de propósito — quem já entrou é o pessoal do grupo, e
+ * derrubar os 22 junto transformaria "vazou" em "todo mundo recomeça".
+ */
+export async function regenerarLinkDeConvidadoAction(groupId: string): Promise<string> {
+  await requireGroupAccess(groupId, "grupo:editar");
+
+  // UUID v4 gerado aqui, e não pelo default do banco: `update` não dispara
+  // default de coluna, e deixar o Postgres decidir exigiria SQL cru.
+  const grupo = await prisma.footballGroup.update({
+    where: { id: groupId },
+    data: { publicToken: randomUUID() },
+    select: { publicToken: true },
+  });
+
+  revalidatePath("/g", "layout");
+  return grupo.publicToken;
 }
 
 function vazioViraNulo(valor: FormDataEntryValue | null): string | null {

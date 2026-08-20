@@ -1,9 +1,19 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { getRoundByToken } from "@/features/rounds/queries";
 import { teamTheme } from "@/lib/team-colors";
 import { formatLongDate, formatTime } from "@/lib/dates";
+import {
+  ALTURA,
+  CANVAS,
+  CORES,
+  INK,
+  INK_2,
+  INK_3,
+  LARGURA,
+  LINE,
+  SURFACE,
+  carregarAnton,
+} from "@/components/og/base";
 
 /**
  * Card dos times pra mandar no grupo (plano §52 — compartilhar card).
@@ -16,25 +26,7 @@ import { formatLongDate, formatTime } from "@/lib/dates";
  * mesmos tokens de `globals.css`.
  */
 
-const CANVAS = "#090a0c";
-const SURFACE = "#111317";
-const LINE = "#262a31";
-const INK = "#eceff3";
-const INK_2 = "#a7aeb9";
-const INK_3 = "#7a828e";
-
-const LARGURA = 1200;
-const ALTURA = 630;
-
-/**
- * A Anton é a fonte display do produto, mas `ImageResponse` precisa do arquivo
- * embutido e `next/font` não expõe o .ttf. Se alguém colocar o arquivo em
- * `public/fonts/`, o card sai com a tipografia certa; sem ele, cai na fonte
- * padrão e o card continua legível — a identidade aqui vem sobretudo da cor.
- */
-const anton = await readFile(
-  join(process.cwd(), "public/fonts/Anton-Regular.ttf"),
-).catch(() => null);
+const anton = await carregarAnton();
 
 export async function GET(
   _request: Request,
@@ -93,10 +85,9 @@ export async function GET(
       >
         {/* Faixa das quatro cores — assinatura visual do produto. */}
         <div style={{ display: "flex", height: 8, marginBottom: 32 }}>
-          <div style={{ flex: 1, backgroundColor: "#35e878" }} />
-          <div style={{ flex: 1, backgroundColor: "#ffd84a" }} />
-          <div style={{ flex: 1, backgroundColor: "#ff4d4d" }} />
-          <div style={{ flex: 1, backgroundColor: "#ff4fa3" }} />
+          {CORES.map((cor) => (
+            <div key={cor} style={{ flex: 1, backgroundColor: cor }} />
+          ))}
         </div>
 
         <div

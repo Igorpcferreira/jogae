@@ -109,3 +109,34 @@ export function relativeDay(date: Date, now = new Date()): string {
 export function startOfMonth(date = new Date()): Date {
   return inicioDoMesNoFuso(date, TZ);
 }
+
+const MESES = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+] as const;
+
+/**
+ * Nome do mês por índice (0–11), como `partesNoFuso` devolve.
+ *
+ * Por índice e não por `Date`: quem já resolveu o fuso tem o número na mão, e
+ * remontar um `Date` só pra formatar é o caminho mais curto pra ler o mês pelo
+ * relógio do processo de novo.
+ */
+export function nomeDoMes(indice: number): string {
+  return MESES[indice] ?? "";
+}
+
+/** "Janeiro de 2026" — cabeçalho de retrospectiva e de melhor mês. */
+export function mesEAno(indice: number, ano: number): string {
+  return `${nomeDoMes(indice)} de ${ano}`;
+}

@@ -1,8 +1,10 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/db/client";
+import { urlBase } from "@/lib/base-url";
 import { normalizeName } from "@/domain/text/normalize";
 import {
   conflitoDeNome,
@@ -159,6 +161,29 @@ async function gravar({
 
   revalidatePath("/g", "layout");
   return { status: "ok", playerId: salvo.id };
+}
+
+/**
+ * Troca o link pessoal de UM jogador. O link é credencial (quem tem responde a
+ * presença dele), vive no WhatsApp e WhatsApp é encaminhado — vazou, ou a
+ * pessoa trocou de celular e perdeu o controle do antigo, gera outro: o velho
+ * para de valer na hora. Sem isso, "cortar o acesso de um" era tirar a pessoa
+ * do elenco. A troca do link de convidado do grupo não cobre este caso: ela
+ * não desfaz o link pessoal de quem já entrou.
+ */
+export async function regenerarLinkPessoalAction(playerId: string): Promise<string> {
+  await requirePlayerAccess(playerId, "elenco:editar");
+
+  // UUID v4 gerado aqui, e não pelo default do banco: `update` não dispara
+  // default de coluna, e deixar o Postgres decidir exigiria SQL cru.
+  const jogador = await prisma.player.update({
+    where: { id: playerId },
+    data: { selfToken: randomUUID() },
+    select: { selfToken: true },
+  });
+
+  revalidatePath("/g", "layout");
+  return `${await urlBase()}/p/${jogador.selfToken}`;
 }
 
 /**

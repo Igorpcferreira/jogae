@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { teamTheme } from "@/lib/team-colors";
@@ -9,6 +9,12 @@ import { Card, Chip, LiveBadge, SectionLabel } from "@/components/ui/primitives"
 import { Sheet } from "@/components/ui/dialog";
 import { Scoreboard } from "@/components/football/scoreboard";
 import { IconAssist, IconGoal, IconUndo } from "@/components/ui/icons";
+import {
+  golRecenteDoMesmoTime,
+  type GolRepetido,
+  type LanceRegistrado,
+} from "@/domain/live/gol-repetido";
+import { celebracaoDoLance, type TipoDeCelebracao } from "@/domain/live/celebracao";
 import {
   encerrarPartidaAction,
   encerrarRodadaAction,
@@ -37,6 +43,12 @@ export interface LiveEvent {
   playerName: string | null;
   assistName: string | null;
   type: "GOAL" | "OWN_GOAL";
+  /** Qual time marcou — a checagem de gol repetido é por time. */
+  teamId: string;
+  /** Autor, quando houve. Gol sem autor não conta pra hat-trick. */
+  playerId: string | null;
+  /** Quando o lance entrou, pelo relógio do servidor (epoch ms). */
+  registradoEm: number;
 }
 
 export interface LiveMatchState {
@@ -53,24 +65,56 @@ export function LiveControl({
   teams,
   match,
   events,
+  golsDaRodada,
   matchRule,
+  agoraNoServidor,
 }: {
   roundId: string;
   teams: LiveTeam[];
   match: LiveMatchState | null;
   events: LiveEvent[];
+  /** Gols de cada jogador na rodada inteira, já confirmados pelo servidor. */
+  golsDaRodada: Record<string, number>;
   matchRule?: string | null;
+  agoraNoServidor: number;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [goalFor, setGoalFor] = useState<string | null>(null);
   const [author, setAuthor] = useState<{ id: string; name: string } | null>(null);
-  const [celebrate, setCelebrate] = useState(false);
+  const [celebrate, setCelebrate] = useState<{
+    tipo: TipoDeCelebracao;
+    nome: string | null;
+  } | null>(null);
   /**
    * Gols que ainda não voltaram do servidor, por time. O placar do banco não
    * mudou ainda, mas o organizador precisa ver o número subir na hora.
    */
   const [naFila, setNaFila] = useState<Record<string, number>>({});
+  /**
+   * Gols apontados neste aparelho que ainda não voltaram do servidor. Entram na
+   * checagem de repetição junto com os do banco: o toque duplo do mesmo dedo é
+   * tão comum quanto duas pessoas apontando o mesmo gol.
+   */
+  const [golsLocais, setGolsLocais] = useState<Array<LanceRegistrado & { autorId: string | null }>>(
+    [],
+  );
+  /** Gol suspeito de ser o mesmo que alguém já marcou — vira pergunta, não bloqueio. */
+  const [suspeita, setSuspeita] = useState<{ teamId: string; repetido: GolRepetido } | null>(
+    null,
+  );
+
+  /**
+   * Diferença entre o relógio do servidor e o deste celular. Comparar carimbo
+   * do banco com `Date.now()` daqui, sem corrigir, faria a checagem sumir em
+   * silêncio no aparelho com a hora errada.
+   */
+  const desvioDoRelogio = useRef(0);
+  useEffect(() => {
+    desvioDoRelogio.current = agoraNoServidor - Date.now();
+  }, [agoraNoServidor]);
+
+  const agoraDoServidor = () => Date.now() + desvioDoRelogio.current;
 
   const teamA = teams.find((team) => team.id === match?.teamAId);
   const teamB = teams.find((team) => team.id === match?.teamBId);
@@ -80,13 +124,50 @@ export function LiveControl({
     setAuthor(null);
   }
 
+  /**
+   * O caminho de todo toque em "Gol".
+   *
+   * Com o link do grupo no ar, mais de um celular acompanha o mesmo jogo: sai o
+   * gol e duas pessoas apertam o botão. O `clientEventId` da fila offline
+   * resolve o reenvio do mesmo aparelho, não isso. Aqui a regra pergunta — o
+   * lance sempre pode ser confirmado, porque gol legítimo recusado não tem
+   * conserto e o cara que fez tá olhando.
+   */
+  function pedirGol(teamId: string) {
+    const lances: LanceRegistrado[] = [
+      ...events.map((event) => ({
+        id: event.id,
+        teamId: event.teamId,
+        registradoEm: event.registradoEm,
+        autor: event.playerName,
+      })),
+      ...golsLocais,
+    ];
+
+    const repetido = golRecenteDoMesmoTime(lances, teamId, agoraDoServidor());
+    if (repetido) {
+      setSuspeita({ teamId, repetido });
+      return;
+    }
+    setGoalFor(teamId);
+  }
+
   function saveGoal(assistPlayerId: string | null) {
     if (!match || !goalFor) return;
     const teamId = goalFor;
     const playerId = author?.id ?? null;
+    const nomeDoAutor = author?.name ?? null;
     const startedAt = match.startedAt;
     closeSheet();
-    setCelebrate(true);
+
+    // Gols do autor na rodada: os que o servidor já confirmou mais os que este
+    // aparelho apontou e ainda não voltaram. Sem os locais, o terceiro gol
+    // seguido no mesmo minuto não seria reconhecido como hat-trick.
+    const golsAntes = playerId
+      ? (golsDaRodada[playerId] ?? 0) +
+        golsLocais.filter((gol) => gol.autorId === playerId).length
+      : null;
+    setCelebrate({ tipo: celebracaoDoLance(golsAntes).tipo, nome: nomeDoAutor });
 
     // O lance vai pro IndexedDB antes de tentar a rede. Se o celular estiver
     // sem sinal no meio do campo, o gol não se perde (plano §40).
@@ -104,6 +185,16 @@ export function LiveControl({
     };
 
     setNaFila((atual) => ({ ...atual, [teamId]: (atual[teamId] ?? 0) + 1 }));
+    setGolsLocais((atual) => [
+      ...atual,
+      {
+        id: pendente.id,
+        teamId,
+        registradoEm: agoraDoServidor(),
+        autor: nomeDoAutor,
+        autorId: playerId,
+      },
+    ]);
 
     startTransition(async () => {
       await enfileirarGol(pendente);
@@ -131,7 +222,10 @@ export function LiveControl({
 
   useEffect(() => {
     if (!celebrate) return;
-    const timer = setTimeout(() => setCelebrate(false), 900);
+    // O hat-trick segura a tela mais tempo porque é o momento da noite; o gol
+    // comum sai rápido pra não atrapalhar quem está apontando o próximo.
+    const duracao = celebrate.tipo === "hat-trick" ? 1500 : 900;
+    const timer = setTimeout(() => setCelebrate(null), duracao);
     return () => clearTimeout(timer);
   }, [celebrate]);
 
@@ -156,7 +250,7 @@ export function LiveControl({
 
   return (
     <div className="flex flex-col gap-5">
-      {celebrate && (
+      {celebrate?.tipo === "gol" && (
         <div
           className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center"
           aria-hidden
@@ -166,6 +260,8 @@ export function LiveControl({
           </span>
         </div>
       )}
+
+      {celebrate?.tipo === "hat-trick" && <HatTrick nome={celebrate.nome} />}
 
       <div className="flex items-center justify-between gap-3">
         <LiveBadge />
@@ -187,13 +283,13 @@ export function LiveControl({
         <GoalButton
           label={teamA.name.replace("Time ", "")}
           theme={themeA}
-          onClick={() => setGoalFor(teamA.id)}
+          onClick={() => pedirGol(teamA.id)}
           disabled={pending}
         />
         <GoalButton
           label={teamB.name.replace("Time ", "")}
           theme={themeB}
-          onClick={() => setGoalFor(teamB.id)}
+          onClick={() => pedirGol(teamB.id)}
           disabled={pending}
         />
       </div>
@@ -203,6 +299,9 @@ export function LiveControl({
           disabled={pending || events.length === 0}
           onClick={() =>
             startTransition(async () => {
+              // Quem desfez já disse que aquilo não foi gol: o próximo toque no
+              // mesmo time não pode ser tratado como repetição.
+              setGolsLocais([]);
               await desfazerUltimoLanceAction(match.id);
               router.refresh();
             })
@@ -287,6 +386,18 @@ export function LiveControl({
         Encerrar rodada
       </Button>
 
+      {suspeita && (
+        <ConfirmacaoDeGolRepetido
+          teamName={(suspeita.teamId === teamA.id ? teamA : teamB).name.replace("Time ", "")}
+          repetido={suspeita.repetido}
+          onConfirmar={() => {
+            setGoalFor(suspeita.teamId);
+            setSuspeita(null);
+          }}
+          onFechar={() => setSuspeita(null)}
+        />
+      )}
+
       {/* Gol de quem? → Teve assistência? — dois toques. */}
       {goalFor && (
         <GoalSheet
@@ -300,6 +411,66 @@ export function LiveControl({
     </div>
   );
 }
+
+/**
+ * A comemoração de hat-trick (plano §27).
+ *
+ * A única animação do app que passa de meio segundo, e a única que ocupa a tela
+ * inteira. Isso só se sustenta porque ela é rara: sai no gol que fecha os três
+ * e não sai mais (`domain/live/celebracao.ts`).
+ *
+ * `aria-hidden` e `pointer-events-none`: quem está apontando o jogo não pode
+ * ficar preso atrás de uma festa, e leitor de tela não tem o que fazer com
+ * confete. O `prefers-reduced-motion` global já zera as duas animações.
+ */
+function HatTrick({ nome }: { nome: string | null }) {
+  return (
+    <div
+      className="pointer-events-none fixed inset-0 z-40 overflow-hidden"
+      aria-hidden
+    >
+      {CONFETES.map((confete, index) => (
+        <span
+          key={index}
+          className={cn(
+            "animate-confete absolute top-0 size-2.5 rounded-[2px]",
+            confete.cor,
+          )}
+          style={{ left: confete.esquerda, animationDelay: confete.atraso }}
+        />
+      ))}
+
+      <div className="animate-hat-trick flex h-full flex-col items-center justify-center gap-2">
+        <span className="font-display text-[64px] leading-none text-yellow drop-shadow-[0_0_48px_rgba(245,200,66,0.45)]">
+          Hat-trick
+        </span>
+        {nome && (
+          <span className="font-display text-[28px] leading-none text-ink">{nome}</span>
+        )}
+        <span className="text-caption font-bold uppercase tracking-[0.14em] text-ink-2">
+          Três na mesma noite
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Posições fixas, não sorteadas: `Math.random()` na renderização faria o
+ * servidor e o cliente desenharem confetes diferentes, e as quatro cores são as
+ * do design system — confete não é lugar pra inventar cor.
+ */
+const CONFETES = [
+  { esquerda: "8%", atraso: "0ms", cor: "bg-green" },
+  { esquerda: "18%", atraso: "180ms", cor: "bg-yellow" },
+  { esquerda: "29%", atraso: "60ms", cor: "bg-red" },
+  { esquerda: "41%", atraso: "260ms", cor: "bg-pink" },
+  { esquerda: "52%", atraso: "120ms", cor: "bg-yellow" },
+  { esquerda: "63%", atraso: "320ms", cor: "bg-green" },
+  { esquerda: "74%", atraso: "40ms", cor: "bg-pink" },
+  { esquerda: "85%", atraso: "220ms", cor: "bg-red" },
+  { esquerda: "93%", atraso: "140ms", cor: "bg-yellow" },
+];
 
 function GoalButton({
   label,
@@ -327,6 +498,53 @@ function GoalButton({
       <IconGoal size={20} />
       Gol {label}
     </button>
+  );
+}
+
+/**
+ * "Já marcaram esse gol?" — a pergunta que evita placar fantasma.
+ *
+ * O botão de confirmar é o primário: o caso comum é ser gol mesmo, e quem tá
+ * com o celular na mão não pode ficar brigando com o app. O que a tela precisa
+ * dar é a informação que falta — de quem foi o gol anterior e há quantos
+ * segundos —, porque é isso que deixa a pessoa decidir em um segundo.
+ */
+function ConfirmacaoDeGolRepetido({
+  teamName,
+  repetido,
+  onConfirmar,
+  onFechar,
+}: {
+  teamName: string;
+  repetido: GolRepetido;
+  onConfirmar: () => void;
+  onFechar: () => void;
+}) {
+  const quem = repetido.autor ? `de ${repetido.autor}` : "sem autor definido";
+  const quando =
+    repetido.segundos <= 1 ? "agora mesmo" : `há ${repetido.segundos} segundos`;
+
+  return (
+    <Sheet
+      titulo="Já marcaram esse gol?"
+      onFechar={onFechar}
+      acessorio={<Chip tone="yellow">{teamName}</Chip>}
+      rodape={
+        <>
+          <Button size="lg" block onClick={onConfirmar}>
+            É outro gol
+          </Button>
+          <Button variant="secondary" size="lg" block onClick={onFechar}>
+            Já tinha marcado
+          </Button>
+        </>
+      }
+    >
+      <p className="text-body text-ink-2 text-pretty">
+        Entrou um gol do {teamName} {quando}, {quem}. Se for o mesmo lance, é só
+        deixar como está — o placar já contou.
+      </p>
+    </Sheet>
   );
 }
 

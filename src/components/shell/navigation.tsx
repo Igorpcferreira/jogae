@@ -46,6 +46,8 @@ export function BottomNav({ slug, hasLive }: { slug: string; hasLive?: boolean }
   return (
     <nav
       aria-label="Navegação principal"
+      /* data-nav-fixa: o rodapé de crédito lê isso no CSS pra não ficar atrás da barra */
+      data-nav-fixa
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 backdrop-blur-md lg:hidden pb-safe"
     >
       <ul className="mx-auto flex max-w-lg items-stretch">

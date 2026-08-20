@@ -1,7 +1,7 @@
 /** Crédito discreto e permanente, inclusive nas páginas públicas compartilhadas. */
 export function Footer() {
   return (
-    <footer className="border-t border-line bg-surface-2">
+    <footer data-rodape className="border-t border-line bg-surface-2">
       <div className="mx-auto flex min-h-16 max-w-5xl items-center justify-center px-4 py-4 text-center">
         <p className="text-caption font-bold uppercase tracking-[0.1em] text-ink-3">
           Desenvolvido por{" "}

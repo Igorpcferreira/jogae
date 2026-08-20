@@ -1,5 +1,9 @@
 import { requireGrupoPorSlug } from "@/features/groups/access";
 import { atualizarGrupoAction } from "@/features/groups/actions";
+import { getResumoDaProximaRodada } from "@/features/groups/queries";
+import { formatRoundSchedule } from "@/lib/dates";
+import { urlBase } from "@/lib/base-url";
+import { LinkDoGrupo } from "./_components/link-do-grupo";
 import { GrupoForm, type ValoresDoGrupo } from "@/components/football/grupo-form";
 import { EmptyState } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/button";
@@ -28,6 +32,11 @@ export default async function ConfigPage({
     );
   }
 
+  const [base, proxima] = await Promise.all([
+    urlBase(),
+    getResumoDaProximaRodada(group.id),
+  ]);
+
   const inicial: ValoresDoGrupo = {
     name: group.name,
     sportType: group.sportType as Modalidade,
@@ -51,6 +60,15 @@ export default async function ConfigPage({
           guarda o formato que tinha no dia.
         </p>
       </header>
+
+      <LinkDoGrupo
+        groupId={group.id}
+        groupName={group.name}
+        base={base}
+        tokenInicial={group.publicToken}
+        dateText={proxima ? formatRoundSchedule(proxima.date, proxima.startsAt) : null}
+        venue={proxima?.venue ?? group.defaultVenue}
+      />
 
       <GrupoForm
         acao={atualizarGrupoAction.bind(null, group.id)}

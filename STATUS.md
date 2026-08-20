@@ -1,12 +1,13 @@
 # STATUS — Jogaê
 
-**Atualizado:** 19/08/2026
+**Atualizado:** 20/08/2026
 **Fase do roadmap:** Fase 0 (Fundação) concluída · Fase 1 (MVP de organização) concluída ·
 Fase 1.5 concluída · Bloco J (deploy) concluído — o app está em produção ·
-Bloco I (conta de jogador, opção B) concluído em código ·
-**Fase 2 (social e gamificação) — primeiro recorte de conquistas entregue**
-**Verificação nesta data:** `npm test` 183/183 (verde também com `TZ=UTC`) ·
-`npm run test:integracao` 63/63 · `npx tsc --noEmit` limpo · `npx eslint .` limpo ·
+Bloco I (conta de jogador, opção B) concluído em código, agora com **link único
+de convidado** pro grupo inteiro ·
+**Fase 2 (social e gamificação) — concluída: todo o §27 está em código**
+**Verificação nesta data:** `npm test` 299/299 (verde também com `TZ=UTC`) ·
+`npm run test:integracao` 81/81 · `npx tsc --noEmit` limpo · `npx eslint .` limpo ·
 `npm run build` OK.
 
 **Em produção:** https://jogae-free.vercel.app · Vercel (região `gru1`) + Supabase
@@ -40,6 +41,13 @@ pessoa no grupo; assistente recebe 404 em `/membros` e 200 no ao vivo.
 | **Testes da camada de dados** | **Serviço extraído + Postgres real em schema `teste`** | Mock de Prisma testaria o mock; schema separado dispensa segundo container |
 | **Conta de jogador** | **Opção B — link pessoal, sem conta** (`docs/decisao-conta-de-jogador.md`) | Entrega o valor da opção C (presença chega sem o organizador no meio) por uma fração do custo, e não fecha a porta pra conta de verdade depois. Decidido em 19/08 |
 | **Escopo do link do jogador** | **Um link por jogador, que não expira** | Link por rodada obrigaria a redistribuir 22 links toda semana no WhatsApp, e esse atrito mata a adoção |
+| **Distribuição do link do jogador** | **Um link de convidado por grupo** (`/e/<token>`), que dispensa os 22 links pessoais no privado | Mandar 22 mensagens uma a uma era o custo que travava o bloco I na prática, e ele volta toda vez que alguém troca de celular. O link do grupo não substitui o modelo de acesso: ele mostra a lista de nomes, a pessoa diz quem é e cai no link pessoal dela. Decidido em 19/08 |
+| **Quem tem o link do grupo pode responder por qualquer um** | **Sim, aceito** | Em grupo de 22 amigos isso é zoeira, não fraude, e é auto-regulado (o cara vê "não vou" na página dele e desfaz). O antídoto pro dia em que o link vazar é trocar o token, na configuração |
+| **Placar ao vivo com mais de um celular apontando** | **Liberado, com pergunta anti-repetição** | O risco não é malandragem, é contagem dupla: sai o gol, duas pessoas apertam o botão. Bloquear custaria gol legítimo; perguntar custa um toque |
+| **Votação de MVP** | **Entra, e não substitui o craque calculado** — "Craque da rodada" (número) e "Escolha da galera" (voto) convivem | `mvpDaRodada` usa participação em gol e **por construção nunca premia goleiro nem zagueiro**. A votação não corrige um erro do cálculo, corrige um limite dele. Trocar um pelo outro só mudaria quem fica de fora |
+| **Como se vota** | **Pelo link pessoal, voto secreto, um por rodada, 48h, com quórum** | A credencial do bloco I faz "um voto por pessoa" sair de graça. O segredo do voto é a regra que separa prêmio de briga na segunda-feira; o quórum evita coroar alguém com dois votos; a janela curta evita campanha no meio da semana |
+| **"Comparação entre amigos" (§27)** | **Vira dupla, não duelo** | É o único item do §27 que empurra contra a regra do próprio plano. Medir o que os dois fizeram **do mesmo lado** usa o mesmo dado virado pro lado que gera resenha. O confronto direto aparece como uma linha entre várias, nunca como placar de quem é melhor |
+| **Recordes** | **Sempre superlativo positivo, e sempre recalculados** | Não existe "pior rodada" nem "mês mais fraco" — a decisão está num teste que quebra se alguém adicionar. Recalcular em vez de gravar porque número gravado sobrevive a um "desfazer lance" e passa a mentir |
 | **Jogador entra na espera sozinho** | **Sim** | Se a lista está cheia, o clique vira lugar na fila em vez de erro — é o que faz a espera andar sem ninguém no meio |
 
 Ainda em aberto: **nome definitivo**.
@@ -72,7 +80,7 @@ motion tokens (`120/220/380ms`, `ease-snappy`, `ease-standard`), texturas
 (grid técnico, stripe de 4 cores), chanfro de 16px (`.cut-corner`),
 foco amarelo 2px, e `prefers-reduced-motion`.
 
-### Domínio (puro, 99 testes)
+### Domínio (puro, 215 testes)
 | Módulo | O que faz | Testes |
 | --- | --- | --- |
 | `domain/list-parser` | Interpreta lista do WhatsApp: seções, numeração 1/01/001, emojis, traços unicode, prefixo de export, vagas vazias, aliases, duplicatas, capacidade. Detecta o caso real de a seção de goleiros terminar sem cabeçalho quando a numeração reinicia em 01. | 22 |
@@ -87,12 +95,20 @@ foco amarelo 2px, e `prefers-reduced-motion`.
 | `domain/statistics` (MVP) | MVP da rodada por participação em gol, desempate por gols e vitórias; empate total não elege ninguém. | 4 |
 | `domain/badges` | Conquistas: artilheiro e garçom do mês, presença de ferro, hat-trick, craque da rodada, estreia. Empate divide a conquista; empate de gente demais não coroa ninguém; nada negativo. | 23 |
 | `domain/attendance` | Presença: confirmar, cancelar, **"cancelou → primeiro da espera sobe"**, goleiro que cai puxa goleiro da espera, clique repetido idempotente, lista/espera cheias, rodada fechada a mexida. | 23 |
+| `domain/roster/escolha-de-jogador` | Lista de nomes do link de convidado: inativo fora, apelido ganha do nome, apelido repetido volta pro nome completo, ordem sem acento. Só devolve id e nome. | 10 |
+| `domain/live/gol-repetido` | Gol do mesmo time dentro da janela vira pergunta: ignora time adversário, lance desfeito e gol antigo; tolera relógio torto nos dois sentidos. | 10 |
+| `domain/statistics/recordes` | Recordes pessoais (gols, assistências, participações e vitórias numa rodada; maior sequência de presença) e melhor mês. Todo recorde é superlativo positivo — há teste que quebra se alguém adicionar um "pior". | 17 |
+| `domain/statistics/dupla` | Jogos juntos, aproveitamento da dupla, quem serve quem, confronto direto; parcerias mais frequentes e dupla do período. | 14 |
+| `domain/statistics/retrospectiva` | Números do período + destaques (artilharia, garçom, presença, craque, escolha da galera), jogo mais movimentado, dupla e estreantes. | 12 |
+| `domain/statistics/perfil` | Resumo do card do jogador: separa rodada (presença) de partida (jogo), V/E/D, aproveitamento, craques e escolhas. | 8 |
+| `domain/mvp/votacao` | Janela de 48h, quem pode votar, voto em si, quórum, empate divide, empate demais não elege, voto secreto na apuração. | 22 |
+| `domain/live/celebracao` | Hat-trick comemora no terceiro gol e não no quarto; gol sem autor nunca é hat-trick. | 4 |
 | `domain/text`, `domain/random` | Normalização, Levenshtein, similaridade, PRNG mulberry32 com seed. | (cobertos indiretamente) |
 
 **Invariantes garantidas por teste:** o balanceador não perde nem duplica jogador,
 respeita capacidade e locks, e a mesma seed sempre dá o mesmo resultado.
 
-### Camada de dados (63 testes de integração contra Postgres)
+### Camada de dados (81 testes de integração contra Postgres)
 `features/rounds/service.ts` e `features/live/service.ts` recebem o client por parâmetro e
 não sabem de sessão nem de `revalidatePath`. O que está coberto:
 importar lista cria jogador novo · aprende alias confirmado · substitui presenças em vez de
@@ -102,6 +118,11 @@ decrementa e não conta no ranking · reenvio da fila offline não duplica placa
 encerrar rodada fecha a partida em andamento e alimenta a vitória no ranking ·
 convite guarda só o hash e recusa duplicado · aceitar convite não rebaixa quem já é membro ·
 último dono não é rebaixado nem removido · assistente não sorteia nem edita config ·
+voto de craque grava um por pessoa e recusa o segundo · recusa voto em si, em
+quem não jogou, de quem não jogou, fora do prazo e em rodada de outro grupo ·
+sem quórum não elege ninguém · apuração não devolve quem votou em quem ·
+link de convidado troca o nome escolhido pelo link pessoal · recusa jogador de outro
+grupo e jogador inativo com a mesma mensagem · token de grupo nasce UUID v4 ·
 duplicar rodada repete a lista sem trazer inativo nem quem faltou · renomear time
 não mexe no elenco dele · cancelar pelo link pessoal promove o primeiro da espera na
 mesma transação · goleiro que cai é substituído por goleiro · confirmar com a lista cheia
@@ -148,14 +169,18 @@ rodada ao vivo não aceita mudança.
 | `/g/[slug]/rodada/importar` | Colar → interpretar → revisar → confirmar |
 | `/g/[slug]/rodada/times` | Modo aleatório/equilibrado, sorteio com animação pulável, troca por toque duplo, transparência do sorteio, copiar pro WhatsApp |
 | `/g/[slug]/ao-vivo` | Escolher confronto, placar 96px, gol por time, sheet "Gol de quem? → Teve assistência?", desfazer, cronômetro, timeline |
-| `/g/[slug]/ranking` | Abas rodada/mês/geral × gols/assistências/participações/vitórias/presença |
+| `/g/[slug]/ranking` | Abas rodada/mês/geral × gols/assistências/participações/vitórias/presença; conquistas do mês com "copiar pro grupo"; nome leva ao card |
+| `/g/[slug]/jogador/[id]` | **Card do jogador**: temporada, melhor mês, conquistas, recordes, com quem mais joga e a ficha da dupla (`?dupla=<id>`) |
+| `/g/[slug]/retrospectiva` | **Retrospectiva** mensal e anual: números, destaques, dupla do período, jogo mais movimentado, estreantes |
 | `/g/[slug]/elenco` | CRUD de jogador: busca, adicionar, editar (nome, apelido, aliases, posição, goleiro, nível), inativar, excluir quem nunca jogou |
-| `/g/[slug]/config` | Edita formato, recorrência e local do grupo |
+| `/g/[slug]/config` | Edita formato, recorrência e local do grupo; mostra e troca o **link de convidado** |
 | `/g/[slug]/membros` | Só do dono: convidar por e-mail, trocar papel, tirar do grupo, revogar convite |
 | `/g/[slug]/mais` | Resumo do grupo, atalhos pra elenco, membros e config, histórico, conta e sair |
+| `/e/[token]` | **Link de convidado do grupo**: um link só, pro WhatsApp. Lista de nomes → "sou eu" → cookie → cai no link pessoal. `?trocar=1` mostra a lista de novo |
 | `/p/[token]` | **Link pessoal do jogador**: "Tô dentro" / "Não vou", posição na espera, o time dele quando saiu o sorteio. Sem login, sem conta — e sem nível técnico |
 | `/r/[token]` | Página pública: times, placares, espera, MVP da rodada, regra do dia — sem login, sem dado privado |
 | `/r/[token]/imagem` | Card PNG 1200×630 dos times (share card e `og:image` do link no WhatsApp) |
+| `/r/[token]/conquistas/imagem` | Card PNG 1200×630 das conquistas da rodada — o share card do §27 |
 | `/offline` | Fallback do service worker |
 
 ### Fase 1.5 — o que entrou nesta sessão
@@ -239,6 +264,136 @@ página pública).
 O recorte das conquistas é **sempre o mês**, mesmo quando a aba do ranking está em
 "Geral": o rótulo diz "do mês", e rótulo que mente é pior que aba a menos.
 
+### Fase 2 completa — sessão de 19/08 (parte 4)
+
+O que faltava do §27 entrou inteiro. O que já existia (6 conquistas, craque
+calculado, sequência de presença) continua igual; o que entrou agora:
+
+| Item do §27 | Onde |
+| --- | --- |
+| Votação de MVP | `domain/mvp/votacao.ts` · `features/mvp/` · urna em `/p/<token>` |
+| Cards de jogador | `/g/<slug>/jogador/<id>` e a versão do próprio em `/p/<token>` |
+| Recordes pessoais | `domain/statistics/recordes.ts` |
+| "Melhor mês" | `melhorMesDoJogador`, no card |
+| Retrospectiva mensal e anual | `domain/statistics/retrospectiva.ts` · `/g/<slug>/retrospectiva` |
+| Comparação entre amigos | `domain/statistics/dupla.ts` — como parceria |
+| Share cards | `/r/<token>/conquistas/imagem` (PNG) + 4 mensagens novas em `domain/share` |
+| Animação de hat-trick | `domain/live/celebracao.ts` + `animate-hat-trick` no ao vivo |
+
+**As decisões de produto que a implementação obrigou a tomar:**
+
+- **Dois prêmios, não um.** "Craque da rodada" continua sendo o calculado;
+  "Escolha da galera" é o votado. No smoke com o seed os dois caíram em pessoas
+  diferentes — o craque foi um jogador de linha com 3 participações em gol, e a
+  galera elegeu o **goleiro**. É exatamente a injustiça estrutural que a votação
+  existe pra consertar, e ela apareceu no primeiro teste com dado real.
+- **O voto é secreto, e isso é arquitetura.** O par votante→votado existe na
+  tabela (é o que garante um voto por pessoa) e **não sai dela**: `apurarVotacao`
+  recebe os pares e devolve só o vencedor e a contagem dele. Não existe consulta
+  no app que responda "quem votou em quem", e um teste verifica que a apuração
+  não devolve o placar completo.
+- **Parcial não aparece.** Com a urna aberta, `getEscolhaDaGalera` devolve
+  `null`. Mostrar quem está ganhando no meio da votação transforma o prêmio em
+  campanha e faz o voto de quem falta ser sobre o placar, não sobre o jogo.
+- **Nada de comparação "eu × você".** A tela de dupla ordena por **frequência**
+  ("vocês jogaram 18 vezes juntos"), não por aproveitamento — ordenar por quem
+  ganha mais viraria, na prática, uma lista de quem carrega quem.
+- **A animação de hat-trick sai no terceiro gol e não sai mais.** O quarto volta
+  a ser "Goool". Uma animação que ocupa a tela inteira só se sustenta sendo
+  rara, e a contagem é **por rodada** — a mesma da conquista, senão a tela
+  comemora o que o histórico não registra.
+
+**O que a implementação exigiu de infraestrutura:**
+
+- **`features/rankings/historico.ts`** — o histórico do grupo numa forma só
+  (`RodadaCompleta`). Cinco coisas (conquistas, recordes, melhor mês,
+  retrospectiva, dupla) faziam a mesma pergunta ao banco; cinco consultas
+  parecidas é como duas telas passam a mostrar números diferentes pro mesmo
+  jogador. `getConquistas` foi migrado pra ele e ganhou a conquista nova de
+  graça.
+- **`Round.finishedAt`** (migration `20260819180000_votacao_de_craque`) — o
+  apito final de verdade. `endsAt` não servia: aquele é o fim **previsto**,
+  calculado do formato do grupo. Rodada encerrada antes da coluna existir cai na
+  data da rodada, o que deixa a votação dela já fechada — o comportamento certo.
+- **`MvpVote`**, com `@@unique([roundId, voterPlayerId])`: um voto por pessoa é
+  regra do banco, não só da action. O link vive no WhatsApp e o clique repetido
+  no 4G do estacionamento chega duas vezes.
+- **`components/og/base.ts`** — cor, tamanho e fonte dos cards PNG num lugar só,
+  agora que existem dois.
+
+**Mês e ano nunca saem de `getMonth()`.** `melhorMesDoJogador` e o recorte da
+retrospectiva usam `partesNoFuso`/`instanteDoFuso`: uma rodada de 31 de janeiro
+às 20:30 de Brasília cairia em fevereiro na Vercel (UTC), e o melhor mês trocaria
+de lugar. Mesma armadilha do bug do 17:30.
+
+### Link de convidado do grupo — sessão de 19/08 (parte 3)
+
+O bloco I estava em código e **não estava em uso**: faltavam as 22 mensagens no
+privado. Este recorte mata esse custo sem trocar o modelo de acesso.
+
+- **`/e/<publicToken>`** — um link só, pro organizador colar na conversa do
+  grupo. Abre a lista de nomes do elenco, a pessoa toca no seu, e o servidor
+  grava um cookie e a redireciona pro link pessoal dela (`/p/<selfToken>`). O
+  `requireAcessoPorLinkPessoal` e as 23 regras de presença **não mudaram**: o
+  link do grupo é um distribuidor, não um modelo de autorização novo.
+- **`FootballGroup.publicToken` virou credencial.** Ele existia desde o init e
+  nunca tinha sido usado por rota nenhuma. Como agora abre a lista do elenco,
+  deixou de ser `cuid()` (contador + fingerprint da máquina, tokens de grupos
+  criados em sequência são parentes) e passou a UUID v4 gerado pelo banco —
+  mesmo raciocínio de `Player.selfToken`. A migration troca o default e
+  regrava os existentes, o que é seguro justamente porque nenhum link com o
+  valor antigo tinha sido publicado.
+- **Os `selfToken` não aparecem no HTML da lista.** O botão manda o `playerId`
+  e o servidor resolve o token. Se os 22 tokens saíssem na página, um print
+  daria link permanente de todo mundo e trocar o link do grupo não adiantaria
+  mais nada. Conferido no `next start` com o seed: 22 nomes na tela, zero
+  tokens no HTML.
+- **Funciona antes da hidratação.** É um `<form action={...}>` com um botão por
+  nome: no `next start` o POST sem JS nenhum devolve 303 pro link pessoal com
+  o cookie no cabeçalho. É a primeira tela que 21 pessoas vão abrir, do 4G do
+  estacionamento — toque que não responde ali é adoção perdida.
+- **"Não é você?"** aparece em `/p/<token>` **só** se o aparelho tem o cookie,
+  ou seja, só pra quem chegou pelo link do grupo. Mostrar sempre transformaria
+  um link pessoal vazado em acesso ao elenco inteiro.
+- **Trocar o link** fica na configuração do grupo, com confirmação. O que a
+  troca não desfaz, e a tela diz: quem já entrou continua com o link pessoal
+  dele — que é outro token.
+- **Desambiguação de nome** (`domain/roster/escolha-de-jogador.ts`): dois "Rafa"
+  na lista viram "Rafael Souza" e "Rafael Lima". Tocar no nome errado é
+  responder a presença de outra pessoa.
+- **Pergunta anti-gol-duplo** (`domain/live/gol-repetido.ts`): com mais gente
+  acompanhando o jogo, dois celulares marcam o mesmo gol. O `clientEventId`
+  da fila offline cobre o reenvio do mesmo aparelho, não isso. Gol do mesmo
+  time dentro de 20s abre "Já marcaram esse gol?" com o autor e há quantos
+  segundos — **pergunta, não bloqueia**: gol fantasma contamina o ranking, mas
+  gol legítimo recusado também não tem conserto. O relógio do servidor viaja
+  junto na página porque a checagem compara carimbo do banco com o "agora" do
+  celular, e celular com hora errada faria a checagem sumir em silêncio.
+
+### Sessão de 20/08 — varredura de lançamento
+O que entrou no dia de colar o link no grupo de verdade:
+
+- **O crédito "Desenvolvido por Igor de Castro" não fica mais atrás do bottom
+  nav.** No mobile das telas do grupo o nav é fixo e cobria o rodapé — ele só
+  aparecia no fim do scroll, cortado. Agora um `body:has([data-nav-fixa])` no
+  `globals.css` dá o respiro só quando o nav está na tela (no `lg` ele vira
+  sidebar e o respiro some). Navegador sem `:has()` fica como era.
+- **Trocar o link pessoal de UM jogador ganhou tela** (era o item 5b desta
+  lista): "Gerar link novo" na ficha do elenco, com confirmação, via
+  `regenerarLinkPessoalAction`. Vazou o link ou a pessoa trocou de celular,
+  gera outro — o antigo responde 404 na hora, sem tirar ninguém do elenco.
+- **`public/fonts/Anton-Regular.ttf` entrou no repositório** (dívida 7): os
+  três cards PNG saem com a tipografia do produto. Junto vieram dois consertos:
+  a rota de conquistas dizia `fontFamily: "Anton"` sem nunca registrar a fonte
+  no `ImageResponse` (caía na padrão em silêncio), e
+  `outputFileTracingIncludes` garante o `.ttf` no bundle serverless da Vercel —
+  sem isso o `readFile` em runtime não acha o arquivo em produção.
+- **Card OG padrão do app** (`src/app/opengraph-image.tsx`): toda rota sem card
+  próprio — a landing e principalmente o link de convidado `/e/<token>`, que é
+  colado na conversa do grupo — ganha prévia com a marca no WhatsApp. De
+  propósito sem dado nenhum: nome de grupo e elenco não entram em imagem que o
+  WhatsApp cacheia.
+
 ### Offline (plano §40)
 - `public/sw.js`: cache-first nos assets versionados do Next, network-first na navegação com
   fallback pra `/offline`. **Não** cacheia POST, `/api/**` nem HTML de `/g/**` — isso vazaria
@@ -321,18 +476,42 @@ O que mudou:
    (Authentication → Emails → Templates) — eles não vivem no repositório.
 3. **Domínio próprio.** O app responde em `jogae-free.vercel.app`. Domínio não muda nada
    de desempenho; é questão de identidade e de mandar o link no grupo sem vergonha.
-4. **O bloco I está em código, mas ainda não em uso.** As migrations
-   `20260819120000_link_pessoal_do_jogador` e `20260819133000_default_do_link_no_banco`
-   foram aplicadas no banco local e no schema `teste`; **falta rodar em produção** (`prisma migrate deploy` pelo `DIRECT_URL`, porta
-   5432 — o pooler da 6543 não roda migration). E falta o passo humano: mandar o link no
-   privado de cada um dos 22. Nenhum jogador de verdade clicou nesse link ainda.
+4. **O bloco I está em código, mas ainda não em uso.** Três migrations
+   (`20260819120000_link_pessoal_do_jogador`, `20260819133000_default_do_link_no_banco`
+   e `20260819160000_link_de_convidado_do_grupo`) foram aplicadas no banco local e no
+   schema `teste`; **falta rodar em produção** (`prisma migrate deploy` pelo
+   `DIRECT_URL`, porta 5432 — o pooler da 6543 não roda migration). Com o link de
+   convidado, o passo humano deixou de ser 22 mensagens e virou uma: copiar o link em
+   `/g/<slug>/config` e colar no grupo. **Nenhum jogador de verdade clicou ainda.**
 5. Sem rate limit fora do login; erro de action ainda aparece só como mensagem inline.
-6. **Da Fase 2 entraram só as conquistas.** Continuam de fora, todos do §27: votação de
-   MVP (o craque hoje é calculado, não votado), recordes pessoais, "melhor mês",
-   retrospectiva mensal e anual, comparação entre amigos, card de jogador, share card de
-   conquista e animação de hat-trick. **A Fase 3 (financeiro) não entrou nada** — não tem
-   regra definida no PRD além da lista de tópicos; precisa de decisão de produto antes de
-   virar schema.
+   O `/e/<token>` também não tem: um token errado custa uma consulta indexada e
+   responde 404, mas nada impede tentar em volume. UUID v4 torna a força bruta
+   irrelevante; rate limit continua sendo o certo a fazer.
+5b. ~~Revogar o link pessoal de uma pessoa só não tem tela.~~ **Resolvido em
+   20/08:** "Gerar link novo" na ficha do jogador (elenco), com confirmação.
+5c. **A troca do link de convidado não foi exercitada pela interface.** O smoke
+   confirmou o efeito no banco (token novo → link antigo responde 404, novo responde
+   200) e a tela renderiza o card com o botão, mas ninguém clicou nele num navegador:
+   remontar o protocolo de Server Action no `curl` não valia o esforço. Mesma coisa
+   pra pergunta "Já marcaram esse gol?" — a regra tem 10 testes, a montagem passou no
+   `tsc` e no build, e a interação em si só existe em aparelho.
+6. **A Fase 2 está completa em código, e vazia de dado real.** Todos os itens do §27
+   existem, mas quase nenhum tem o que mostrar hoje: recorde precisa de rodadas,
+   "melhor mês" precisa de meses, a retrospectiva anual só faz sentido em dezembro, e a
+   votação nunca teve um voto de gente de verdade. O que dá pra afirmar é que a
+   mecânica funciona com o seed — o resto é tempo. **A Fase 3 (financeiro) não entrou
+   nada** — não tem regra definida no PRD além da lista de tópicos; precisa de decisão
+   de produto antes de virar schema.
+6b. **A interação da Fase 2 não foi tocada por dedo nenhum.** O smoke cobriu o que o
+   servidor renderiza (retrospectiva, card, urna com 19 candidatos, resultado com a urna
+   fechada, PNG de conquistas). O que só existe em aparelho: **o toque no nome pra
+   votar** (a action tem 12 testes de integração, mas o clique em si não) e **a animação
+   de hat-trick** (a regra tem 4 testes; a animação nunca rodou fora do CSS).
+6c. **O custo do card do jogador cresce com o grupo.** `getCardDoJogador` lê o
+   histórico inteiro pra calcular recorde e parceria. Num grupo de dois anos são ~100
+   rodadas, o `cache()` do React resolve a repetição dentro da mesma renderização, e
+   `/p/<token>` passou a pagar isso também. Se a home ou uma lista um dia exibir card,
+   aí sim vira coluna.
 
 9. **Fuso é um só pro app inteiro** (`America/Sao_Paulo`). O Fut Manus joga em UTC−4 e
    vê horário de Brasília — uma hora a mais. O bug do 17:30 está corrigido (o que o
@@ -346,9 +525,8 @@ O que mudou:
    rota expõe é um `select 1`, mas vale configurar.
 
 **Dívidas menores:**
-7. A imagem dos times sai na fonte padrão: a Anton exigiria o `.ttf` embutido e o
-   `next/font` não expõe o arquivo. Se `public/fonts/Anton-Regular.ttf` existir, a rota
-   usa — é só colocar lá.
+7. ~~A imagem dos times sai na fonte padrão.~~ **Resolvido em 20/08:** o `.ttf`
+   está em `public/fonts/` e o tracing da Vercel o inclui no bundle.
 8. ~~`/g/[slug]/ranking` e o histórico ainda não mostram o MVP.~~ **Resolvido em 19/08:**
    o craque aparece no histórico da tela Mais e como conquista no ranking.
 

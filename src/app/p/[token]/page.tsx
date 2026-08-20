@@ -1,13 +1,22 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Card, Chip, SectionLabel } from "@/components/ui/primitives";
+import { Card, Chip, SectionLabel, StatBlock } from "@/components/ui/primitives";
 import { TeamCard, TeamStripe } from "@/components/football/team-card";
 import { ConquistaCard } from "@/components/football/conquista-card";
+import { RecordeCard } from "@/components/football/recorde-card";
+import { BotaoCopiar } from "@/components/ui/copiar";
 import { IconClock, IconPin, JogaeMark } from "@/components/ui/icons";
 import { podeMexerNaPresenca } from "@/domain/attendance/presenca";
+import { cn } from "@/lib/cn";
+import { lerJogadorLembrado } from "@/features/entrada/cookie";
+import { getCardDoJogador } from "@/features/jogadores/queries";
+import { getPainelDeVotacao, getRodadaEmVotacao } from "@/features/mvp/queries";
 import { getPainelDoJogador } from "@/features/presenca/queries";
-import { formatRoundSchedule, formatTime } from "@/lib/dates";
+import { buildCardDoJogadorMessage } from "@/domain/share/whatsapp";
+import { RECORDES } from "@/domain/statistics/recordes";
+import { formatLongDate, formatRoundSchedule, formatTime, mesEAno } from "@/lib/dates";
 import { RespostaDoJogador } from "./_components/resposta-do-jogador";
+import { VotacaoDoCraque } from "./_components/votacao-do-craque";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +65,40 @@ export default async function PaginaDoJogador({
 
   const { jogador, rodada, conquistas } = painel;
   const primeiroNome = (jogador.nickname ?? jogador.displayName).split(" ")[0];
+
+  // Saída pra quem tocou no nome errado no link do grupo. Só aparece se este
+  // aparelho passou por lá: o link pessoal sozinho não abre o elenco, e mostrar
+  // o link de convidado aqui transformaria um link vazado em acesso ao grupo.
+  const veioDoLinkDoGrupo = (await lerJogadorLembrado(jogador.groupId)) !== null;
+
+  // O que a Fase 2 acrescentou nesta tela: a votação do craque e o card do
+  // jogador (temporada, recordes, melhor mês). Em paralelo — uma não depende da
+  // outra, e cada ida ao banco atravessa a rede (função em gru1, banco em
+  // sa-east-1).
+  const [emVotacao, card] = await Promise.all([
+    getRodadaEmVotacao(jogador.groupId),
+    getCardDoJogador(jogador.groupId, jogador.id, jogador.group.timezone),
+  ]);
+
+  const votacao = emVotacao
+    ? await getPainelDeVotacao(emVotacao.roundId, jogador.id)
+    : null;
+
+  const mensagemDoCard =
+    card && card.resumo.rodadas > 0
+      ? buildCardDoJogadorMessage({
+          groupName: jogador.group.name,
+          nome: jogador.nickname ?? jogador.displayName,
+          rodadas: card.resumo.rodadas,
+          gols: card.resumo.gols,
+          assistencias: card.resumo.assistencias,
+          vitorias: card.resumo.vitorias,
+          aproveitamento: card.resumo.aproveitamento,
+          recorde: card.recordes[0]
+            ? `${RECORDES[card.recordes[0].tipo].rotulo} — ${RECORDES[card.recordes[0].tipo].descricao(card.recordes[0].valor)}`
+            : null,
+        })
+      : null;
 
   return (
     <div className="relative min-h-dvh">
@@ -153,6 +196,32 @@ export default async function PaginaDoJogador({
               </section>
             )}
 
+            {votacao && (
+              <section className="flex flex-col gap-3">
+                <SectionLabel>Escolha da galera</SectionLabel>
+                <Card className="py-5">
+                  {votacao.podeVotar ? (
+                    <VotacaoDoCraque
+                      token={token}
+                      roundId={votacao.roundId}
+                      candidatos={votacao.candidatos}
+                      // "Quinta · 23:30" — o prazo em hora de parede, que é
+                      // como alguém checa se ainda dá tempo.
+                      fechaEm={
+                        votacao.fechaEm
+                          ? formatRoundSchedule(votacao.fechaEm, votacao.fechaEm)
+                          : null
+                      }
+                    />
+                  ) : (
+                    <p className="text-body-s text-ink-3">
+                      {votacao.motivo ?? "A votação dessa rodada já fechou."}
+                    </p>
+                  )}
+                </Card>
+              </section>
+            )}
+
             {conquistas.length > 0 && (
               <section className="flex flex-col gap-3">
                 <SectionLabel>Suas conquistas</SectionLabel>
@@ -169,6 +238,106 @@ export default async function PaginaDoJogador({
               </section>
             )}
 
+            {card && card.resumo.rodadas > 0 && (
+              <>
+                <section className="flex flex-col gap-3">
+                  <SectionLabel>Seus números</SectionLabel>
+                  <Card>
+                    <div className="grid grid-cols-3 gap-3">
+                      <StatBlock value={card.resumo.gols} label="Gols" tone="text-red" />
+                      <StatBlock
+                        value={card.resumo.assistencias}
+                        label="Assistências"
+                        tone="text-yellow"
+                      />
+                      <StatBlock
+                        value={card.resumo.rodadas}
+                        label="Rodadas"
+                        tone="text-ink"
+                      />
+                    </div>
+                    <p className="mt-4 text-body-s text-ink-2">
+                      {card.resumo.vitorias}{" "}
+                      {card.resumo.vitorias === 1 ? "vitória" : "vitórias"} em{" "}
+                      {card.resumo.partidas}{" "}
+                      {card.resumo.partidas === 1 ? "jogo" : "jogos"} ·{" "}
+                      {Math.round(card.resumo.aproveitamento * 100)}% de aproveitamento
+                    </p>
+                  </Card>
+                </section>
+
+                {card.melhorMes && (
+                  <section className="flex flex-col gap-3">
+                    <SectionLabel>Seu melhor mês</SectionLabel>
+                    <Card className="flex items-center justify-between gap-4 py-5">
+                      <div>
+                        <div className="font-display text-[22px] leading-none text-ink">
+                          {mesEAno(card.melhorMes.mes, card.melhorMes.ano)}
+                        </div>
+                        <p className="mt-1.5 text-body-s text-ink-2">
+                          {card.melhorMes.gols}{" "}
+                          {card.melhorMes.gols === 1 ? "gol" : "gols"} e{" "}
+                          {card.melhorMes.assistencias}{" "}
+                          {card.melhorMes.assistencias === 1
+                            ? "assistência"
+                            : "assistências"}
+                        </p>
+                      </div>
+                      <span className="font-display text-score-m tabular leading-none text-pink">
+                        {card.melhorMes.participacoes}
+                      </span>
+                    </Card>
+                  </section>
+                )}
+
+                {card.recordes.length > 0 && (
+                  <section className="flex flex-col gap-3">
+                    <SectionLabel>Seus recordes</SectionLabel>
+                    <div className="grid gap-2">
+                      {card.recordes.map((recorde) => (
+                        <RecordeCard
+                          key={recorde.tipo}
+                          tipo={recorde.tipo}
+                          valor={recorde.valor}
+                          quando={recorde.data ? formatLongDate(recorde.data) : null}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {card.parcerias.length > 0 && (
+                  <section className="flex flex-col gap-3">
+                    <SectionLabel>Com quem você mais joga</SectionLabel>
+                    <Card className="p-0">
+                      <ul>
+                        {card.parcerias.map((parceria, index) => (
+                          <li
+                            key={parceria.parceiroId}
+                            className={cn(
+                              "flex items-center gap-3 px-4 py-3",
+                              index > 0 && "border-t border-line/50",
+                            )}
+                          >
+                            <span className="min-w-0 flex-1 truncate text-body font-medium text-ink">
+                              {parceria.nome}
+                            </span>
+                            <span className="text-caption tabular text-ink-3">
+                              {parceria.jogosJuntos} jogos juntos
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </Card>
+                  </section>
+                )}
+
+                {mensagemDoCard && (
+                  <BotaoCopiar texto={mensagemDoCard} rotulo="Copiar seu card" block />
+                )}
+              </>
+            )}
+
             <a
               href={`/r/${rodada.publicToken}`}
               className="text-body-s text-ink-2 underline decoration-line-strong underline-offset-4"
@@ -178,9 +347,19 @@ export default async function PaginaDoJogador({
           </>
         )}
 
-        <p className="text-caption uppercase tracking-[0.06em] text-ink-3">
-          Este link é seu. Não repassa pro grupo — quem abrir responde no seu lugar.
-        </p>
+        <div className="flex flex-col gap-3">
+          <p className="text-caption uppercase tracking-[0.06em] text-ink-3">
+            Este link é seu. Não repassa pro grupo — quem abrir responde no seu lugar.
+          </p>
+          {veioDoLinkDoGrupo && (
+            <a
+              href={`/e/${jogador.group.publicToken}?trocar=1`}
+              className="text-body-s text-ink-3 underline decoration-line-strong underline-offset-4"
+            >
+              Não é você? Escolher outro nome
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

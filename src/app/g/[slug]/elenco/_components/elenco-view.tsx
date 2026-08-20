@@ -13,6 +13,7 @@ import {
   atualizarJogadorAction,
   criarJogadorAction,
   excluirJogadorAction,
+  regenerarLinkPessoalAction,
 } from "@/features/players/actions";
 import { Button } from "@/components/ui/button";
 import { ChipRadioGroup, Field, Input, Textarea } from "@/components/ui/form";
@@ -26,6 +27,7 @@ import {
   IconPlus,
   IconSearch,
   IconShare,
+  IconSync,
   IconTrash,
   IconX,
 } from "@/components/ui/icons";
@@ -517,12 +519,15 @@ function LinkPessoal({
   groupName: string;
   nome: string;
 }) {
+  const [link, setLink] = useState(jogador.linkPessoal);
   const [copiado, setCopiado] = useState<"link" | "mensagem" | null>(null);
+  const [confirmando, setConfirmando] = useState(false);
+  const [trocando, iniciarTroca] = useTransition();
 
   const mensagem = buildLinkPessoalMessage({
     nome,
     groupName,
-    url: jogador.linkPessoal,
+    url: link,
   });
 
   async function copiar(texto: string, qual: "link" | "mensagem") {
@@ -532,6 +537,15 @@ function LinkPessoal({
     } catch {
       setCopiado(null);
     }
+  }
+
+  function trocar() {
+    iniciarTroca(async () => {
+      const novo = await regenerarLinkPessoalAction(jogador.id);
+      setLink(novo);
+      setConfirmando(false);
+      setCopiado(null);
+    });
   }
 
   return (
@@ -545,7 +559,7 @@ function LinkPessoal({
       </p>
 
       <code className="overflow-x-auto rounded-sm bg-canvas px-2.5 py-2 text-body-s text-ink-3">
-        {jogador.linkPessoal}
+        {link}
       </code>
 
       <div className="flex gap-2">
@@ -554,7 +568,8 @@ function LinkPessoal({
           variant="secondary"
           size="sm"
           block
-          onClick={() => copiar(jogador.linkPessoal, "link")}
+          disabled={trocando}
+          onClick={() => copiar(link, "link")}
         >
           {copiado === "link" ? <IconCheck size={15} /> : <IconCopy size={15} />}
           {copiado === "link" ? "Copiado" : "Copiar link"}
@@ -564,12 +579,55 @@ function LinkPessoal({
           variant="secondary"
           size="sm"
           block
+          disabled={trocando}
           onClick={() => copiar(mensagem, "mensagem")}
         >
           {copiado === "mensagem" ? <IconCheck size={15} /> : <IconShare size={15} />}
           {copiado === "mensagem" ? "Copiado" : "Copiar recado"}
         </Button>
       </div>
+
+      {confirmando ? (
+        <div className="flex flex-col gap-2">
+          <p role="status" className="text-body-s text-red">
+            O link que {jogador.displayName} tem hoje para de funcionar. Vai ter
+            que mandar o novo no privado dele.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant="danger"
+              size="sm"
+              block
+              disabled={trocando}
+              onClick={trocar}
+            >
+              {trocando ? "Gerando…" : "Confirmar troca"}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              block
+              disabled={trocando}
+              onClick={() => setConfirmando(false)}
+            >
+              Deixa quieto
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setConfirmando(true)}
+          className="self-start"
+        >
+          <IconSync size={15} />
+          Gerar link novo
+        </Button>
+      )}
     </section>
   );
 }

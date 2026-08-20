@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildCardDoJogadorMessage,
+  buildConquistaMessage,
+  buildConquistasMessage,
+  buildLinkDoGrupoMessage,
+  buildRetrospectivaMessage,
   buildLinkPessoalMessage,
   buildResultMessage,
   buildRoundCallMessage,
@@ -131,5 +136,161 @@ describe("buildLinkPessoalMessage", () => {
     expect(
       buildLinkPessoalMessage({ ...base, dateText: "Quinta, 20:30", venue: "Arena Farofa" }),
     ).toContain("Próxima rodada: Quinta, 20:30 · Arena Farofa.");
+  });
+});
+
+describe("buildLinkDoGrupoMessage", () => {
+  const base = {
+    groupName: "Fut da Quinta",
+    url: "https://jogae.app/e/8f14e45f-ceea-4d15-9b0f-9a2c1e4b7d3a",
+  };
+
+  it("abre com o nome do grupo e entrega o link inteiro", () => {
+    const mensagem = buildLinkDoGrupoMessage(base);
+    expect(mensagem.startsWith("⚽ FUT DA QUINTA")).toBe(true);
+    expect(mensagem).toContain(base.url);
+  });
+
+  it("explica que é só tocar no nome — a lista de nomes é a novidade", () => {
+    expect(buildLinkDoGrupoMessage(base)).toMatch(/toca no seu nome/i);
+  });
+
+  it("derruba as três objeções: conta, instalação e repetir o processo", () => {
+    const mensagem = buildLinkDoGrupoMessage(base);
+    expect(mensagem).toMatch(/não precisa criar conta/i);
+    expect(mensagem).toMatch(/instalar nada/i);
+    expect(mensagem).toMatch(/direto na sua página/i);
+  });
+
+  it("não manda guardar segredo: este link é do grupo, ao contrário do pessoal", () => {
+    expect(buildLinkDoGrupoMessage(base)).not.toMatch(/não repassa/i);
+  });
+
+  it("só cita a rodada quando sabe quando é", () => {
+    expect(buildLinkDoGrupoMessage(base)).not.toContain("Próxima rodada");
+    expect(
+      buildLinkDoGrupoMessage({ ...base, dateText: "Quinta, 20:30", venue: "Arena Farofa" }),
+    ).toContain("Próxima rodada: Quinta, 20:30 · Arena Farofa.");
+  });
+});
+
+describe("buildConquistaMessage", () => {
+  const base = {
+    groupName: "Fut da Quinta",
+    conquista: "Artilheiro do mês",
+    emoji: "⚽",
+    nome: "Igão",
+    detalhe: "9 gols",
+  };
+
+  it("põe a conquista no topo e o nome logo abaixo", () => {
+    const mensagem = buildConquistaMessage(base);
+    expect(mensagem.startsWith("⚽ ARTILHEIRO DO MÊS")).toBe(true);
+    expect(mensagem).toContain("Igão — 9 gols");
+  });
+
+  it("só inclui link quando tem link", () => {
+    expect(buildConquistaMessage(base)).not.toContain("http");
+    expect(
+      buildConquistaMessage({ ...base, publicUrl: "https://jogae.app/r/abc" }),
+    ).toContain("https://jogae.app/r/abc");
+  });
+});
+
+describe("buildCardDoJogadorMessage", () => {
+  const base = {
+    groupName: "Fut da Quinta",
+    nome: "Igão",
+    rodadas: 12,
+    gols: 9,
+    assistencias: 1,
+    vitorias: 14,
+    aproveitamento: 0.58,
+  };
+
+  it("resume a temporada em linhas curtas", () => {
+    const mensagem = buildCardDoJogadorMessage(base);
+    expect(mensagem).toContain("⚽ 9 gols");
+    expect(mensagem).toContain("👟 1 assistência");
+    expect(mensagem).toContain("58% de aproveitamento");
+  });
+
+  it("concorda em número no singular", () => {
+    const mensagem = buildCardDoJogadorMessage({
+      ...base,
+      gols: 1,
+      rodadas: 1,
+      vitorias: 1,
+    });
+    expect(mensagem).toContain("⚽ 1 gol");
+    expect(mensagem).toContain("1 rodada");
+    expect(mensagem).toContain("1 vitória");
+  });
+
+  it("nunca menciona nível técnico (plano §13)", () => {
+    expect(buildCardDoJogadorMessage(base)).not.toMatch(/n[íi]vel/i);
+  });
+});
+
+describe("buildRetrospectivaMessage", () => {
+  const base = {
+    groupName: "Fut da Quinta",
+    periodo: "Janeiro de 2026",
+    rodadas: 4,
+    partidas: 24,
+    gols: 96,
+    jogadores: 26,
+    artilheiros: { nomes: ["Igão"], valor: 12 },
+    garcons: { nomes: ["Salles", "Deivão"], valor: 6 },
+    presencas: { nomes: ["Marcos"], valor: 4 },
+  };
+
+  it("abre com grupo e período e traz os números do mês", () => {
+    const mensagem = buildRetrospectivaMessage(base);
+    expect(mensagem.startsWith("📅 FUT DA QUINTA · JANEIRO DE 2026")).toBe(true);
+    expect(mensagem).toContain("4 rodadas · 24 jogos · 96 gols");
+  });
+
+  it("junta empatados com 'e'", () => {
+    expect(buildRetrospectivaMessage(base)).toContain("Salles e Deivão");
+  });
+
+  it("omite destaque vazio em vez de dizer que ninguém se destacou", () => {
+    const mensagem = buildRetrospectivaMessage({
+      ...base,
+      artilheiros: { nomes: [], valor: 0 },
+    });
+    expect(mensagem).not.toContain("Artilharia");
+    expect(mensagem).toContain("Garçom");
+  });
+
+  it("inclui a dupla do período quando existe", () => {
+    const mensagem = buildRetrospectivaMessage({
+      ...base,
+      dupla: { nomes: ["Igão", "Salles"], jogosJuntos: 14 },
+    });
+    expect(mensagem).toContain("🤝 Dupla: Igão e Salles (14 jogos juntos)");
+  });
+});
+
+describe("buildConquistasMessage", () => {
+  const base = {
+    groupName: "Fut da Quinta",
+    recorte: "do mês",
+    conquistas: [
+      { emoji: "⚽", rotulo: "Artilheiro do mês", nome: "Igão", detalhe: "9 gols" },
+      { emoji: "🧤", rotulo: "Garçom do mês", nome: "Salles", detalhe: "5 assistências" },
+    ],
+  };
+
+  it("junta tudo numa mensagem só, com o recorte no cabeçalho", () => {
+    const mensagem = buildConquistasMessage(base);
+    expect(mensagem.startsWith("🏅 CONQUISTAS DO MÊS")).toBe(true);
+    expect(mensagem).toContain("⚽ Artilheiro do mês: Igão — 9 gols");
+    expect(mensagem).toContain("🧤 Garçom do mês: Salles — 5 assistências");
+  });
+
+  it("sem conquista não gera mensagem vazia com cabeçalho", () => {
+    expect(buildConquistasMessage({ ...base, conquistas: [] })).toBe("");
   });
 });

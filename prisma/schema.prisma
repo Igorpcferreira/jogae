@@ -125,8 +125,19 @@ model FootballGroup {
   /// Configurações avançadas e opcionais (regras de partida, ranking, cores).
   settings Json @default("{}")
 
-  /// Token não previsível para links públicos (plano §39).
-  publicToken String @unique @default(cuid())
+  /// Link de convidado do grupo (`/e/<publicToken>`): o link único que o
+  /// organizador cola na conversa do WhatsApp. Ele abre a lista de nomes do
+  /// elenco e deixa cada um dizer quem é — a partir daí a pessoa cai no link
+  /// pessoal dela (`Player.selfToken`) e responde presença sem conta nenhuma.
+  ///
+  /// É **credencial**, não identificador: quem tem o link vê os nomes do elenco
+  /// e pode responder no lugar de qualquer um deles. Por isso UUID v4 gerado
+  /// pelo banco, e não o `cuid()` que ele tinha — cuid carrega contador e
+  /// fingerprint da máquina, então dois grupos criados em sequência têm tokens
+  /// parentes. Mesmo raciocínio de `Player.selfToken`.
+  ///
+  /// Gravar um valor novo é o que revoga o link antigo (tela de configuração).
+  publicToken String @unique @default(dbgenerated("gen_random_uuid()::text"))
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -188,6 +199,8 @@ model Player {
   teamPlayers TeamPlayer[]
   goals       MatchEvent[]  @relation("EventAuthor")
   assists     MatchEvent[]  @relation("EventAssist")
+  votosDados  MvpVote[]     @relation("VotoDoJogador")
+  votosRecebidos MvpVote[]  @relation("VotoNoJogador")
 
   @@index([groupId, active])
 }
@@ -247,6 +260,15 @@ model Round {
   /// Token do link público da rodada.
   publicToken String @unique @default(cuid())
 
+  /// Quando o apito final soou — é daqui que a janela de votação de craque
+  /// conta as 48h (`domain/mvp/votacao.ts`).
+  ///
+  /// Separado de `endsAt` de propósito: aquele é o horário **previsto** do fim,
+  /// que vem do formato do grupo e existe desde antes de a bola rolar. Este é o
+  /// instante em que alguém encerrou a rodada de verdade. Nulo nas rodadas
+  /// encerradas antes desta coluna existir — a consulta cai na data da rodada.
+  finishedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -254,8 +276,38 @@ model Round {
   attendances Attendance[]
   teams       Team[]
   matches     Match[]
+  votos       MvpVote[]
 
   @@index([groupId, date])
+}
+
+/// Voto pra "Escolha da galera" (plano §27, Fase 2).
+///
+/// O voto é **secreto**: o par votante→votado existe aqui porque é o que
+/// garante um voto por pessoa, e não sai desta tabela. Nenhuma consulta do app
+/// devolve "quem votou em quem" — `apurarVotacao` recebe os pares e entrega só
+/// o vencedor. Mostrar o placar completo transformaria o prêmio numa discussão
+/// de segunda-feira, que é exatamente o que o plano manda evitar.
+///
+/// Quem vota é um `Player`, não um `User`: no Jogaê o jogador não tem conta —
+/// ele se identifica pelo link pessoal (`Player.selfToken`, bloco I). É essa
+/// credencial que faz "um voto por pessoa" sair de graça.
+model MvpVote {
+  id      String @id @default(cuid())
+  roundId String
+
+  voterPlayerId String
+  votedPlayerId String
+
+  createdAt DateTime @default(now())
+
+  round Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  voter Player @relation("VotoDoJogador", fields: [voterPlayerId], references: [id], onDelete: Cascade)
+  voted Player @relation("VotoNoJogador", fields: [votedPlayerId], references: [id], onDelete: Cascade)
+
+  /// Um voto por pessoa por rodada — a regra vive no banco, não só na action.
+  @@unique([roundId, voterPlayerId])
+  @@index([roundId, votedPlayerId])
 }
 
 enum DrawMode {

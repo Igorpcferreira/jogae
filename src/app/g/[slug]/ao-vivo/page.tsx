@@ -48,6 +48,20 @@ export default async function LivePage({
 
   const current = round.matches.find((match) => match.status === "LIVE") ?? null;
 
+  // Gols de cada um **na rodada**, não na partida. No fut de resenha a noite
+  // tem seis jogos de 10 minutos; hat-trick por partida sairia toda hora, e
+  // ninguém chama três gols espalhados pela noite de outra coisa. É a mesma
+  // contagem que a conquista `hat-trick` usa no histórico — as duas precisam
+  // concordar, senão a tela comemora o que o ranking não registra.
+  const golsDaRodada: Record<string, number> = {};
+  for (const match of round.matches) {
+    for (const evento of match.events) {
+      if (evento.voidedAt) continue;
+      if (evento.type !== "GOAL" || !evento.playerId) continue;
+      golsDaRodada[evento.playerId] = (golsDaRodada[evento.playerId] ?? 0) + 1;
+    }
+  }
+
   const events: LiveEvent[] = (current?.events ?? [])
     .filter((event) => !event.voidedAt)
     .map((event) => ({
@@ -57,6 +71,9 @@ export default async function LivePage({
       playerName: event.player?.nickname ?? event.player?.displayName ?? null,
       assistName: event.assistPlayer?.nickname ?? event.assistPlayer?.displayName ?? null,
       type: event.type,
+      teamId: event.teamId,
+      playerId: event.playerId,
+      registradoEm: event.createdAt.getTime(),
     }));
 
   const settings = (round.group.settings ?? {}) as { matchRule?: string };
@@ -78,7 +95,20 @@ export default async function LivePage({
           : null
       }
       events={events}
+      golsDaRodada={golsDaRodada}
       matchRule={settings.matchRule ?? null}
+      // Relógio do servidor: o celular na beira do campo pode estar minutos
+      // fora, e a checagem de gol repetido compara carimbo do banco com "agora"
+      // do cliente. Sem esta referência ela sumiria em silêncio justo no
+      // aparelho desacertado.
+      //
+      // A regra de pureza existe pro componente que **re-renderiza**: valor
+      // instável entre renders vira UI que pisca e hidratação que não bate.
+      // Aqui é Server Component, e ele roda uma vez por requisição — este
+      // `Date.now()` é dado de request, da mesma natureza de `cookies()` e
+      // `headers()`, e chega ao cliente como número congelado no payload.
+      // eslint-disable-next-line react-hooks/purity -- valor de request em Server Component
+      agoraNoServidor={Date.now()}
     />
   );
 }
