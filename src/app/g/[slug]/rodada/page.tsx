@@ -14,8 +14,11 @@ import {
   SectionLabel,
 } from "@/components/ui/primitives";
 import { PlayerRow } from "@/components/football/player-row";
+import { BotaoCopiar } from "@/components/ui/copiar";
 import { IconPin, IconClock, IconFormation } from "@/components/ui/icons";
-import { formatRoundSchedule, relativeDay } from "@/lib/dates";
+import { buildRoundCallMessage } from "@/domain/share/whatsapp";
+import { urlBase } from "@/lib/base-url";
+import { formatLongDate, formatRoundSchedule, formatTime, relativeDay } from "@/lib/dates";
 import { CreateRoundButton } from "../_components/create-round-button";
 import { PromoteButton, GoalkeeperToggle } from "./_components/attendance-controls";
 
@@ -45,6 +48,19 @@ export default async function RoundPage({
   const { confirmed, goalkeepers, waiting } = splitAttendances(round.attendances);
   const fieldPlayers = confirmed.filter((a) => !a.asGoalkeeper);
   const remaining = Math.max(0, capacity - confirmed.length);
+
+  // A chamada pro grupo ("18 confirmados. Faltam 2 pra fechar."). É a mensagem
+  // que o organizador cola no WhatsApp quando a lista mexe — alguém desistiu,
+  // alguém subiu da espera — e o link público mostra a lista sempre atual.
+  const chamada = buildRoundCallMessage({
+    groupName: group.name,
+    dateText: formatLongDate(round.date),
+    time: formatTime(round.startsAt ?? round.date),
+    venue: round.venue,
+    confirmed: confirmed.length,
+    capacity,
+    publicUrl: `${await urlBase()}/r/${round.publicToken}`,
+  });
 
   return (
     <div className="flex flex-col gap-7">
@@ -198,14 +214,17 @@ export default async function RoundPage({
         </section>
       )}
 
-      <Card className="flex items-center gap-3 py-3">
-        <IconClock size={18} className="shrink-0 text-ink-3" />
-        <p className="text-body-s text-ink-2">
-          {remaining === 0
-            ? `${confirmed.length} confirmados. Fechou.`
-            : `Faltam ${remaining} pra fechar ${round.teamCount} times.`}
-          {waiting.length > 0 && ` ${waiting.length} na espera.`}
-        </p>
+      <Card className="flex flex-col gap-3 py-4">
+        <div className="flex items-center gap-3">
+          <IconClock size={18} className="shrink-0 text-ink-3" />
+          <p className="text-body-s text-ink-2">
+            {remaining === 0
+              ? `${confirmed.length} confirmados. Fechou.`
+              : `Faltam ${remaining} pra fechar ${round.teamCount} times.`}
+            {waiting.length > 0 && ` ${waiting.length} na espera.`}
+          </p>
+        </div>
+        <BotaoCopiar texto={chamada} rotulo="Copiar chamada pro grupo" block />
       </Card>
     </div>
   );

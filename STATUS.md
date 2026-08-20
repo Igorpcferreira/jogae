@@ -393,6 +393,12 @@ O que entrou no dia de colar o link no grupo de verdade:
   colado na conversa do grupo — ganha prévia com a marca no WhatsApp. De
   propósito sem dado nenhum: nome de grupo e elenco não entram em imagem que o
   WhatsApp cacheia.
+- **"Copiar chamada pro grupo" na tela Rodada.** `buildRoundCallMessage` existia
+  com teste e não estava ligado a botão nenhum. Agora, quando alguém desiste e a
+  espera sobe, o organizador cola a chamada atualizada ("18 confirmados. Faltam
+  2 pra fechar." + link público) em um toque. Aviso **automático** no WhatsApp
+  não existe de propósito: a API oficial é paga e pra empresa, bot não-oficial
+  arrisca banir o número — o caminho futuro é push do PWA pra quem subiu.
 
 ### Offline (plano §40)
 - `public/sw.js`: cache-first nos assets versionados do Next, network-first na navegação com
