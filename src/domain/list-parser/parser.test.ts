@@ -200,3 +200,150 @@ describe("parseList — capacidade e vagas", () => {
     expect(result.stats.confirmedCount).toBe(0);
   });
 });
+
+describe("parseList — cabeçalho de lista real não vira jogador", () => {
+  // A mensagem real que criou quatro "jogadores" fantasmas em produção:
+  // "Toda Quinta 20:30 Às 22:00", "Local Campo 03 - Farofa",
+  // "Localização: https://..." e "Lista Fecha Com 20". O gatilho era a
+  // primeira linha: "CAMPO CONFIRMADO!" liga a seção explícita e o filtro
+  // antigo de "parece nome" parava de rodar.
+  const mensagemReal = `✅ CAMPO CONFIRMADO!
+Toda QUINTA 20:30 às 22:00
+Local📍Campo 03 - Farofa
+Localização:  https://g.co/kgs/2sVgTvg ⚽
+
+🚨ATENÇÃO: Precisamos iniciar às 20:30 em ponto, assim não perdemos minutos no horário.
+
+Goleiros🧤
+01-
+02-
+.
+.
+01-daniel
+02-guilherme
+03-Marcos manus
+04-deivao
+05 - Juan
+06- pablo
+07- alexandre
+08-Igão
+09-Pedrão
+10-jorge
+❗️LISTA FECHA COM 20❗️
+
+LISTA DE ESPERA⏰
+01-
+02-
+03 -
+04-`;
+
+  it("importa só gente: cabeçalho, local, link e aviso ficam de fora", () => {
+    const result = parseList(mensagemReal, { players: known });
+
+    expect(names(result.confirmed)).toEqual([
+      "Daniel",
+      "Guilherme",
+      "Marcos Manus",
+      "Deivao",
+      "Juan",
+      "Pablo",
+      "Alexandre",
+      "Igão",
+      "Pedrão",
+      "Jorge",
+    ]);
+    expect(result.goalkeepers).toHaveLength(0);
+    expect(result.waiting).toHaveLength(0);
+    // 2 vagas de goleiro + 4 da espera.
+    expect(result.stats.emptySlots).toBe(6);
+
+    const ignoradas = result.warnings.filter(
+      (warning) => warning.code === "LINE_NOT_A_NAME" || warning.code === "LINE_TOO_LONG",
+    );
+    // Horário, local, link e "lista fecha" — o aviso longo de ATENÇÃO cai em
+    // qualquer um dos dois códigos, o que importa é não virar jogador.
+    expect(ignoradas.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("aproveita o cabeçalho como metadado em vez de jogá-lo fora", () => {
+    const result = parseList(mensagemReal, { players: known });
+    expect(result.metadata.venueUrl).toBe("https://g.co/kgs/2sVgTvg");
+    expect(result.metadata.timeText).toBe("20:30–22:00");
+    expect(result.metadata.venue).toContain("Campo 03");
+  });
+
+  it("apelido curto com número passa; frase com número não", () => {
+    const result = parseList(`01-CR7\n02-Lista fecha com 20\n03-Campo 03 - Farofa`);
+    expect(names(result.confirmed)).toEqual(["Cr7"]);
+    expect(
+      result.warnings.filter((warning) => warning.code === "LINE_NOT_A_NAME"),
+    ).toHaveLength(2);
+  });
+
+  it("nome que o organizador já cadastrou passa mesmo parecendo estranho", () => {
+    const cadastrado: KnownPlayer[] = [
+      { id: "z1", displayName: "Zé 10", aliases: [] },
+    ];
+    const result = parseList("01-Zé 10", { players: cadastrado });
+    expect(names(result.confirmed)).toEqual(["Zé 10"]);
+    expect(result.confirmed[0].matchedPlayerId).toBe("z1");
+  });
+
+  it("linha com dois-pontos é recado, não jogador", () => {
+    const result = parseList(`01-Salles\nObs: quem furar paga a rodada\n02-Guilherme`);
+    expect(names(result.confirmed)).toEqual(["Salles", "Guilherme"]);
+  });
+});
+
+describe("parseList — ataques da revisão adversária (20/08)", () => {
+  it('recado que começa com horário não vira "30 Em Ponto" no slot 20', () => {
+    const result = parseList("FUT QUINTA\n⏰ 20:30 em ponto\n01-Salles\n02-Guilherme");
+    expect(names(result.confirmed)).toEqual(["Salles", "Guilherme"]);
+  });
+
+  it('"Goleiro: Danilo" põe o Danilo no gol e devolve a numeração pra linha', () => {
+    const result = parseList("Goleiro: Danilo\n01-Salles\n02-Guilherme");
+    expect(names(result.goalkeepers)).toEqual(["Danilo"]);
+    expect(names(result.confirmed)).toEqual(["Salles", "Guilherme"]);
+  });
+
+  it("anotação ao lado de nome conhecido é presença do conhecido, não recado", () => {
+    const elenco: KnownPlayer[] = [
+      { id: "c1", displayName: "Carlão", aliases: [] },
+      { id: "r1", displayName: "Rafa", aliases: [] },
+    ];
+    const result = parseList("01-Carlão pix ✔️\n02-Rafa chega 21h15\n03-Salles", {
+      players: elenco,
+    });
+    expect(result.confirmed).toHaveLength(3);
+    expect(result.confirmed[0].matchedPlayerId).toBe("c1");
+    expect(result.confirmed[1].matchedPlayerId).toBe("r1");
+  });
+
+  it("prefixo ambíguo não decide por ninguém: vira aviso, não jogador", () => {
+    const elenco: KnownPlayer[] = [
+      { id: "r1", displayName: "Rafa Souza", nickname: "Rafa", aliases: [] },
+      { id: "r2", displayName: "Rafa Lima", aliases: ["rafa"] },
+    ];
+    const result = parseList("01-Rafa chega 21h15", { players: elenco });
+    expect(result.confirmed).toHaveLength(0);
+    expect(result.warnings.some((w) => w.code === "LINE_NOT_A_NAME")).toBe(true);
+  });
+
+  it("dia da semana sem número também é cabeçalho, não jogador", () => {
+    const result = parseList(
+      "⚽ FUT DOS PARÇAS ⚽\nToda quinta-feira\nArena Farofa - Campo 03\n\n01-Salles\n02-Guilherme",
+    );
+    expect(names(result.confirmed)).toEqual(["Salles", "Guilherme"]);
+  });
+
+  it("recado curto de lista (levar colete, quem furar paga) não vira jogador", () => {
+    const result = parseList(
+      "01-Salles\n02-Guilherme\nLevar colete e bola\nQuem furar paga a próxima\nProibido chuteira de trava",
+    );
+    expect(names(result.confirmed)).toEqual(["Salles", "Guilherme"]);
+    expect(
+      result.warnings.filter((w) => w.code === "LINE_NOT_A_NAME").length,
+    ).toBeGreaterThanOrEqual(3);
+  });
+});

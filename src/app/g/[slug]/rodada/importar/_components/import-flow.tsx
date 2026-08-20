@@ -182,7 +182,9 @@ export function ImportListFlow({
   const duplicateWarnings = parsed.warnings.filter(
     (warning) => warning.code === "DUPLICATE_IN_LIST",
   );
-  const ignoredWarnings = parsed.warnings.filter((warning) => warning.code === "LINE_TOO_LONG");
+  const ignoredWarnings = parsed.warnings.filter(
+    (warning) => warning.code === "LINE_TOO_LONG" || warning.code === "LINE_NOT_A_NAME",
+  );
 
   return (
     <div className="flex flex-col gap-6">

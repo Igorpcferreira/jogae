@@ -43,7 +43,8 @@ export type WarningCode =
   | "NO_GOALKEEPERS"
   | "OVER_CAPACITY"
   | "NO_SECTION_DETECTED"
-  | "LINE_TOO_LONG";
+  | "LINE_TOO_LONG"
+  | "LINE_NOT_A_NAME";
 
 export interface ParseWarning {
   code: WarningCode;

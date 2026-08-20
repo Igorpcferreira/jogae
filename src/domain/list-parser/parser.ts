@@ -47,6 +47,39 @@ const VENUE_RE =
 /** Linha que é só ruído visual da lista. */
 const NOISE_RE = /^(?:[-–—=_.·•*~\s]+|lista|⚽|bola|fut)$/i;
 
+/** Chavões de recado que aparecem no meio das listas e não são nome de ninguém. */
+const BOILERPLATE_RE =
+  /\b(aten[cç][aã]o|obs|observa[cç][aã]o|localiza[cç][aã]o|endere[cç]o|lista\s+(?:fecha|de)|importante|aviso|regras?|pagamento|mensalidade|pix|pontualidade|levar|trazer|colete|proibido|furar|paga(?:r|m)?|confirmar|chegar|chegue|quem)\b/i;
+
+/**
+ * Por que esta linha **não** é nome de jogador — ou `null` quando parece nome.
+ *
+ * Existe porque cabeçalho de lista real ("Toda QUINTA 20:30 às 22:00",
+ * "Local Campo 03 - Farofa", "LISTA FECHA COM 20") virou jogador em produção:
+ * o filtro antigo só rodava antes do primeiro nome e sem seção explícita.
+ * Aqui a checagem vale pra toda linha candidata, e quem chama decide a exceção
+ * (nome que o organizador já cadastrou passa mesmo com número — "CR7" é
+ * escolha dele, e o match exato prova que é gente).
+ *
+ * Também é o critério do script que caça jogador-fantasma no banco
+ * (`scripts/limpar-jogadores-fantasma.ts`) — mudou aqui, mudou lá.
+ */
+export function motivoNaoNome(texto: string): string | null {
+  const limpo = cleanText(texto);
+  if (!limpo) return null;
+  if (URL_RE.test(limpo) || /\bwww\./i.test(limpo)) return "um link";
+  if (TIME_RE.test(limpo) || DATE_RE.test(limpo) || WEEKDAY_RE.test(limpo)) {
+    return "data ou horário";
+  }
+  if (limpo.includes(":")) return "um recado";
+  if (BOILERPLATE_RE.test(limpo)) return "recado da lista";
+  // "Campo 03 - Farofa" numa linha própria é o local do jogo, não gente.
+  // Não existe regra por dígito de propósito: "Zé 10", "CR7" e "Jogador 2"
+  // são nomes legítimos, e quem decide isso é o organizador na revisão.
+  if (VENUE_RE.test(limpo)) return "o local do jogo";
+  return null;
+}
+
 function detectSectionHeader(line: string): ListSection | null {
   // Uma linha numerada nunca é cabeçalho: "01-Goleiro Danilo" é jogador.
   if (NUMBERED_RE.test(line)) return null;
@@ -62,6 +95,10 @@ function detectSectionHeader(line: string): ListSection | null {
 }
 
 function stripLinePrefix(line: string): { slot: number | null; rest: string } {
+  // "20:30 em ponto": o que parece numeração ("20:") é horário. Deixa a linha
+  // inteira pro filtro de nome enxergar o "20:30" — senão o recado vira o
+  // jogador "30 Em Ponto" no slot 20.
+  if (/^\d{1,2}\s*[:h]\s*\d{2}\b/i.test(line)) return { slot: null, rest: line };
   const numbered = line.match(NUMBERED_RE);
   if (numbered) {
     return { slot: Number(numbered[1]), rest: numbered[2].trim() };
@@ -69,6 +106,39 @@ function stripLinePrefix(line: string): { slot: number | null; rest: string } {
   const bullet = line.match(BULLET_RE);
   if (bullet) return { slot: null, rest: bullet[1].trim() };
   return { slot: null, rest: line };
+}
+
+/**
+ * "Goleiro: Danilo" — rótulo de seção com o nome na mesma linha. O cabeçalho
+ * consome só até o ":"; o que vem depois continua vivo como candidato a nome.
+ * Sem isto o Danilo sumia em silêncio e os numerados seguintes viravam goleiro.
+ */
+function nomeAposCabecalho(line: string): string | null {
+  const separador = line.indexOf(":");
+  if (separador === -1) return null;
+  const rotulo = line.slice(0, separador);
+  if (!SECTION_KEYWORDS.some(({ re }) => re.test(rotulo))) return null;
+  const resto = line.slice(separador + 1).trim();
+  return resto || null;
+}
+
+/**
+ * "Carlão pix ✔️" e "Rafa chega 21h15": anotação colada num nome que o grupo
+ * já conhece. A linha é da pessoa — descartá-la sumiria com presença de gente
+ * de verdade. Só vale quando o começo casa com **um** jogador; prefixo ambíguo
+ * não decide por ninguém.
+ */
+function jogadorPorPrefixo(
+  normalized: string,
+  index: ReturnType<typeof buildMatchIndex>,
+): KnownPlayer | null {
+  let achado: KnownPlayer | null = null;
+  for (const { key, player } of index.candidates) {
+    if (key !== normalized && !normalized.startsWith(`${key} `)) continue;
+    if (achado && achado.id !== player.id) return null;
+    achado = player;
+  }
+  return achado;
 }
 
 function buildMatchIndex(players: KnownPlayer[]) {
@@ -145,7 +215,14 @@ function extractMetadata(lines: string[]): ParsedMetadata {
         if (weekday) metadata.dateText = titleCaseName(weekday[1]);
       }
     }
-    if (!metadata.venue && VENUE_RE.test(line) && !NUMBERED_RE.test(line)) {
+    // Cabeçalho de seção não é local: "CAMPO CONFIRMADO!" tem "campo" e já
+    // virou venue de rodada em produção.
+    if (
+      !metadata.venue &&
+      VENUE_RE.test(line) &&
+      !NUMBERED_RE.test(line) &&
+      !detectSectionHeader(line)
+    ) {
       const venue = line.replace(/^local\s*:?\s*/i, "").replace(URL_RE, "").trim();
       if (venue && venue.length <= 80) metadata.venue = venue;
     }
@@ -188,7 +265,8 @@ export function parseList(rawText: string, context: GroupContext = { players: []
   let explicitSection = false;
   let slotsInSection = 0;
 
-  lines.forEach((line, i) => {
+  lines.forEach((linhaOriginal, i) => {
+    let line = linhaOriginal;
     if (!line) return;
 
     const header = detectSectionHeader(line);
@@ -196,7 +274,10 @@ export function parseList(rawText: string, context: GroupContext = { players: []
       section = header;
       explicitSection = true;
       slotsInSection = 0;
-      return;
+      // "Goleiro: Danilo" — o rótulo vira seção e o nome segue no fluxo.
+      const resto = nomeAposCabecalho(line);
+      if (!resto) return;
+      line = resto;
     }
 
     const { slot, rest } = stripLinePrefix(line);
@@ -236,7 +317,30 @@ export function parseList(rawText: string, context: GroupContext = { players: []
       return;
     }
 
-    if (slot !== null) slotsInSection += 1;
+    // Linha que não parece nome de gente (link, horário, recado) não vira
+    // jogador — foi assim que "Lista Fecha Com 20" entrou num elenco de
+    // produção. Duas exceções, e as duas são "o organizador já conhece":
+    // match exato no elenco passa sempre ("CR7" é escolha dele), e anotação
+    // colada num nome conhecido ("Carlão pix ✔️") é presença do conhecido.
+    let resgate: KnownPlayer | null = null;
+    if (!index.exact.has(normalized)) {
+      const motivo = motivoNaoNome(rest);
+      if (motivo) {
+        resgate = jogadorPorPrefixo(normalized, index);
+        if (!resgate) {
+          warnings.push({
+            code: "LINE_NOT_A_NAME",
+            message: `Ignorei “${name}”: parece ${motivo}, não nome de jogador.`,
+            entryIndexes: [],
+          });
+          return;
+        }
+      }
+    }
+
+    // Conta qualquer entrada, numerada ou não: é o que deixa "Goleiro: Danilo"
+    // seguido de "01-..." devolver a numeração pra lista de linha.
+    slotsInSection += 1;
 
     const suggestions = findMatches(normalized, index, suggestThreshold);
     const exact = index.exact.get(normalized);
@@ -244,9 +348,11 @@ export function parseList(rawText: string, context: GroupContext = { players: []
 
     const matchedPlayerId = exact
       ? exact.id
-      : best && best.score >= autoMatchThreshold
-        ? best.playerId
-        : null;
+      : resgate
+        ? resgate.id
+        : best && best.score >= autoMatchThreshold
+          ? best.playerId
+          : null;
 
     entries.push({
       index: entries.length,
