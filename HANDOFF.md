@@ -99,6 +99,54 @@ O dia de colar o link no grupo. Quatro coisas entraram; o que vale registrar:
   `next.config.ts` o card funcionaria em dev e cairia na fonte padrão em
   produção — o tipo de diferença que ninguém reporta.
 
+## Sessão de 20/08 (parte 2) — o primeiro uso real
+
+O grupo colou a lista de verdade e o parser criou quatro jogadores-fantasma em
+produção. O que vale registrar:
+
+- **O caso que nenhum teste tinha: a lista com cabeçalho de recado.** O filtro
+  "parece nome" só rodava antes do primeiro nome e sem seção explícita — e
+  "✅ CAMPO CONFIRMADO!" era detectado como cabeçalho de seção, ligando a flag
+  que desligava o filtro. Lição: **filtro de validade roda em toda linha, não
+  só na primeira** — e a mensagem real do grupo agora é fixture.
+- **Regra por dígito foi tentada e removida no mesmo commit.** "Jogador 22",
+  "Zé 10" e "CR7" são gente; o teste de capacidade (22 jogadores sintéticos)
+  quebrou na hora e mostrou o falso positivo. O recorte que ficou: link,
+  horário/data, dois-pontos, chavão de recado e palavra de local — nada de
+  heurística por número.
+- **Jogador-fantasma não sai pela tela.** "Excluir" recusa quem tem presença —
+  correto pra gente, beco sem saída pra fantasma. `limpar-jogadores-fantasma.ts`
+  usa o MESMO `motivoNaoNome` do parser (critério único), só apaga quem não tem
+  lance, e foi validado semeando um fantasma no banco local antes de existir a
+  versão de produção.
+- **`FootballGroup.settings` pagou o investimento.** "Partida até 2 gols ou 8
+  minutos" entrou **sem migration** — o JSON de configurações avançadas existia
+  desde o init esperando exatamente isso. Leitura sempre por
+  `lerRegrasDePartida` (valida forma e intervalo; JSON é entrada, não confiança).
+- **Apito é WebAudio sintetizado, não asset.** Oscilador quadrado + trinado de
+  45Hz = apito de bolinha; zero download no 4G do campo. Autoplay: o navegador
+  exige gesto prévio na página — no fluxo real sempre houve (iniciar partida),
+  e a falha é silenciosa com vibração de reserva.
+- **O app apita, não encerra.** Fim por regra vira banner + som + botão
+  destacado; `encerrarPartidaAction` continua sendo o único jeito de encerrar.
+  Auto-encerrar descartaria gol registrado com atraso e o "mais um minutinho".
+- **A revisão adversária (33 agentes, 12 achados sustentados) pagou o custo.**
+  Os que doeriam hoje à noite: numeração comendo horário ("⏰ 20:30 em ponto"
+  → jogador "30 Em Ponto" no slot 20 — o `:` está na classe de separadores do
+  `NUMBERED_RE`); "Goleiro: Danilo" consumido inteiro como cabeçalho (Danilo
+  sumia E os numerados seguintes viravam goleiro); anotação ao lado de nome
+  conhecido ("Carlão pix ✔️") descartando gente de verdade — virou resgate por
+  prefixo único; e dois bugs PRÉ-EXISTENTES do ao vivo: `golsLocais` nunca era
+  podado após confirmação (**hat-trick comemorado no 2º gol** — o confirmado
+  contava no servidor E na lista local) e `naFila` nunca reconciliava com o
+  servidor (corrida action×fila offline = placar em dobro). Os dois caíram com
+  a mesma correção estrutural: `LiveEvent.clientEventId` + placar pendente
+  **derivado** (gol local só conta enquanto o servidor não devolveu aquele id),
+  em vez de contadores incrementados na mão. Cada cenário virou teste.
+- **`_count` filtrado do Prisma** (`goals: { where: { voidedAt: null } }`)
+  funciona no driver adapter — o script de fantasmas usa pra não travar em
+  lance desfeito (soft-delete conta no `_count` cru).
+
 ## Sessão de 19/08 (parte 4) — Fase 2 completa
 
 Todo o resto do §27. Detalhe no STATUS §2; o que vale registrar do caminho:

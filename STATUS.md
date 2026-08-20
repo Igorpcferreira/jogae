@@ -400,6 +400,41 @@ O que entrou no dia de colar o link no grupo de verdade:
   não existe de propósito: a API oficial é paga e pra empresa, bot não-oficial
   arrisca banir o número — o caminho futuro é push do PWA pra quem subiu.
 
+### Sessão de 20/08 (parte 2) — parser fantasma e fim de partida
+O primeiro uso real achou um bug sério e pediu uma funcionalidade:
+
+- **BUG em produção: cabeçalho de lista virou jogador.** A lista real do grupo
+  ("✅ CAMPO CONFIRMADO! / Toda QUINTA 20:30 às 22:00 / Local📍Campo 03 -
+  Farofa / Localização: https… / ❗️LISTA FECHA COM 20❗️") criou **quatro
+  jogadores-fantasma** com presença na rodada. Causa: "CAMPO CONFIRMADO!" é
+  cabeçalho de seção e ligava `explicitSection` — e o filtro "parece nome" só
+  rodava antes do primeiro nome sem seção explícita. Correção:
+  `motivoNaoNome()` em `domain/list-parser/parser.ts` roda pra **toda** linha
+  candidata (link, horário/data, dois-pontos, chavões de recado, palavras de
+  local), com exceção pra nome que já está no elenco (match exato passa —
+  "CR7" cadastrado é gente). **Sem regra por dígito de propósito**: "Zé 10" e
+  "Jogador 2" são nomes. Linha ignorada aparece na revisão com o motivo. A
+  mensagem real do grupo é fixture de teste. De carona: "CAMPO CONFIRMADO!"
+  também virava o `venue` do metadado — cabeçalho de seção não é mais local.
+- **`scripts/limpar-jogadores-fantasma.ts`** — caça no banco jogador cujo nome
+  o parser corrigido recusaria (mesmo critério, importado do domínio). Relata
+  por padrão, grava com `--aplicar`, **nunca** toca em quem tem gol ou
+  assistência, e apaga em transação: votos, vaga em time, presenças, aliases e
+  o jogador. Validado no banco local com fantasma semeado de verdade.
+  **Falta rodar em produção** (ver instrução no cabeçalho do script).
+- **Fim de partida configurável** (`domain/live/fim-de-partida.ts`, 12 testes):
+  "partida vai até X gols ou Y minutos", por grupo, gravado em
+  `FootballGroup.settings.partida` — o campo JSON já existia pra isso, **sem
+  migration**. O ao vivo ganhou: contagem regressiva ao lado do cronômetro
+  (vermelha no último minuto), banner "Fim de jogo!" com botão de encerrar, e
+  **apito sintetizado** (`src/lib/apito.ts`, WebAudio, sem asset) + vibração na
+  virada. O app **avisa e apita, não encerra sozinho** — o "deixa mais um
+  minutinho" é sagrado e gol atrasado não pode derrubar a partida. O relógio
+  do ao vivo agora desconta o desvio do celular (antes usava `Date.now()` cru
+  contra o `startedAt` do servidor). A regra vira texto na tela de escolher
+  confronto e na página pública via `descreverRegras` quando o grupo não
+  escreveu `matchRule` próprio. Config: card "Fim de partida" em `/config`.
+
 ### Offline (plano §40)
 - `public/sw.js`: cache-first nos assets versionados do Next, network-first na navegação com
   fallback pra `/offline`. **Não** cacheia POST, `/api/**` nem HTML de `/g/**` — isso vazaria

@@ -16,6 +16,11 @@ import {
 } from "@/domain/live/gol-repetido";
 import { celebracaoDoLance, type TipoDeCelebracao } from "@/domain/live/celebracao";
 import {
+  situacaoDaPartida,
+  type RegrasDePartida,
+} from "@/domain/live/fim-de-partida";
+import { apitarFimUmaVez, desarmarApito } from "@/lib/apito";
+import {
   encerrarPartidaAction,
   encerrarRodadaAction,
   registrarGolAction,
@@ -49,6 +54,12 @@ export interface LiveEvent {
   playerId: string | null;
   /** Quando o lance entrou, pelo relógio do servidor (epoch ms). */
   registradoEm: number;
+  /**
+   * Id que este aparelho deu ao lance antes de mandar (fila offline). É o que
+   * deixa o placar otimista reconciliar: gol local confirmado pelo servidor
+   * para de contar em dobro.
+   */
+  clientEventId: string | null;
 }
 
 export interface LiveMatchState {
@@ -67,6 +78,7 @@ export function LiveControl({
   events,
   golsDaRodada,
   matchRule,
+  regras,
   agoraNoServidor,
 }: {
   roundId: string;
@@ -76,6 +88,8 @@ export function LiveControl({
   /** Gols de cada jogador na rodada inteira, já confirmados pelo servidor. */
   golsDaRodada: Record<string, number>;
   matchRule?: string | null;
+  /** Fim de partida do grupo: "até X gols ou Y minutos". */
+  regras: RegrasDePartida;
   agoraNoServidor: number;
 }) {
   const router = useRouter();
@@ -87,18 +101,24 @@ export function LiveControl({
     nome: string | null;
   } | null>(null);
   /**
-   * Gols que ainda não voltaram do servidor, por time. O placar do banco não
-   * mudou ainda, mas o organizador precisa ver o número subir na hora.
-   */
-  const [naFila, setNaFila] = useState<Record<string, number>>({});
-  /**
-   * Gols apontados neste aparelho que ainda não voltaram do servidor. Entram na
-   * checagem de repetição junto com os do banco: o toque duplo do mesmo dedo é
-   * tão comum quanto duas pessoas apontando o mesmo gol.
+   * Gols apontados neste aparelho. Entram na checagem de repetição e no placar
+   * otimista **enquanto o servidor não confirma** — a reconciliação é por
+   * `clientEventId`, então o mesmo lance nunca conta em dobro, nem quando a
+   * action falha e a fila offline entrega por outro caminho.
    */
   const [golsLocais, setGolsLocais] = useState<Array<LanceRegistrado & { autorId: string | null }>>(
     [],
   );
+  /**
+   * Partida trocou → gol local da partida anterior não pode vazar pro placar
+   * da nova (o mesmo time joga de novo na sequência). Ajuste de estado durante
+   * o render, como a doc do React manda para "derivar do prop anterior".
+   */
+  const [partidaAnterior, setPartidaAnterior] = useState<string | null>(match?.id ?? null);
+  if ((match?.id ?? null) !== partidaAnterior) {
+    setPartidaAnterior(match?.id ?? null);
+    setGolsLocais([]);
+  }
   /** Gol suspeito de ser o mesmo que alguém já marcou — vira pergunta, não bloqueio. */
   const [suspeita, setSuspeita] = useState<{ teamId: string; repetido: GolRepetido } | null>(
     null,
@@ -116,8 +136,66 @@ export function LiveControl({
 
   const agoraDoServidor = () => Date.now() + desvioDoRelogio.current;
 
+  /**
+   * O relógio da partida bate uma vez por segundo, sempre pelo relógio do
+   * servidor corrigido — é ele que alimenta o cronômetro, a contagem
+   * regressiva e a detecção de "deu o tempo". Uma fonte só: relógio da tela
+   * discordando do apito seria pior que não ter apito.
+   */
+  const [tickAgora, setTickAgora] = useState(agoraNoServidor);
+  const partidaAtiva = match?.startedAt ?? null;
+  useEffect(() => {
+    if (!partidaAtiva) return;
+    const timer = setInterval(
+      () => setTickAgora(Date.now() + desvioDoRelogio.current),
+      1000,
+    );
+    return () => clearInterval(timer);
+  }, [partidaAtiva]);
+
   const teamA = teams.find((team) => team.id === match?.teamAId);
   const teamB = teams.find((team) => team.id === match?.teamBId);
+
+  // Reconciliação: gol local que o servidor já devolveu (mesmo clientEventId)
+  // sai da conta. É o que impede placar em dobro quando a action falha mas a
+  // fila offline entrega, e hat-trick comemorado no segundo gol.
+  const confirmadosNoServidor = new Set(
+    events.map((event) => event.clientEventId).filter((id): id is string => id !== null),
+  );
+  const golsPendentes = golsLocais.filter((gol) => !confirmadosNoServidor.has(gol.id));
+
+  // Placar otimista (banco + pendentes) — o fim por gols precisa disparar no
+  // toque do segundo gol, não quando o servidor responder.
+  const placarA = match
+    ? match.scoreA + golsPendentes.filter((gol) => gol.teamId === match.teamAId).length
+    : 0;
+  const placarB = match
+    ? match.scoreB + golsPendentes.filter((gol) => gol.teamId === match.teamBId).length
+    : 0;
+  const decorridoSeg = partidaAtiva
+    ? Math.max(0, Math.floor((tickAgora - new Date(partidaAtiva).getTime()) / 1000))
+    : 0;
+  const situacao = situacaoDaPartida({
+    golsA: placarA,
+    golsB: placarB,
+    decorridoSeg,
+    regras,
+  });
+
+  /**
+   * O apito toca na **virada** pra "fim", uma vez por partida. A memória mora
+   * no módulo do apito (não num ref): navegar pro ranking e voltar durante o
+   * "mais um minutinho" remonta este componente, e re-apitar a cada visita
+   * transformaria o aviso em buzina. Desfazer o gol do limite desarma — se o
+   * time fizer outro depois, apita de novo.
+   */
+  const partidaId = match?.id ?? null;
+  const fimAtivo = Boolean(match && situacao.fim);
+  useEffect(() => {
+    if (!partidaId) return;
+    if (fimAtivo) apitarFimUmaVez(partidaId);
+    else desarmarApito(partidaId);
+  }, [fimAtivo, partidaId]);
 
   function closeSheet() {
     setGoalFor(null);
@@ -141,7 +219,9 @@ export function LiveControl({
         registradoEm: event.registradoEm,
         autor: event.playerName,
       })),
-      ...golsLocais,
+      // Só os pendentes: lance já confirmado está em `events` e entraria em
+      // dobro na checagem de repetição.
+      ...golsPendentes,
     ];
 
     const repetido = golRecenteDoMesmoTime(lances, teamId, agoraDoServidor());
@@ -160,12 +240,12 @@ export function LiveControl({
     const startedAt = match.startedAt;
     closeSheet();
 
-    // Gols do autor na rodada: os que o servidor já confirmou mais os que este
-    // aparelho apontou e ainda não voltaram. Sem os locais, o terceiro gol
-    // seguido no mesmo minuto não seria reconhecido como hat-trick.
+    // Gols do autor na rodada: os que o servidor já confirmou mais os deste
+    // aparelho que **ainda não voltaram** — o confirmado já está nos dois
+    // lados, e contá-lo em dobro faria o hat-trick sair no segundo gol.
     const golsAntes = playerId
       ? (golsDaRodada[playerId] ?? 0) +
-        golsLocais.filter((gol) => gol.autorId === playerId).length
+        golsPendentes.filter((gol) => gol.autorId === playerId).length
       : null;
     setCelebrate({ tipo: celebracaoDoLance(golsAntes).tipo, nome: nomeDoAutor });
 
@@ -178,13 +258,17 @@ export function LiveControl({
       playerId,
       assistPlayerId,
       ownGoal: false,
+      // Pelo relógio do servidor: celular 10 min atrasado gravaria todo gol
+      // como "1'" — e o minuto do lance é permanente na timeline.
       minute: startedAt
-        ? Math.max(1, Math.floor((Date.now() - new Date(startedAt).getTime()) / 60_000) + 1)
+        ? Math.max(
+            1,
+            Math.floor((agoraDoServidor() - new Date(startedAt).getTime()) / 60_000) + 1,
+          )
         : null,
       criadoEm: Date.now(),
     };
 
-    setNaFila((atual) => ({ ...atual, [teamId]: (atual[teamId] ?? 0) + 1 }));
     setGolsLocais((atual) => [
       ...atual,
       {
@@ -210,7 +294,8 @@ export function LiveControl({
           clientEventId: pendente.id,
         });
         await removerPendentes([pendente.id]);
-        setNaFila((atual) => ({ ...atual, [teamId]: Math.max(0, (atual[teamId] ?? 1) - 1) }));
+        // O refresh traz o lance com o clientEventId — a reconciliação tira o
+        // gol local da conta sozinha, sem contador pra decrementar.
         router.refresh();
       } catch {
         // Continua na fila; o indicador de sincronização assume daqui.
@@ -265,18 +350,56 @@ export function LiveControl({
 
       <div className="flex items-center justify-between gap-3">
         <LiveBadge />
-        <MatchClock startedAt={match.startedAt} />
+        {match.startedAt && (
+          <MatchClock
+            decorridoSeg={decorridoSeg}
+            restanteSeg={situacao.restanteSeg}
+          />
+        )}
       </div>
+
+      {situacao.fim && (
+        <Card
+          role="status"
+          className="flex flex-col gap-3 border-red/60 bg-red/10 py-4"
+        >
+          <div className="flex items-center gap-2.5">
+            <span
+              className="size-2.5 shrink-0 rounded-pill bg-red animate-live-pulse"
+              aria-hidden
+            />
+            <p className="text-body font-bold text-ink">
+              {situacao.motivo === "gols"
+                ? `${(placarA >= placarB ? teamA : teamB).name.replace("Time ", "")} chegou a ${regras.limiteGols} ${regras.limiteGols === 1 ? "gol" : "gols"}. Fim de jogo!`
+                : `Deu ${regras.limiteMinutos} ${regras.limiteMinutos === 1 ? "minuto" : "minutos"}. Fim de jogo!`}
+            </p>
+          </div>
+          <Button
+            variant="danger"
+            size="lg"
+            block
+            disabled={pending}
+            onClick={() =>
+              startTransition(async () => {
+                await encerrarPartidaAction(match.id);
+                router.refresh();
+              })
+            }
+          >
+            Encerrar partida
+          </Button>
+        </Card>
+      )}
 
       {/* Placar otimista: o que o banco confirmou + o que ainda está na fila. */}
       <Scoreboard
         live
         teamAName={teamA.name.replace("Time ", "")}
         teamAColor={teamA.color}
-        scoreA={match.scoreA + (naFila[teamA.id] ?? 0)}
+        scoreA={placarA}
         teamBName={teamB.name.replace("Time ", "")}
         teamBColor={teamB.color}
-        scoreB={match.scoreB + (naFila[teamB.id] ?? 0)}
+        scoreB={placarB}
       />
 
       <div className="grid grid-cols-2 gap-2">
@@ -688,26 +811,39 @@ function FixturePicker({
   );
 }
 
-function MatchClock({ startedAt }: { startedAt: string | null }) {
-  const [elapsed, setElapsed] = useState("00:00");
+function formatarRelogio(segundos: number): string {
+  const s = Math.max(0, segundos);
+  return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+}
 
-  useEffect(() => {
-    if (!startedAt) return;
-    const start = new Date(startedAt).getTime();
-    const tick = () => {
-      const seconds = Math.max(0, Math.floor((Date.now() - start) / 1000));
-      setElapsed(
-        `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`,
-      );
-    };
-    tick();
-    const timer = setInterval(tick, 1000);
-    return () => clearInterval(timer);
-  }, [startedAt]);
-
-  if (!startedAt) return null;
-
+/**
+ * Cronômetro da partida: quanto já foi e, quando o grupo tem limite de tempo,
+ * quanto falta. Quem conta o segundo é o pai (uma fonte de relógio só) — aqui
+ * é apresentação. O "faltam" fica vermelho no último minuto: é quando quem tá
+ * perdendo começa a olhar pro relógio.
+ */
+function MatchClock({
+  decorridoSeg,
+  restanteSeg,
+}: {
+  decorridoSeg: number;
+  restanteSeg: number | null;
+}) {
   return (
-    <span className="font-display text-[26px] tabular leading-none text-ink-2">{elapsed}</span>
+    <div className="flex flex-col items-end gap-1">
+      <span className="font-display text-[26px] tabular leading-none text-ink-2">
+        {formatarRelogio(decorridoSeg)}
+      </span>
+      {restanteSeg !== null && (
+        <span
+          className={cn(
+            "text-caption font-bold uppercase tracking-[0.1em] tabular leading-none",
+            restanteSeg <= 60 ? "text-red" : "text-ink-3",
+          )}
+        >
+          {restanteSeg === 0 ? "Tempo esgotado" : `Faltam ${formatarRelogio(restanteSeg)}`}
+        </span>
+      )}
+    </div>
   );
 }

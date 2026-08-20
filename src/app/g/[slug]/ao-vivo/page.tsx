@@ -1,3 +1,4 @@
+import { descreverRegras, lerRegrasDePartida } from "@/domain/live/fim-de-partida";
 import { requireGrupoPorSlug } from "@/features/groups/access";
 import { getCurrentRound } from "@/features/rounds/queries";
 import { EmptyState } from "@/components/ui/primitives";
@@ -74,9 +75,11 @@ export default async function LivePage({
       teamId: event.teamId,
       playerId: event.playerId,
       registradoEm: event.createdAt.getTime(),
+      clientEventId: event.clientEventId,
     }));
 
   const settings = (round.group.settings ?? {}) as { matchRule?: string };
+  const regras = lerRegrasDePartida(round.group.settings);
 
   return (
     <LiveControl
@@ -96,7 +99,8 @@ export default async function LivePage({
       }
       events={events}
       golsDaRodada={golsDaRodada}
-      matchRule={settings.matchRule ?? null}
+      matchRule={settings.matchRule ?? descreverRegras(regras)}
+      regras={regras}
       // Relógio do servidor: o celular na beira do campo pode estar minutos
       // fora, e a checagem de gol repetido compara carimbo do banco com "agora"
       // do cliente. Sem esta referência ela sumiria em silêncio justo no

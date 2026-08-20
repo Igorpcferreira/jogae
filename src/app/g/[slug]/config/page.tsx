@@ -3,7 +3,9 @@ import { atualizarGrupoAction } from "@/features/groups/actions";
 import { getResumoDaProximaRodada } from "@/features/groups/queries";
 import { formatRoundSchedule } from "@/lib/dates";
 import { urlBase } from "@/lib/base-url";
+import { lerRegrasDePartida } from "@/domain/live/fim-de-partida";
 import { LinkDoGrupo } from "./_components/link-do-grupo";
+import { RegrasDaPartida } from "./_components/regras-da-partida";
 import { GrupoForm, type ValoresDoGrupo } from "@/components/football/grupo-form";
 import { EmptyState } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/button";
@@ -69,6 +71,8 @@ export default async function ConfigPage({
         dateText={proxima ? formatRoundSchedule(proxima.date, proxima.startsAt) : null}
         venue={proxima?.venue ?? group.defaultVenue}
       />
+
+      <RegrasDaPartida groupId={group.id} inicial={lerRegrasDePartida(group.settings)} />
 
       <GrupoForm
         acao={atualizarGrupoAction.bind(null, group.id)}

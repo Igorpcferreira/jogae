@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { cn } from "@/lib/cn";
+import { descreverRegras, lerRegrasDePartida } from "@/domain/live/fim-de-partida";
 import { teamTheme } from "@/lib/team-colors";
 import { getRoundByToken, splitAttendances } from "@/features/rounds/queries";
 import {
@@ -126,6 +127,10 @@ export default async function PublicRoundPage({
   const conquistas = await getConquistasDaRodadaPublica(round.id);
 
   const settings = (round.group.settings ?? {}) as { matchRule?: string };
+  // Grupo que escreveu a regra em texto manda; sem texto, a frase sai dos
+  // limites configurados ("Partida vai até 2 gols ou 8 minutos.").
+  const regraDoDia =
+    settings.matchRule ?? descreverRegras(lerRegrasDePartida(round.group.settings));
 
   return (
     <div className="relative min-h-dvh">
@@ -310,11 +315,11 @@ export default async function PublicRoundPage({
           </section>
         )}
 
-        {settings.matchRule && (
+        {regraDoDia && (
           <section className="flex flex-col gap-3">
             <SectionLabel>Como funciona hoje</SectionLabel>
             <Card className="py-4">
-              <p className="text-body text-ink-2">{settings.matchRule}</p>
+              <p className="text-body text-ink-2">{regraDoDia}</p>
             </Card>
           </section>
         )}

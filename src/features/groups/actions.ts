@@ -12,6 +12,10 @@ import {
   type Modalidade,
   type ModoGoleiro,
 } from "@/domain/groups/setup";
+import {
+  LIMITE_GOLS_MAXIMO,
+  LIMITE_MINUTOS_MAXIMO,
+} from "@/domain/live/fim-de-partida";
 import { proximaDataRecorrente } from "@/domain/schedule/recurrence";
 import { requireGroupAccess, requireUsuario } from "@/features/auth/queries";
 import { slugsExistentes } from "./queries";
@@ -224,4 +228,43 @@ export async function regenerarLinkDeConvidadoAction(groupId: string): Promise<s
 function vazioViraNulo(valor: FormDataEntryValue | null): string | null {
   const texto = typeof valor === "string" ? valor.trim() : "";
   return texto === "" ? null : texto;
+}
+
+const regrasDePartidaSchema = z.object({
+  limiteGols: z.number().int().min(1).max(LIMITE_GOLS_MAXIMO).nullable(),
+  limiteMinutos: z.number().int().min(1).max(LIMITE_MINUTOS_MAXIMO).nullable(),
+});
+
+/**
+ * Grava a regra de fim de partida ("até 2 gols ou 8 minutos") no `settings`
+ * do grupo. É merge, não substituição: o `settings` também guarda o
+ * `matchRule` em texto livre e o que mais vier a morar lá.
+ */
+export async function salvarRegrasDePartidaAction(
+  groupId: string,
+  entrada: { limiteGols: number | null; limiteMinutos: number | null },
+): Promise<{ status: "ok" } | { status: "erro"; mensagem: string }> {
+  await requireGroupAccess(groupId, "grupo:editar");
+
+  const analise = regrasDePartidaSchema.safeParse(entrada);
+  if (!analise.success) {
+    return { status: "erro", mensagem: "Números fora do intervalo. Confere e tenta de novo." };
+  }
+
+  const grupo = await prisma.footballGroup.findUniqueOrThrow({
+    where: { id: groupId },
+    select: { settings: true },
+  });
+  const atuais =
+    grupo.settings && typeof grupo.settings === "object" && !Array.isArray(grupo.settings)
+      ? grupo.settings
+      : {};
+
+  await prisma.footballGroup.update({
+    where: { id: groupId },
+    data: { settings: { ...atuais, partida: analise.data } },
+  });
+
+  revalidatePath("/g", "layout");
+  return { status: "ok" };
 }
