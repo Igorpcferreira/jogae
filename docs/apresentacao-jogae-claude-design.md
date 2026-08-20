@@ -1,5 +1,11 @@
 # Jogaê — briefing para apresentação em PDF
 
+> ⚠️ **SUBSTITUÍDO em 20/08 por `apresentacao-jogae-funcionalidades.md`.**
+> Este briefing é de 13/08, antes do lançamento: ele descreve como "próximas
+> evoluções" funcionalidades que hoje estão no ar (link pessoal, espera
+> automática, conquistas, votação de craque, retrospectiva). **Não use este
+> arquivo como fonte** — use o novo, que reflete o produto em produção.
+
 > Documento-base para criar uma apresentação premium no Claude Design, pensada para compartilhar no grupo e apresentar o Jogaê de forma clara, visual e empolgante.
 
 ## 1. Objetivo desta apresentação
