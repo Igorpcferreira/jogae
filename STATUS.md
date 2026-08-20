@@ -422,6 +422,10 @@ O primeiro uso real achou um bug sério e pediu uma funcionalidade:
   assistência, e apaga em transação: votos, vaga em time, presenças, aliases e
   o jogador. Validado no banco local com fantasma semeado de verdade.
   **Falta rodar em produção** (ver instrução no cabeçalho do script).
+- **"Compartilhar imagem dos times"** substitui o "abrir numa aba": Web Share
+  API com o PNG anexado (`src/lib/compartilhar.ts`) — o menu nativo abre e a
+  imagem cai direto no grupo. Sem suporte a arquivo (desktop), abre a aba como
+  antes. Pedido do primeiro uso real, na noite de estreia.
 - **Fim de partida configurável** (`domain/live/fim-de-partida.ts`, 12 testes):
   "partida vai até X gols ou Y minutos", por grupo, gravado em
   `FootballGroup.settings.partida` — o campo JSON já existia pra isso, **sem

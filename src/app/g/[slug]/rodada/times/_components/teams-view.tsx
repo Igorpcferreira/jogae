@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
+import { compartilharImagem } from "@/lib/compartilhar";
 import { TEAM_COLOR_ORDER, TEAM_THEMES } from "@/lib/team-colors";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
@@ -63,6 +64,7 @@ export function TeamsView({
   const [drawing, setDrawing] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [compartilhando, setCompartilhando] = useState(false);
   const [editandoTime, setEditandoTime] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -236,17 +238,21 @@ export function TeamsView({
                 <IconShare size={17} />
                 {copied === "link" ? "Link copiado!" : "Copiar link da rodada"}
               </Button>
-              <ButtonLink
-                href={imagemUrl}
-                target="_blank"
-                rel="noopener"
-                variant="secondary"
+              <Button
                 size="lg"
+                variant="secondary"
                 block
+                disabled={compartilhando}
+                onClick={() => {
+                  setCompartilhando(true);
+                  void compartilharImagem(imagemUrl, "times.png").finally(() =>
+                    setCompartilhando(false),
+                  );
+                }}
               >
                 <IconShare size={17} />
-                Abrir imagem dos times
-              </ButtonLink>
+                {compartilhando ? "Preparando imagem…" : "Compartilhar imagem dos times"}
+              </Button>
               <ButtonLink href={liveHref} variant="danger" size="lg" block>
                 Começar jogo
               </ButtonLink>
